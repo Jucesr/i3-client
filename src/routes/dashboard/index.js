@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class HomeRoute extends React.Component {
+export default class DashboardRoute extends React.Component {
 
   constructor(props){
     super(props)
@@ -10,7 +10,7 @@ export default class HomeRoute extends React.Component {
   render(){
     const {props} = this
     return (
-      <div> Welcome to my app </div>
+      <div> This is the dashboard </div>
     )
   }
 }
