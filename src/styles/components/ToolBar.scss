@@ -1,0 +1,40 @@
+.ToolBar{
+  margin: auto;
+  height: calc(100vh - #{$header_height} - #{$sub_header_height});
+  transition: width 300ms linear;
+  overflow: hidden;
+  border-right: 1px solid #d4dadf;
+  box-shadow: 1px 0px 1px 0px rgba(116, 129, 141, 0.1);
+}
+
+.ToolBar_open{
+  width: 180px;
+}
+
+.ToolBar_close{
+  width: 0px;
+}
+
+.ToolBar-container{
+  display: flex;
+  flex-direction: column;
+}
+
+.ToolBar-item{
+
+  &:hover{
+    background-color: darken(white, 10%);
+    cursor: pointer;
+  }
+
+  div{
+    margin: 10px;
+    
+  }
+}
+
+.ToolBar-item-active{
+  background-color: darken(white, 5%);
+  font-weight: bold;
+  color: $redux; 
+}

@@ -1,8 +1,5 @@
 import React from 'react';
-import ReactDom from 'react-dom';
-import {Link, BrowserRouter , Route, Switch} from 'react-router-dom';
-
-
+import {BrowserRouter , Route, Switch} from 'react-router-dom';
 import DrashboardRoute from './dashboard/';
 import ProjectRoute from './projects/';
 
@@ -15,12 +12,6 @@ export default () => (
   <BrowserRouter >
     <div>
       <Header />
-
-      <ul>
-        <li><Link to="/dashboard">Drashboard</Link></li>
-        <li><Link to="/projects">Projects</Link></li>
-      </ul>
-
       <Switch>
         <Route path="/" component={HomePage} exact={true}/>
         <Route path="/dashboard" component={DrashboardRoute} />
@@ -28,7 +19,7 @@ export default () => (
         <Route component={NotFoundPage} />
       </Switch>
 
-      <Footer />
+      {/* <Footer /> */}
     </div>
 
   </BrowserRouter>

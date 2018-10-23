@@ -2,6 +2,7 @@ const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const CompressionPlugin = require('compression-webpack-plugin');
+const globImporter = require('node-sass-glob-importer');
 // const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
@@ -15,6 +16,12 @@ module.exports = (env) => {
     output: {
       path: path.join(__dirname, 'public', 'dist'),
       filename: 'bundle.js'
+    },
+    resolve: {
+      alias: {
+        actions: path.resolve(__dirname, 'src/store/actions'),
+        utils: path.resolve(__dirname, 'src/utils')
+      }
     },
     module: {
       rules: [{
@@ -34,6 +41,7 @@ module.exports = (env) => {
             {
               loader: 'sass-loader',
               options: {
+                importer: globImporter(),
                 sourceMap: true
               }
             }

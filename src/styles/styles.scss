@@ -1,8 +1,6 @@
 @import './base/setting';
 @import './base/base';
 
-
-@import './components/header';
-@import './components/loader';
-@import './components/footer';
+@import './components/*';
+@import './routes/*';
 

@@ -1,0 +1,62 @@
+.ProjectItem{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: 250px;
+  max-height: 218px;
+  overflow: hidden;
+  margin: 10px;
+
+  &:hover{
+    cursor: pointer;
+    .ProjectItem-hover{
+      opacity: 1;
+    }
+  }
+  
+}
+
+.ProjectItem-hover{
+  transition: .5s ease;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(rgb(0, 0, 0), $alpha: 0.5);
+  display: flex;
+  opacity: 0;
+  top: 0;
+  align-content: center;
+  align-items: center;
+  p{
+    margin: auto;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+  }
+}
+
+.ProjectItem-picture{
+  max-height: 140px;
+  max-width: 250px;
+  overflow: hidden;
+}
+
+
+.ProjectItem-progress{
+  p{
+    margin: 0;
+    text-align: center;
+  }
+  border-left:  1px solid darken(white, 10%);
+  border-right: 1px solid darken(white, 10%);
+}
+
+
+
+.ProjectItem-info{
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 10px;
+  background-color: darken(white, 5%);
+  border: 1px solid darken(white, 10%)
+}

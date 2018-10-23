@@ -10,7 +10,9 @@ export default class HomeRoute extends React.Component {
   render(){
     const {props} = this
     return (
-      <div> Welcome to my app </div>
+      <div className="HomePage">
+          <img src="/images/logo.png"></img>
+      </div>
     )
   }
 }

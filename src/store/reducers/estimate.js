@@ -2,7 +2,8 @@ const initialState = {
   items: {},
   error: null,
   isFetching: false,
-  active: undefined
+  active: undefined,
+  expanded: {},
 }
 
 export default (state = initialState, action = {}) => {
@@ -10,7 +11,7 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
-    case 'ADD_PROJECT': {
+    case 'ADD_ESTIMATE': {
       return {
         ...state,
         items: {
@@ -22,7 +23,7 @@ export default (state = initialState, action = {}) => {
       };
     }
 
-    case 'SELECT_PROJECT': {
+    case 'SELECT_ESTIMATE': {
       return {
         ...state,
         active: payload
@@ -30,14 +31,14 @@ export default (state = initialState, action = {}) => {
       }
     }
     
-    case 'LOAD_PROJECTS_REQUEST': {
+    case 'LOAD_ESTIMATES_REQUEST': {
       return {
         ...state,
         isFetching: true
       };
     }
 
-    case 'LOAD_PROJECTS_FAILURE': {
+    case 'LOAD_ESTIMATES_FAILURE': {
       return {
         ...state,
         error,
@@ -45,9 +46,9 @@ export default (state = initialState, action = {}) => {
       };
     }
 
-    case 'LOAD_PROJECTS_SUCCESS': {
+    case 'LOAD_ESTIMATES_SUCCESS': {
 
-      const projects = response.reduce((current, project) => {
+      const estimates = response.reduce((current, project) => {
         current[project.id] = project
         return current
       }, {})
@@ -56,24 +57,32 @@ export default (state = initialState, action = {}) => {
         ...state,
         items: {
           ...state.items,
-          ...projects
+          ...estimates
         },
         error: null,
         isFetching: false
       };
     }
 
-    case 'ADD_ESTIMATE': {
-      const active_project = state.items[state.active]
+    case 'CLEAR_ESTIMATE': {
       return {
         ...state,
-        items: {
-          ...state.items,
-          [active_project.id]: {
-            ...active_project,
-            estimates: active_project.estimates.concat(payload.id)
-          }
-        }
+        active: undefined
+        
+      }  
+    }
+    case 'SELECT_PROJECT': {
+      return {
+        ...state,
+        active: undefined
+        
+      }
+    }
+
+    case 'SAVE_EXPANDED' : {
+      return {
+        ...state,
+        expanded: payload
       }
     }
 
