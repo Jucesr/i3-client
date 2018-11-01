@@ -1,6 +1,7 @@
 import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 import projectReducer from './reducers/project'
 import estimateReducer from './reducers/estimate'
+import estimateItemsReducer from './reducers/estimate_items'
 
 
 //Middleware
@@ -15,7 +16,8 @@ export default () => {
   const store = createStore(
     combineReducers({
       projects: projectReducer,
-      estimates: estimateReducer
+      estimates: estimateReducer,
+      estimate_items: estimateItemsReducer
     }),
     persistedState,
     composeEnhancers(applyMiddleware(thunk), applyMiddleware(callAPI))

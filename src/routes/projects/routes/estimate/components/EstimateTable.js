@@ -2,11 +2,20 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ReactTable from "react-table"
 import ReactModal from 'react-modal';
-import ModalForm from './ModalForm'
+// import ModalForm from './ModalForm'
 import QuantityInput from './QuantityInput'
 import RowActionsModal from './RowActionsModal'
 
-// import "react-table/react-table.css"
+import "react-table/react-table.css"
+
+import _ from 'lodash'
+// import { tail, reverse, sum } from "lodash-es";
+
+// const _ = {
+//   tail,
+//   reverse,
+//   sum
+// }
 
 Number.prototype.format = function(n, x, s, c) {
     var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
@@ -78,7 +87,7 @@ class EstimateTable extends React.Component {
   }
 
   getParent = () => {
-    return document.querySelector('#estimate_subpage_table');
+    return document.querySelector('#EstimateRoute');
   }
 
   generateAction(title, action){
@@ -230,10 +239,10 @@ class EstimateTable extends React.Component {
     return (
       <div>
         <ReactTable
-          data={this.props.estimate_data}
+          data={this.props.data}
           pivotBy={['level_1', 'level_2']}
           showPagination={false}
-          defaultPageSize={this.props.estimate_data.length}
+          defaultPageSize={this.props.data.length}
           columns={[
             {
               Header: '',
@@ -315,12 +324,12 @@ class EstimateTable extends React.Component {
           className="-striped -highlight"
           getTrProps={this.getTrProps.bind(this)}
           onExpandedChange={expanded => {
-            this.props.saveExpanded(expanded)
+            this.props.save_expanded(expanded)
             this.setState({ expanded })
           }}
           expanded={this.state.expanded}
         />
-        {
+        {/* {
           this.state.row_actions_modal.visible &&
 
           <RowActionsModal
@@ -335,9 +344,9 @@ class EstimateTable extends React.Component {
            actions={this.state.row_actions_modal.actions}
 
           />
-        }
+        } */}
 
-        <ReactModal
+        {/* <ReactModal
           className="Modal_form_wrapper"
           isOpen={this.state.showEditForm}
           onRequestClose={this.handleCloseModal}
@@ -350,7 +359,7 @@ class EstimateTable extends React.Component {
             onSubmit={this.state.onSubmitModal}
             onSubmitText="Save"
           />
-        </ReactModal>
+        </ReactModal> */}
 
 
       </div>
@@ -360,7 +369,7 @@ class EstimateTable extends React.Component {
 
 EstimateTable.propTypes = {
   data: PropTypes.array.isRequired,
-  expanded: PropTypes.array.isRequired,
+  expanded: PropTypes.object.isRequired,
   delete_line_item: PropTypes.func.isRequired,
   add_line_item: PropTypes.func.isRequired,
   save_line_item: PropTypes.func.isRequired,

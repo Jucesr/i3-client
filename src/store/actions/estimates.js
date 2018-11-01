@@ -31,13 +31,15 @@ export const loadEstimates = () => {
           code: "E01",
           name: "Revisión 1 - 10 Junio",
           description: "Idea de costo",
-          currency: "MXN"
+          currency: "MXN",
+          estimate_items: [1, 2, 3]
         },{
           id: 2,
           code: "E02",
           name: "Revisión 2 - 23 Julio",
           description: "Primera presentación formal con el cliente en Mexicali",
-          currency: "MXN"
+          currency: "MXN",
+          estimate_items: [4, 5, 6]
         },{
           id: 3,
           code: "E01",
@@ -54,7 +56,7 @@ export const loadEstimates = () => {
 
         setTimeout(() => {
           resolve(EstimatesFetchedFromDB)
-        }, 3000);
+        }, 500);
         
       })
     }

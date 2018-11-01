@@ -101,18 +101,18 @@ class EstimateRoute extends React.Component {
     let estimateArray = props.active_project.estimates.map( id => estimateItems[id] )
 
     return (
-      <div className="EstimateRoute">
+      <div id="EstimateRoute" className="EstimateRoute">
         {
           props.estimates.active ? (
-            <div>
-              {/* <EstimateTable 
+            <div style={{width:"100%"}}>
+              <EstimateTable 
                 data={data}
                 expanded={props.estimates.expanded}
                 save_expanded={props.saveExpanded}
                 delete_line_item={() => {}}
                 add_line_item={() => {}}
                 save_line_item={() => {}}
-              /> */}
+              />
               <button onClick={this.onClearEstimate}>Chose another</button>
 
             </div>
