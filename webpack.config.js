@@ -60,16 +60,16 @@ module.exports = (env) => {
         'process.env.FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(process.env.FIREBASE_MESSAGING_SENDER_ID)
       }),
       // new BundleAnalyzerPlugin(),
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-      new CompressionPlugin({
-        asset: "[path].gz[query]",
-        algorithm: "gzip",
-        test: /\.js$|\.css$|\.html$/,
-        threshold: 10240,
-        minRatio: 0.8
-      })
+      // new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+      // new CompressionPlugin({
+      //   asset: "[path].gz[query]",
+      //   algorithm: "gzip",
+      //   test: /\.js$|\.css$|\.html$/,
+      //   threshold: 10240,
+      //   minRatio: 0.8
+      // })
     ],
-    devtool: isProduction ? 'source-map' : 'inline-source-map',
+    devtool: isProduction ? 'source-map' : 'eval-source-map',
     devServer: {
       contentBase: path.join(__dirname, 'public'),
       historyApiFallback: true,

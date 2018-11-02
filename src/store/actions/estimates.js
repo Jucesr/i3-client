@@ -32,14 +32,14 @@ export const loadEstimates = () => {
           name: "Revisión 1 - 10 Junio",
           description: "Idea de costo",
           currency: "MXN",
-          estimate_items: [1, 2, 3]
+          items: [1, 2, 3, 4, 5, 6, 7]
         },{
           id: 2,
           code: "E02",
           name: "Revisión 2 - 23 Julio",
           description: "Primera presentación formal con el cliente en Mexicali",
           currency: "MXN",
-          estimate_items: [4, 5, 6]
+          items: [3, 4, 5, 6]
         },{
           id: 3,
           code: "E01",

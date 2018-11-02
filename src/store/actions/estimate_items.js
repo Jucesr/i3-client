@@ -35,7 +35,7 @@ export const loadEstimateItems = () => {
         },{
           id: 2,
           parent_id: 1,
-          line_item_id: null,
+          line_item_id: 1,
           is_disable: false,
           code: "01.01",
           description: 'Diseno',
@@ -75,7 +75,7 @@ export const loadEstimateItems = () => {
         },{
           id: 6,
           parent_id: 5,
-          line_item_id: null,
+          line_item_id: 2,
           is_disable: false,
           code: "03.01.01.01",
           description: 'Zapata 20x20',
@@ -85,7 +85,7 @@ export const loadEstimateItems = () => {
         },{
           id: 7,
           parent_id: 5,
-          line_item_id: null,
+          line_item_id: 3,
           is_disable: false,
           code: "03.01.01.02",
           description: 'Zapata 40x40',

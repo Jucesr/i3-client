@@ -43,16 +43,16 @@ class EstimateTable extends React.Component {
     }
     this.actions = {
       add_item: (row) => this.generateAction('Add line item', () => {
-        let {reference_number} = row
-        let levels = reference_number.split('.')
+        let {code} = row
+        let levels = code.split('.')
         let pos = levels.length - 1;
         levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
-        reference_number = levels.join('.')
+        code = levels.join('.')
 
         this.setState((prevState) => ({
           showEditForm: true,
           onSubmitModal: this.onAddItem,
-          line_item: {reference_number}
+          line_item: {code}
         }))
       }),
       add_header: (row) => this.generateAction('Add header', () => {
@@ -74,7 +74,7 @@ class EstimateTable extends React.Component {
         }))
       }),
       quantity_takeoff: row => this.generateAction('Quantity take off', () => {
-        // let rn = row.reference_number;
+        // let rn = row.code;
         // let quantity = this.props.selectedDbItem.properties.Volume
         this.props.quantityTakeOffItem()
       })
@@ -168,10 +168,10 @@ class EstimateTable extends React.Component {
      let actions = []
      let className
      switch (rowInfo.row._pivotID) {
-       case "level_1":
+       case "level_0":
          color = 'rgb(205,205,205)'
        break;
-       case "level_2":
+       case "level_1":
          row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
          color = 'rgb(225,225,225)'
          actions = [
@@ -213,7 +213,7 @@ class EstimateTable extends React.Component {
   //Handlers
 
   onSaveItem = (values) =>{
-    let levels = values.reference_number.split('.')
+    let levels = values.code.split('.')
     levels.map( (lv, i) => {
       values[`level_${i+1}`] = lv
     })
@@ -223,7 +223,7 @@ class EstimateTable extends React.Component {
   }
 
   onAddItem = (values) =>{
-    let levels = values.reference_number.split('.')
+    let levels = values.code.split('.')
     levels = _.reverse(_.tail(_.reverse(levels))) //Remove last element of array
     levels.map( (lv, i) => {
       values[`level_${i+1}`] = lv
@@ -234,44 +234,60 @@ class EstimateTable extends React.Component {
     this.handleCloseModal()
   }
 
+  transformData = (data) => {
+    data = data.map(d => {
+      let {structure} = d;
+
+      Object.keys(structure).map(key => {
+        d[key] = structure[key].code;
+        d[`${key}_description`] = structure[key].description
+      })
+
+      return d;
+
+    })
+
+    return data;
+  }
+
   render(){
 
     return (
       <div>
         <ReactTable
-          data={this.props.data}
-          pivotBy={['level_1', 'level_2']}
+          data={this.transformData(this.props.data)}
+          pivotBy={['level_0', 'level_1']}
           showPagination={false}
           defaultPageSize={this.props.data.length}
           columns={[
             {
               Header: '',
-              accessor: 'level_1',
+              accessor: 'level_0',
               width: 30,
               resizable: false,
               PivotValue: () => (<div></div>),
               pivot: true
             },{
               Header: '',
-              accessor: 'level_2',
+              accessor: 'level_1',
               width: 30,
               resizable: false,
               Aggregated: row => false,
               PivotValue: () => (<div></div>)
             },{
-              Header: 'RN',
-              accessor: 'reference_number',
+              Header: 'Code',
+              accessor: 'code',
               Aggregated: row => {
-                let arrayOfLevels = ['level_1', 'level_2']
+                let arrayOfLevels = ['level_0', 'level_1']
                 let level = arrayOfLevels.filter(lv => row.row[lv])[0]
                 let rn;
                 switch (level) {
-                  case "level_1":
-                    rn = row.subRows[0]._subRows[0]._original.level_1
+                  case "level_0":
+                    rn = row.subRows[0]._subRows[0]._original.level_0
                   break;
-                  case "level_2":
-                    rn = row.subRows[0]._original.level_2 ?
-                      `${row.subRows[0]._original.level_1}.${row.subRows[0]._original.level_2}`
+                  case "level_1":
+                    rn = row.subRows[0]._original.level_1 ?
+                      `${row.subRows[0]._original.level_0}.${row.subRows[0]._original.level_1}`
                       :
                       ''
                   break;
@@ -287,15 +303,15 @@ class EstimateTable extends React.Component {
               Header: 'Description',
               accessor: 'description',
               Aggregated: row => {
-                let arrayOfLevels = ['level_1', 'level_2']
+                let arrayOfLevels = ['level_0', 'level_1']
                 let level = arrayOfLevels.filter(lv => row.row[lv])[0]
                 let description;
                 switch (level) {
-                  case "level_1":
-                    description = row.subRows[0]._subRows[0]._original.level_1_description
+                  case "level_0":
+                    description = row.subRows[0]._subRows[0]._original.level_0_description
                   break;
-                  case "level_2":
-                    description = row.subRows[0]._original.level_2_description
+                  case "level_1":
+                    description = row.subRows[0]._original.level_1_description
                   break;
 
                 }
@@ -306,14 +322,19 @@ class EstimateTable extends React.Component {
                 );
               }
             },{
+              Header: 'UOM',
+              accessor: 'uom',
+              Aggregated: row => false
+            },{
               Header: 'Unit price',
-              accessor: 'unit_price',
+              accessor: 'unit_rate',
               Aggregated: row => false,
               Cell: this.formatIndividualColumn('currency')
             },{
               Header: 'Quantity',
               accessor: 'quantity',
-              Aggregated: row => false
+              Aggregated: row => false,
+              Cell: this.formatIndividualColumn('number')
             },{
               Header: 'Total',
               accessor: 'total',

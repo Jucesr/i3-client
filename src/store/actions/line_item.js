@@ -35,20 +35,20 @@ export const loadLineItems = () => {
           id: 2,
           code: "01",
           description: {
-            es: 'Diseño estructural',
-            en: 'Design'
+            es: 'Zapata 20x20',
+            en: 'Footing 20x20'
           },
-          uom: 'lote',
-          unit_rate: 1200
+          uom: 'ml',
+          unit_rate: 59
         },{
           id: 3,
           code: "01",
           description: {
-            es: 'Diseño estructural',
-            en: 'Design'
+            es: 'Zapata 40x40',
+            en: 'Footing 40x40'
           },
-          uom: 'lote',
-          unit_rate: 1200
+          uom: 'ml',
+          unit_rate: 64
         }]
 
         resolve(items)
