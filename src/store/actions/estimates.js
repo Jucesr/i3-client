@@ -1,12 +1,29 @@
+import { loadEstimateItemById } from "./estimate_items";
+
 export const addEstimate = (estimate) => ({
   type    : 'ADD_ESTIMATE',
   payload : estimate
 })
 
-export const selectEstimate = (id) => ({
-  type    : 'SELECT_ESTIMATE',
-  payload : id
-})
+// export const selectEstimate = (id) => ({
+//   type    : 'SELECT_ESTIMATE',
+//   payload : id
+// })
+
+export const selectEstimate = (id) => {
+  return (dispatch, getState) => {
+    dispatch({
+      type    : 'SELECT_ESTIMATE',
+      payload : id
+    })
+    let state = getState().estimates
+    let estimate_items = state.items[id].items
+
+    estimate_items.forEach(element => {
+      dispatch(loadEstimateItemById(element))
+    });
+  }
+}
 
 export const clearEstimate = () => ({
   type    : 'CLEAR_ESTIMATE',
@@ -32,7 +49,7 @@ export const loadEstimates = () => {
           name: "Revisión 1 - 10 Junio",
           description: "Idea de costo",
           currency: "MXN",
-          items: [1, 2, 3, 4, 5, 6, 7]
+          items: [11, 12, 13, 14, 15, 16, 17]
         },{
           id: 2,
           code: "E02",

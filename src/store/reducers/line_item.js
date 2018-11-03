@@ -63,6 +63,34 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'LOAD_LINE_ITEM_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
+
+    case 'LOAD_LINE_ITEM_FAILURE': {
+      return {
+        ...state,
+        error,
+        isFetching: false
+      };
+    }
+
+    case 'LOAD_LINE_ITEM_SUCCESS': {
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [`${response.id}`]: {...response, lastFetched: Date.now()}
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
     case 'CLEAR_LINE_ITEM': {
       return {
         ...state,
