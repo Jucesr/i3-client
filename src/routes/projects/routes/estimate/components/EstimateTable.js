@@ -9,13 +9,6 @@ import RowActionsModal from './RowActionsModal'
 import "react-table/react-table.css"
 
 import _ from 'lodash'
-// import { tail, reverse, sum } from "lodash-es";
-
-// const _ = {
-//   tail,
-//   reverse,
-//   sum
-// }
 
 Number.prototype.format = function(n, x, s, c) {
     var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
@@ -169,14 +162,20 @@ class EstimateTable extends React.Component {
      let className
      switch (rowInfo.row._pivotID) {
        case "level_0":
-         color = 'rgb(205,205,205)'
+         color = 'rgb(190,190,190)'
        break;
        case "level_1":
          row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
-         color = 'rgb(225,225,225)'
+         color = 'rgb(215,215,215)'
          actions = [
            [add_item(row), add_header(row), add_sub_header(row)]
          ]
+       break;
+       case "level_2":
+        color = 'rgb(235,235,235)'
+       break;
+       case "level_3":
+        color = 'rgb(245,245,245)'
        break;
        default:
          //Line items
@@ -228,7 +227,6 @@ class EstimateTable extends React.Component {
     levels.map( (lv, i) => {
       values[`level_${i+1}`] = lv
     })
-    console.log(values);
 
     this.props.addLineItem(values)
     this.handleCloseModal()
@@ -243,6 +241,9 @@ class EstimateTable extends React.Component {
         d[`${key}_description`] = structure[key].description
       })
 
+      d['level_0'] = '00';
+      d['level_0_description'] = 'Estimate'
+
       return d;
 
     })
@@ -252,47 +253,44 @@ class EstimateTable extends React.Component {
 
   render(){
 
+    const levelDepth = ['level_0', 'level_1', 'level_2', 'level_3']
+
+    const pivotColums = levelDepth.map( pivot => ({
+      Header: '',
+      accessor: pivot,
+      width: 30,
+      resizable: false,
+      Aggregated: row => false,
+      PivotValue: () => (<div></div>),
+      pivot: true
+    }))
+
     return (
       <div>
         <ReactTable
           data={this.transformData(this.props.data)}
-          pivotBy={['level_0', 'level_1']}
+          pivotBy={levelDepth}
           showPagination={false}
           defaultPageSize={this.props.data.length}
           columns={[
+            ...pivotColums,
             {
-              Header: '',
-              accessor: 'level_0',
-              width: 30,
-              resizable: false,
-              PivotValue: () => (<div></div>),
-              pivot: true
-            },{
-              Header: '',
-              accessor: 'level_1',
-              width: 30,
-              resizable: false,
-              Aggregated: row => false,
-              PivotValue: () => (<div></div>)
-            },{
               Header: 'Code',
               accessor: 'code',
               Aggregated: row => {
-                let arrayOfLevels = ['level_0', 'level_1']
+                let arrayOfLevels = levelDepth
                 let level = arrayOfLevels.filter(lv => row.row[lv])[0]
+                let level_number = parseInt ( level[level.length - 1] , 10)
+                let length = levelDepth.length -1
                 let rn;
-                switch (level) {
-                  case "level_0":
-                    rn = row.subRows[0]._subRows[0]._original.level_0
-                  break;
-                  case "level_1":
-                    rn = row.subRows[0]._original.level_1 ?
-                      `${row.subRows[0]._original.level_0}.${row.subRows[0]._original.level_1}`
-                      :
-                      ''
-                  break;
+                let original = row.subRows[0];
 
+                for (let index = 0; index < length - level_number ; index++) {
+                  original = original._subRows[0]
                 }
+
+                rn = original._original[level]
+
                 return (
                   <span>
                     {rn}
@@ -303,18 +301,24 @@ class EstimateTable extends React.Component {
               Header: 'Description',
               accessor: 'description',
               Aggregated: row => {
-                let arrayOfLevels = ['level_0', 'level_1']
-                let level = arrayOfLevels.filter(lv => row.row[lv])[0]
-                let description;
-                switch (level) {
-                  case "level_0":
-                    description = row.subRows[0]._subRows[0]._original.level_0_description
-                  break;
-                  case "level_1":
-                    description = row.subRows[0]._original.level_1_description
-                  break;
 
+                let arrayOfLevels = levelDepth
+                let level = arrayOfLevels.filter(lv => row.row[lv])[0]
+                let level_number = parseInt ( level[level.length - 1] , 10)
+                let length = levelDepth.length -1
+                let description;
+
+                let original = row.subRows[0];
+                
+                //  0 -> 2
+                //  1 => 1
+                //  2 => 0
+                for (let index = 0; index < length - level_number ; index++) {
+                  original = original._subRows[0]
                 }
+
+                description = original._original[`level_${level_number}_description`]
+
                 return (
                   <span>
                     {description}

@@ -2,6 +2,9 @@ import React from 'react'
 import {connect} from 'react-redux';
 import EstimateTable from "./components/EstimateTable";
 import EstimateCard from "./components/EstimateCard";
+
+
+import EstimateTest from "./components/EstimateTest";
 import { loadEstimates, selectEstimate, clearEstimate, saveExpanded } from "actions/estimates";
 import { loadEstimateItems } from "actions/estimate_items";
 import { loadLineItems } from "actions/line_item";
@@ -19,9 +22,6 @@ class EstimateRoute extends React.Component {
 
   onSelectEstimate = (id) =>{
     this.props.selectEstimate(id)
-    this.props.loadEstimateItems()
-    this.props.loadLineItems()
-    // this.props.history.push(`/projects/`)   
   }
 
   onClearEstimate = () => {
@@ -35,6 +35,9 @@ class EstimateRoute extends React.Component {
     const getStructure = ( current, parent_id ) => {
       if(parent_id != null){
         let element = raw[parent_id]
+        if(!element){
+          return current
+        }
         current.push(element)
         return getStructure(current, element.parent_id)  
       }else{
@@ -46,14 +49,16 @@ class EstimateRoute extends React.Component {
       let estimate_item = raw[key];
     
       //  If it is a line item and not a section
-      if(estimate_item.is_line_item == true){
+      if(estimate_item && estimate_item.is_line_item == true){
         //  Get the tree structure
+       
         let structure = getStructure([], estimate_item.parent_id)
     
         structure = structure.reverse()
     
         let structure_object = structure.reduce((current, item, index) => {
-          current[`level_${index}`] = {
+
+          current[`level_${index + 1}`] = {
             code: item.code,
             description: item.description
           }
@@ -62,17 +67,18 @@ class EstimateRoute extends React.Component {
         }, {})
     
         estimate_item.structure = structure_object
-    
-        delete estimate_item.parent_id
 
         //  Get Line item.
         let id = estimate_item.line_item_id
+
         let line_item = this.props.line_items.items[id]
 
-        estimate_item.uom = line_item.uom
-        estimate_item.unit_rate = line_item.unit_rate
-        estimate_item.total = estimate_item.unit_rate * estimate_item.quantity
-    
+        if(line_item){
+          estimate_item.uom = line_item.uom
+          estimate_item.unit_rate = line_item.unit_rate_mxn + (line_item.unit_rate_usd * 19.5)
+          estimate_item.total = estimate_item.unit_rate * estimate_item.quantity
+        }
+
         current.push(estimate_item)
       }
       
@@ -101,74 +107,8 @@ class EstimateRoute extends React.Component {
 
   render(){
 
-    // const data = [{
-    //   _id: '001',
-    //   reference_number: '01.01',
-    //   level_1: '01',
-    //   level_1_description: 'Requerimientos generales',
-    //   description: 'Diseno',
-    //   unit_price: 1000.00,
-    //   quantity: 20.00,
-    //   total: 1000.00
-    // },{
-    //   _id: '002',
-    //   reference_number: '01.02',
-    //   level_1: '01',
-    //   level_1_description: 'Requerimientos generales',
-    //   description: 'Licencias',
-    //   unit_price: 1500.00,
-    //   quantity: 2,
-    //   total: 3000.00
-    // },{
-    //   _id: '003',
-    //   reference_number: '03.02.01',
-    //   level_1: '03',
-    //   level_1_description: 'Concretos',
-    //   level_2: '02',
-    //   level_2_description: 'Cimentaciones',
-    //   description: 'Excavacion a maquina',
-    //   unit_price: 109.82,
-    //   quantity: 200.45,
-    //   total: 22012.74
-    // },{
-    //   _id: '004',
-    //   reference_number: '03.02.02',
-    //   level_1: '03',
-    //   level_1_description: 'Concretos',
-    //   level_2: '02',
-    //   level_2_description: 'Cimentaciones',
-    //   description: 'Afine manual',
-    //   unit_price: 40.54,
-    //   quantity: 713.71,
-    //   total: 28933.80
-    // },{
-    //   _id: '005',
-    //   reference_number: '03.03.01',
-    //   level_1: '03',
-    //   level_1_description: 'Concretos',
-    //   level_2: '03',
-    //   level_2_description: 'Firmes',
-    //   description: 'Plantilla de concreto',
-    //   unit_price: 129.16,
-    //   quantity: 200.4,
-    //   total: 25888.49
-    // },{
-    //   _id: '006',
-    //   reference_number: '04.01.01',
-    //   level_1: '04',
-    //   level_1_description: 'Albañileria',
-    //   level_2: '01',
-    //   level_2_description: 'Muros',
-    //   description: 'Muro de 8"',
-    //   unit_price: 129.16,
-    //   quantity: 200.4,
-    //   total: 25888.49
-    // }]
-
     const {props} = this
 
-    
-    
     const estimateCards = props.estimates.items
 
     const selectedEstimate = props.estimates.active ? estimateCards[props.estimates.active] : undefined 
@@ -176,6 +116,8 @@ class EstimateRoute extends React.Component {
     const estimateData = selectedEstimate ? this.estimateItemConnector(selectedEstimate.items) : []
 
     //  Take only the estimates of the active project
+
+    // console.log(estimateData)
 
     let estimateCardsArray = props.active_project.estimates.map( id => estimateCards[id] )
 
@@ -192,6 +134,10 @@ class EstimateRoute extends React.Component {
                 add_line_item={() => {}}
                 save_line_item={() => {}}
               />
+
+              
+
+              {/* <EstimateTest items={estimateData} /> */}
               <button onClick={this.onClearEstimate}>Chose another</button>
 
             </div>
@@ -228,6 +174,7 @@ const mapDispatchToProps = (dispatch) => ({
   clearEstimate: () => dispatch(clearEstimate()),
   saveExpanded: expanded => dispatch(saveExpanded(expanded)),
   loadEstimateItems: () => dispatch(loadEstimateItems()),
+  loadLineItemById: id => dispatch(loadLineItemById(id)),
   loadLineItems: () => dispatch(loadLineItems())
 })
 
