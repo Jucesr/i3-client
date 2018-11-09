@@ -21,14 +21,6 @@ export default (state = initialState, action = {}) => {
         }
       };
     }
-
-    case 'SELECT_LINE_ITEM': {
-      return {
-        ...state,
-        active: payload
-        
-      }
-    }
     
     case 'LOAD_LINE_ITEMS_REQUEST': {
       return {
@@ -79,7 +71,7 @@ export default (state = initialState, action = {}) => {
     }
 
     case 'LOAD_LINE_ITEM_SUCCESS': {
-
+      
       return {
         ...state,
         items: {
@@ -91,13 +83,40 @@ export default (state = initialState, action = {}) => {
       };
     }
 
-    case 'CLEAR_LINE_ITEM': {
+
+    case 'LOAD_LINE_ITEM_DETAILS_REQUEST': {
       return {
         ...state,
-        active: undefined
-        
-      }  
+        isFetching: true
+      };
     }
+
+    case 'LOAD_LINE_ITEM_DETAILS_FAILURE': {
+      return {
+        ...state,
+        error,
+        isFetching: false
+      };
+    }
+
+    case 'LOAD_LINE_ITEM_DETAILS_SUCCESS': {
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload]: {
+            ...state.items[payload],
+            line_item_details: [
+              ...response
+            ],
+            lastFetched: Date.now()
+          }
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
     case 'SELECT_PROJECT': {
       return {
         ...state,

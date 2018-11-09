@@ -1,5 +1,5 @@
 .ToolBar{
-  margin: auto;
+  margin: 0 auto;
   height: calc(100vh - #{$header_height} - #{$sub_header_height});
   transition: width 300ms linear;
   overflow: hidden;

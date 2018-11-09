@@ -5,11 +5,6 @@ export const addEstimate = (estimate) => ({
   payload : estimate
 })
 
-// export const selectEstimate = (id) => ({
-//   type    : 'SELECT_ESTIMATE',
-//   payload : id
-// })
-
 export const selectEstimate = (id) => {
   return (dispatch, getState) => {
     dispatch({
@@ -35,14 +30,13 @@ export const saveExpanded = (expanded) => ({
   payload : expanded
 })
 
-
 export const loadEstimates = () => {
   return {
-
     type: 'LOAD_ESTIMATES',
-
     callAPI: () => {
       return new Promise((resolve, reject) => {
+
+        
         const EstimatesFetchedFromDB = [{
           id: 1,
           code: "E01",
@@ -56,7 +50,37 @@ export const loadEstimates = () => {
           name: "Revisión 2 - 23 Julio",
           description: "Primera presentación formal con el cliente en Mexicali",
           currency: "MXN",
-          items: [3, 4, 5, 6]
+          items: [
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            219,
+            220,
+            221,
+            222,
+            224,
+            225,
+            226,
+            227,
+            228,
+            229,
+            230
+          ]
         },{
           id: 3,
           code: "E01",
@@ -73,7 +97,7 @@ export const loadEstimates = () => {
 
         setTimeout(() => {
           resolve(EstimatesFetchedFromDB)
-        }, 500);
+        }, 10);
         
       })
     }

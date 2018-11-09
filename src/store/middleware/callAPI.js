@@ -25,20 +25,20 @@ const callAPIMiddleware = ({ dispatch, getState }) => {
       }
   
       dispatch({
-        ...payload,
+        payload,
         type: `${type}_REQUEST`
       })
       
-      return callAPI().then(
+      return callAPI(dispatch).then(
         response => 
             dispatch({
-              ...payload,
+              payload,
               response,
               type: `${type}_SUCCESS`
             }) 
         , error =>
             dispatch({
-                ...payload,
+                payload,
                 error,
                 type: `${type}_FAILURE`
             })

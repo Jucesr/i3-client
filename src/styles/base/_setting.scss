@@ -20,5 +20,7 @@ $fs-size: 1.2rem;
 $fm-size: 1.4rem;
 $fl-size: 1.8rem;
 
+// Height layout
 $header_height: 4rem;
 $sub_header_height: 5rem;
+$route_page_heigth: calc(100vh - #{$header_height} - #{$sub_header_height});

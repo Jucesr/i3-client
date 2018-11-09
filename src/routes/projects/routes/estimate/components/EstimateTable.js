@@ -1,21 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ReactTable from "react-table"
-import ReactModal from 'react-modal';
+import ReactModal from 'react-modal'
+import _ from 'lodash'
 // import ModalForm from './ModalForm'
 import QuantityInput from './QuantityInput'
 import RowActionsModal from './RowActionsModal'
+import { formatColumn } from "utils";
 
 import "react-table/react-table.css"
-
-import _ from 'lodash'
-
-Number.prototype.format = function(n, x, s, c) {
-    var re = '\\d(?=(\\d{' + (x || 3) + '})+' + (n > 0 ? '\\D' : '$') + ')',
-        num = this.toFixed(Math.max(0, ~~n));
-
-    return (c ? num.replace('.', c) : num).replace(new RegExp(re, 'g'), '$&' + (s || ','));
-};
 
 class EstimateTable extends React.Component {
 
@@ -97,33 +90,6 @@ class EstimateTable extends React.Component {
     }
   }
 
-  formatIndividualColumn(format){
-     switch (format) {
-       case 'currency':
-         return row => {
-             return !isNaN(row.value) ? (
-               `$${parseFloat(row.value).format(2,3,',','.')}`
-             ) : row.value
-           }
-       break;
-
-       case 'number':
-         return row => {
-             return !isNaN(row.value) ? (
-               `${parseFloat(row.value).format(2,3,',','.')}`
-             ) : row.value
-           }
-       break;
-
-       case 'text': {
-         return row => row.value
-       }
-       break;
-       default:
-
-     }
-   }
-
   handleCloseModal() {
     this.setState( () => ({
       showEditForm: false
@@ -187,17 +153,23 @@ class EstimateTable extends React.Component {
          }
          let last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
 
-         color = 'rgb(245,245,245)'
+         color = 'rgb(255,255,255)'
          className = 'test-hover'
          actions = [
            [add_item(last_row)],
            [edit_item(row), delete_item(row) , quantity_takeoff(row)]
          ]
 
+         events.onClick = () => {
+           // Should call an action to bring the line item details.
+           this.props.select_estimate_item(row.id)
+         }
+
        break;
      }
      //All rows
      events = {
+       ...events,
        className,
        onContextMenu: this.onContextMenu(actions),
        style: {
@@ -268,10 +240,11 @@ class EstimateTable extends React.Component {
     return (
       <div>
         <ReactTable
+          className="EstimateTable"//"-striped -highlight"
           data={this.transformData(this.props.data)}
           pivotBy={levelDepth}
           showPagination={false}
-          defaultPageSize={this.props.data.length}
+          // defaultPageSize={this.props.data.length}
           columns={[
             ...pivotColums,
             {
@@ -300,6 +273,8 @@ class EstimateTable extends React.Component {
             },{
               Header: 'Description',
               accessor: 'description',
+              Cell: formatColumn('text'),
+              minWidth: 600,
               Aggregated: row => {
 
                 let arrayOfLevels = levelDepth
@@ -309,10 +284,7 @@ class EstimateTable extends React.Component {
                 let description;
 
                 let original = row.subRows[0];
-                
-                //  0 -> 2
-                //  1 => 1
-                //  2 => 0
+
                 for (let index = 0; index < length - level_number ; index++) {
                   original = original._subRows[0]
                 }
@@ -330,23 +302,32 @@ class EstimateTable extends React.Component {
               accessor: 'uom',
               Aggregated: row => false
             },{
-              Header: 'Unit price',
-              accessor: 'unit_rate',
-              Aggregated: row => false,
-              Cell: this.formatIndividualColumn('currency')
-            },{
               Header: 'Quantity',
               accessor: 'quantity',
               Aggregated: row => false,
-              Cell: this.formatIndividualColumn('number')
+              Cell: formatColumn('number')
+            },{
+              Header: 'UR MXN',
+              accessor: 'unit_rate_mxn',
+              Aggregated: row => false,
+              Cell: formatColumn('currency')
+            },{
+              Header: 'UR USD',
+              accessor: 'unit_rate_usd',
+              Aggregated: row => false,
+              Cell: formatColumn('currency')
+            },{
+              Header: 'Unit price',
+              accessor: 'unit_rate',
+              Aggregated: row => false,
+              Cell: formatColumn('currency')
             },{
               Header: 'Total',
               accessor: 'total',
               aggregate: vals => _.sum(vals),
-              Cell: this.formatIndividualColumn('currency')
+              Cell: formatColumn('currency')
             }
           ]}
-          className="-striped -highlight"
           getTrProps={this.getTrProps.bind(this)}
           onExpandedChange={expanded => {
             this.props.save_expanded(expanded)
@@ -354,7 +335,7 @@ class EstimateTable extends React.Component {
           }}
           expanded={this.state.expanded}
         />
-        {/* {
+        {
           this.state.row_actions_modal.visible &&
 
           <RowActionsModal
@@ -369,7 +350,7 @@ class EstimateTable extends React.Component {
            actions={this.state.row_actions_modal.actions}
 
           />
-        } */}
+        }
 
         {/* <ReactModal
           className="Modal_form_wrapper"

@@ -23,6 +23,7 @@
     "cleave.js": "^1.4.4",
     "compression-webpack-plugin": "^1.0.1",
     "css-loader": "^0.28.4",
+    "decimal.js": "^10.0.1",
     "express": "^4.16.1",
     "extract-text-webpack-plugin": "^3.0.2",
     "identity-obj-proxy": "^3.0.0",
@@ -48,6 +49,7 @@
     "webpack": "^3.1.0"
   },
   "devDependencies": {
+    "node-fetch": "^2.2.1",
     "node-sass-glob-importer": "^5.2.0",
     "webpack-bundle-analyzer": "^2.9.1",
     "webpack-dev-server": "^2.5.1"

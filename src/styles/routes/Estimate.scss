@@ -1,3 +1,15 @@
 .EstimateRoute{
   display: flex;
 }
+
+.EstimateTable{
+  // height: calc(100vh - #{$header_height} - #{$sub_header_height});
+  height: calc( #{$route_page_heigth} * 70 / 100);
+
+}
+
+.EstimateDetailTable{
+  height: calc( #{$route_page_heigth} * 30 / 100);
+}
+
+

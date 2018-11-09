@@ -20,16 +20,6 @@ export const addLineItem = (estimate_item) => ({
   payload : estimate_item
 })
 
-export const selectLineItem = (id) => ({
-  type    : 'SELECT_LINE_ITEM',
-  payload : id
-})
-
-export const clearLineItem = () => ({
-  type    : 'CLEAR_LINE_ITEM',
-  payload : {}
-})
-
 export const loadLineItemById = (id) => ({
   type: 'LOAD_LINE_ITEM',
   shouldCallAPI: shouldCallAPI('line_items', id),
@@ -67,47 +57,48 @@ export const loadLineItemById = (id) => ({
   }
 })
 
+export const loadLineItemDetailsById = (id) => ({
+  type: 'LOAD_LINE_ITEM_DETAILS',
+  shouldCallAPI: state => {
+      if(!state['line_items'].items[id].line_item_details)
+        return true
+  
+      const days = 3;
+      const miliseconds_in_day = 86400000;  
+      const timeToStale = days * miliseconds_in_day;  
+      const timeSinceLastFetch = Date.now() - state['line_items'].items[id].lastFetched;
+      const shouldFetch = (timeSinceLastFetch) > timeToStale;
+      return shouldFetch 
+  
+  },
+  payload : id,
+  callAPI: () => {
+    return new Promise((resolve, reject) => {
+      fetch(`${API_URL}/line_item/${id}/detail`)
+        .then(
+          response => {
+            if(response.status == 404)
+              reject('Not found')
+          return response.json() 
+          }
+        )
+        .then(response => {
 
-export const loadLineItems = () => {
-  return {
+          // let line_item_detail = pick(response, [
+          //   'id',
+          //   'is_assembly',
+          //   'entity_id',
+          //   'entity_code',
+          //   'description',
+          //   'uom',
+          //   'quantity',
+          //   'unit_rate_mxn',
+          //   'unit_rate_usd'
+          // ])
 
-    type: 'LOAD_LINE_ITEMS',
-
-    callAPI: () => {
-      return new Promise((resolve, reject) => {
-
-        const items = [{
-          id: 1,
-          code: "01",
-          description: {
-            es: 'Diseño estructural',
-            en: 'Design'
-          },
-          uom: 'lote',
-          unit_rate: 1200
-        },{
-          id: 2,
-          code: "01",
-          description: {
-            es: 'Zapata 20x20',
-            en: 'Footing 20x20'
-          },
-          uom: 'ml',
-          unit_rate: 59
-        },{
-          id: 3,
-          code: "01",
-          description: {
-            es: 'Zapata 40x40',
-            en: 'Footing 40x40'
-          },
-          uom: 'ml',
-          unit_rate: 64
-        }]
-
-        resolve(items)
-      })
-    }
-
+          resolve(response) 
+          })
+    })
   }
-}
+})
+

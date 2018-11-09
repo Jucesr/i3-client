@@ -41,7 +41,7 @@ export const loadProjects = () => {
 
         setTimeout(() => {
           resolve(projectsFetchedFromDB)
-        }, 3000);
+        }, 10);
         
       })
     }
