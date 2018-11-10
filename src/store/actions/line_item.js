@@ -20,42 +20,47 @@ export const addLineItem = (estimate_item) => ({
   payload : estimate_item
 })
 
-export const loadLineItemById = (id) => ({
-  type: 'LOAD_LINE_ITEM',
-  shouldCallAPI: shouldCallAPI('line_items', id),
-  callAPI: () => {
-    return new Promise((resolve, reject) => {
+export const loadLineItemById = (id, options = {}) => {
 
-      fetch(`${API_URL}/line_item/${id}`)
-        .then(
-          response => {
-            if(response.status == 404)
-              reject('Not found')
-          return response.json() 
-          }
-        )
-        .then(response => {
+  const {force = false} = options
 
-          let line_item = pick(response, [
-            'id',
-            'code',
-            'spanish_description',
-            'english_description',
-            'uom',
-            'unit_rate_mxn',
-            'unit_rate_usd'
-          ])
+  return {
+    type: 'LOAD_LINE_ITEM',
+    shouldCallAPI: force ? undefined : shouldCallAPI('line_items', id),
+    callAPI: () => {
+      return new Promise((resolve, reject) => {
 
-          line_item.description = {
-            es: line_item.spanish_description,
-            en: line_item.english_description,
-          }
+        fetch(`${API_URL}/line_item/${id}`)
+          .then(
+            response => {
+              if(response.status == 404)
+                reject('Not found')
+            return response.json() 
+            }
+          )
+          .then(response => {
 
-          resolve(line_item) 
-          })
-    })
+            let line_item = pick(response, [
+              'id',
+              'code',
+              'spanish_description',
+              'english_description',
+              'uom',
+              'unit_rate_mxn',
+              'unit_rate_usd'
+            ])
+
+            line_item.description = {
+              es: line_item.spanish_description,
+              en: line_item.english_description,
+            }
+
+            resolve(line_item) 
+            })
+      })
+    }
   }
-})
+}
 
 export const loadLineItemDetailsById = (id) => ({
   type: 'LOAD_LINE_ITEM_DETAILS',
@@ -101,4 +106,49 @@ export const loadLineItemDetailsById = (id) => ({
     })
   }
 })
+
+export const updateLineItemDetailById = (ids, line_item_detail) => ({
+  type: 'UPDATE_LINE_ITEM_DETAIL',
+  // shouldCallAPI: shouldCallAPI('estimate_items', id),
+  payload: ids.line_item,
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+          `${API_URL}/line_item/${ids.line_item}/detail/${ids.line_item_detail}`, 
+          {
+            method: 'PATCH',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(line_item_detail)
+          }
+        )
+        .then(
+          response => {
+            if(response.status == 404)
+              reject('Not found')
+          return response.json() 
+          }
+        )
+        .then(response => {
+          let lid = pick(response, [
+            'id',
+            'quantity',
+            'formula'
+          ])
+
+          //  TODO: Should fetch all Line items that were affected
+          // if(estimate_item.is_line_item){
+          
+          dispatch(loadLineItemById(ids.line_item, {force: true}))
+          // }
+
+          resolve(lid) 
+          })
+    })
+  }
+})
+
+
 

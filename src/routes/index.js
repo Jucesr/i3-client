@@ -2,6 +2,7 @@ import React from 'react';
 import {BrowserRouter , Route, Switch} from 'react-router-dom';
 import DrashboardRoute from './dashboard/';
 import ProjectRoute from './projects/';
+import socketIOClient from "socket.io-client";
 
 import HomePage from '../components/Home';
 import NotFoundPage from '../components/NotFoundPage';

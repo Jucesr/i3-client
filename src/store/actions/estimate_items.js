@@ -21,20 +21,51 @@ export const addEstimateItem = (estimate_item) => ({
   payload : estimate_item
 })
 
-// export const selectEstimateItem = (id) => {
-//   return (dispatch, getState) => {
-//     dispatch({
-//       type    : 'SELECT_ESTIMATE_ITEM',
-//       payload : id
-//     })
-//     let state = getState().estimates
-//     let estimate_items = state.items[id].items
+export const updateEstimateItemById = (id, estimate_item) => ({
+  type: 'UPDATE_ESTIMATE_ITEM',
+  // shouldCallAPI: shouldCallAPI('estimate_items', id),
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+          `${API_URL}/estimate_item/${id}`, 
+          {
+            method: 'PATCH',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(estimate_item)
+          }
+        )
+        .then(
+          response => {
+            if(response.status == 404)
+              reject('Not found')
+          return response.json() 
+          }
+        )
+        .then(response => {
+          let estimate_item = pick(response, [
+            'id',
+            'line_item_id',
+            'parent_id',
+            'code',
+            'description',
+            'quantity',
+            'indirect_percentage',
+            'is_line_item'
+          ])
 
-//     estimate_items.forEach(element => {
-//       dispatch(loadEstimateItemById(element))
-//     });
-//   }
-// }
+          //  If the Estimate item is a LI and it has changed it should fetch the new one
+          if(estimate_item.is_line_item){
+            dispatch(loadLineItemById(estimate_item.line_item_id))
+          }
+
+          resolve(estimate_item) 
+          })
+    })
+  }
+})
 
 export const selectEstimateItem = (id) => ({
   type    : 'SELECT_ESTIMATE_ITEM',

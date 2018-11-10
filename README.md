@@ -5,6 +5,7 @@ This file is used to explain in detail changes I make to this app as I am buidin
 
 - [I3-WEB-CLIENT.](#i3-web-client)
   - [V0.1](#v01)
+  - [V0.2](#v02)
   - [Glossary](#glossary)
 
 <!-- /TOC -->
@@ -22,6 +23,16 @@ Date: Nov 8, 2018
   * Remove loadEstimateItems action from Estimate Item, no longer need it since it is connected with the API.
   * Move method formatColumn from index to util file.
   * Add 'line item detail' field to Store.
+
+## V0.2
+Date: Nov 9, 2018
+
+  * Implement socket IO for real-time data.
+  * Estimate Route
+    * Change font size for table of LIDs.
+    * Quantity of a EI can be changed in the table.
+    * Quantity of a LID can be changed in detail table.
+    * An estimate item can be selected
 
 
 ## Glossary

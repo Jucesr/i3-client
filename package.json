@@ -8,7 +8,8 @@
     "heroku-postbuild": "npm run build",
     "build-dev": "webpack",
     "build": "webpack -p --env production",
-    "dev-server": "webpack-dev-server"
+    "dev-server": "webpack-dev-server",
+    "local-server": "webpack-dev-server --port 8080 --host 172.16.19.131"
   },
   "author": "Julio Ojeda",
   "license": "ISC",
@@ -45,6 +46,7 @@
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
     "sass-loader": "^6.0.6",
+    "socket.io-client": "^2.1.1",
     "style-loader": "^0.18.2",
     "webpack": "^3.1.0"
   },

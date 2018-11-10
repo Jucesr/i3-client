@@ -5,10 +5,14 @@ import configureStore from './store/';
 import AppRouter from './routes/'
 import LoadingPage from './components/LoadingPage'
 
+import configureSocketIO from './services/socket'
+
 import 'normalize.css/normalize.css'
 import './styles/styles.scss'
 
-const store = configureStore();
+const store = configureStore()
+
+configureSocketIO(store)
 
 const app = (
   <Provider store={store}>

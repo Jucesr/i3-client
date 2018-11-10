@@ -7,9 +7,9 @@ import EstimateCard from "./components/EstimateCard";
 
 import { loadEstimates, selectEstimate, clearEstimate, saveExpanded } from "actions/estimates";
 
-import { selectEstimateItem } from "actions/estimate_items";
+import { selectEstimateItem, updateEstimateItemById } from "actions/estimate_items";
 
-import { loadLineItemDetailsById } from "actions/line_item";
+import { loadLineItemDetailsById, updateLineItemDetailById } from "actions/line_item";
 
 class EstimateRoute extends React.Component {
 
@@ -79,8 +79,8 @@ class EstimateRoute extends React.Component {
 
           //  Round values to 2 Decimals
 
-          let urm = new Decimal(unit_rate_mxn)
-          let urd = new Decimal(unit_rate_usd)
+          let urm = new Decimal(unit_rate_mxn ? unit_rate_mxn : 0)
+          let urd = new Decimal(unit_rate_usd ? unit_rate_usd : 0)
 
           let unit_rate = parseFloat (urm.plus(urd.times(19.5)).toFixed(2))
           let total = parseFloat( new Decimal(unit_rate).times(estimate_item.quantity).toFixed(2) )
@@ -150,11 +150,15 @@ class EstimateRoute extends React.Component {
 
     //  Line item details
 
-    let EI = props.estimate_items.active ? props.estimate_items.items[props.estimate_items.active] : undefined
+    let EI_ID = props.estimate_items.active ? props.estimate_items.active : undefined
+
+    let EI = EI_ID ? props.estimate_items.items[EI_ID] : undefined
     
     let LI = EI ? props.line_items.items[EI.line_item_id] : undefined
 
     let LIDs = LI ? (LI.line_item_details ? LI.line_item_details : []) : []
+
+    LIDs = LIDs.map(lid => ({...lid, line_item_id: LI.id}))
 
     return (
       <div id="EstimateRoute" className="EstimateRoute">
@@ -168,13 +172,15 @@ class EstimateRoute extends React.Component {
                   save_expanded={props.saveExpanded}
                   delete_line_item={() => {}}
                   add_line_item={() => {}}
-                  save_line_item={() => {}}
+                  save_line_item={props.updateEstimateItemById}
                   select_estimate_item = {this.onSelectEstimateItem}
+                  estimate_item_selected = {EI_ID}
                 /> 
               </div>
               <div>
                 <EstimateDetailTable
                   data={LIDs}
+                  save_line_item_detail={props.updateLineItemDetailById}
                 />  
               </div>
               {/* <button onClick={this.onClearEstimate}>Chose another</button> */}
@@ -210,8 +216,10 @@ class EstimateRoute extends React.Component {
 const mapDispatchToProps = (dispatch) => ({
   loadEstimates: () => dispatch(loadEstimates()),
   loadLineItemDetailsById: id => dispatch(loadLineItemDetailsById(id)),
+  updateLineItemDetailById: (ids, item) => dispatch(updateLineItemDetailById(ids, item)),
   selectEstimate: id => dispatch(selectEstimate(id)),
   selectEstimateItem: id => dispatch(selectEstimateItem(id)),
+  updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
   clearEstimate: () => dispatch(clearEstimate()),
   saveExpanded: expanded => dispatch(saveExpanded(expanded)),
   loadLineItemById: id => dispatch(loadLineItemById(id))

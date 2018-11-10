@@ -91,6 +91,34 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'UPDATE_ESTIMATE_ITEM_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
+
+    case 'UPDATE_ESTIMATE_ITEM_FAILURE': {
+      return {
+        ...state,
+        error,
+        isFetching: false
+      };
+    }
+
+    case 'UPDATE_ESTIMATE_ITEM_SUCCESS': {
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [response.id]: response
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
     case 'CLEAR_ESTIMATE_ITEM': {
       return {
         ...state,

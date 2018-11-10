@@ -71,12 +71,17 @@ export default (state = initialState, action = {}) => {
     }
 
     case 'LOAD_LINE_ITEM_SUCCESS': {
-      
+
+      let li = state.items[response.id] ? state.items[response.id] : {} 
       return {
         ...state,
         items: {
           ...state.items,
-          [`${response.id}`]: {...response, lastFetched: Date.now()}
+          [response.id]: {
+            ...li,
+            ...response, 
+            lastFetched: Date.now()
+          }
         },
         error: null,
         isFetching: false
@@ -109,6 +114,45 @@ export default (state = initialState, action = {}) => {
             line_item_details: [
               ...response
             ],
+            lastFetched: Date.now()
+          }
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
+    case 'UPDATE_LINE_ITEM_DETAIL_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
+
+    case 'UPDATE_LINE_ITEM_DETAIL_FAILURE': {
+      return {
+        ...state,
+        error,
+        isFetching: false
+      };
+    }
+
+    case 'UPDATE_LINE_ITEM_DETAIL_SUCCESS': {
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload]: {
+            ...state.items[payload],
+            line_item_details: state.items[payload].line_item_details.map( lid => {
+              if(lid.id == response.id){
+                lid = {
+                  ...lid,
+                  ...response
+                }
+              }
+              return lid
+            }),
             lastFetched: Date.now()
           }
         },

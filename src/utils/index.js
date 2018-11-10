@@ -1,5 +1,6 @@
 import React from 'react'
 
+
 export const replaceAll = (text, obj) => {
   for (var x in obj) {
       text = text.replace(new RegExp(x, 'g'), obj[x]);

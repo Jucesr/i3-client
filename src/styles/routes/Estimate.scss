@@ -9,7 +9,27 @@
 }
 
 .EstimateDetailTable{
+  font-size: 1.2rem;
   height: calc( #{$route_page_heigth} * 30 / 100);
 }
 
+.EstimateItemRow {
+  background: white;
+  &:hover{
+    cursor: pointer;
+    background: lighten(rgb(63,97,131), 55)
+    //background: darken(white, 10);
+  }
+}
+
+.EstimateItemRow--Selected {
+  background: lighten(rgb(63,97,131), 50)
+}
+
+
+.QuantityInput{
+  border: none;
+  width: 100%;
+  height: 100%;
+}
 

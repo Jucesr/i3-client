@@ -118,30 +118,31 @@ class EstimateTable extends React.Component {
   }
 
   getTrProps(state, rowInfo, column){
-   let events = {}
+    let props = {}
 
-   let {add_item, add_header, add_sub_header, delete_item, edit_item, quantity_takeoff} = this.actions
+    let {add_item, add_header, add_sub_header, delete_item, edit_item, quantity_takeoff} = this.actions
    if(rowInfo ){
+    
+    let styles = {}
      let row
-     let color
      let actions = []
      let className
      switch (rowInfo.row._pivotID) {
        case "level_0":
-         color = 'rgb(190,190,190)'
+       styles.background = 'rgb(190,190,190)'
        break;
        case "level_1":
          row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
-         color = 'rgb(215,215,215)'
+         styles.background = 'rgb(215,215,215)'
          actions = [
            [add_item(row), add_header(row), add_sub_header(row)]
          ]
        break;
        case "level_2":
-        color = 'rgb(235,235,235)'
+        styles.background = 'rgb(235,235,235)'
        break;
        case "level_3":
-        color = 'rgb(245,245,245)'
+        styles.background = 'rgb(245,245,245)'
        break;
        default:
          //Line items
@@ -153,14 +154,14 @@ class EstimateTable extends React.Component {
          }
          let last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
 
-         color = 'rgb(255,255,255)'
-         className = 'test-hover'
+         //color = 'rgb(255,255,255)'
+         className = `EstimateItemRow ${row.id == this.props.estimate_item_selected ? 'EstimateItemRow--Selected ': ''}`
          actions = [
            [add_item(last_row)],
            [edit_item(row), delete_item(row) , quantity_takeoff(row)]
          ]
 
-         events.onClick = () => {
+         props.onClick = () => {
            // Should call an action to bring the line item details.
            this.props.select_estimate_item(row.id)
          }
@@ -168,17 +169,17 @@ class EstimateTable extends React.Component {
        break;
      }
      //All rows
-     events = {
-       ...events,
+     props = {
+       ...props,
        className,
        onContextMenu: this.onContextMenu(actions),
        style: {
-           background: color
+           ...styles
        }
      }
    }
 
-   return events
+   return props
    }
 
   //Handlers
@@ -305,7 +306,12 @@ class EstimateTable extends React.Component {
               Header: 'Quantity',
               accessor: 'quantity',
               Aggregated: row => false,
-              Cell: formatColumn('number')
+              Cell: row => <QuantityInput 
+                            quantityValue={parseFloat(row.value)}
+                            onBlur={quantity => {
+                              this.props.save_line_item(row.original.id, {quantity})
+                            }}
+                            /> //formatColumn('number')
             },{
               Header: 'UR MXN',
               accessor: 'unit_rate_mxn',
