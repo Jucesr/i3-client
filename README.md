@@ -6,6 +6,7 @@ This file is used to explain in detail changes I make to this app as I am buidin
 - [I3-WEB-CLIENT.](#i3-web-client)
   - [V0.1](#v01)
   - [V0.2](#v02)
+  - [V0.3](#v03)
   - [Glossary](#glossary)
 
 <!-- /TOC -->
@@ -34,6 +35,13 @@ Date: Nov 9, 2018
     * Quantity of a LID can be changed in detail table.
     * An estimate item can be selected
 
+## V0.3
+Date: Nov 10, 2018
+  * Add buttons to the subheader.
+    * Button to select another estimate
+    * Button to show model.
+  * Add Viewer component to render a 3D model.
+  
 
 ## Glossary
 

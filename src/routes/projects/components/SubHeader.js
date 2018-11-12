@@ -5,14 +5,19 @@ const SubHeader = (props) => {
   const {
     projectName,
     estimateName,
-    onClickMenuHandler
+    onClickMenuHandler,
+    clearEstimate
   } = props
+  
   return (
-    <div className="SubHeader-wrapper">
-      <div className="SubHeader">
-        <div onClick={onClickMenuHandler}>
-          <img width="30px" src="/images/menu.png"></img>
-        </div>
+    <div className="SubHeader">
+
+      <div className="SubHeader-menu" onClick={onClickMenuHandler}>
+        <img width="30px" src="/images/menu.png"></img>
+      </div>
+
+      <div className="SubHeader-margin">
+        
         <div className="SubHeader-project">
           <strong>{projectName}</strong>
         </div>
@@ -20,6 +25,24 @@ const SubHeader = (props) => {
         <div className="SubHeader-estimate">
           {estimateName}
         </div>
+
+      </div>
+
+      <div className="SubHeader-toolbar">
+        <ToolItem action={clearEstimate}  src="calculator.png"/>
+        <ToolItem src="cubes.png"/>
+      </div>
+
+    </div>
+  )
+}
+
+const ToolItem = (props) => {
+  
+  return (
+    <div className="SubHeader-toolbar-item">
+      <div onClick={props.action}>
+        <img src={`/images/tools/${props.src}`}></img>
       </div>
     </div>
   )

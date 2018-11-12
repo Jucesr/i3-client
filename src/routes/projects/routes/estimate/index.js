@@ -4,8 +4,9 @@ import {Decimal} from 'decimal.js';
 import EstimateTable from "./components/EstimateTable";
 import EstimateDetailTable from "./components/EstimateDetailTable";
 import EstimateCard from "./components/EstimateCard";
+import Viewer from "./components/Viewer";
 
-import { loadEstimates, selectEstimate, clearEstimate, saveExpanded } from "actions/estimates";
+import { loadEstimates, selectEstimate, saveExpanded } from "actions/estimates";
 
 import { selectEstimateItem, updateEstimateItemById } from "actions/estimate_items";
 
@@ -15,18 +16,21 @@ class EstimateRoute extends React.Component {
 
   constructor(props){
     super(props)
+
+    this.state = {
+      is_model_visible: false
+    }
   }
 
   componentDidMount = () => {
     this.props.loadEstimates()
+
+    //  Load tools for estimate
+    console.log('I am mounted')
   }
 
   onSelectEstimate = (id) =>{
     this.props.selectEstimate(id)
-  }
-
-  onClearEstimate = () => {
-    this.props.clearEstimate()
   }
 
   parseEstimateItems = (raw) => {
@@ -136,7 +140,7 @@ class EstimateRoute extends React.Component {
 
   render(){
 
-    const {props} = this
+    const {props, state} = this
 
     const estimateCards = props.estimates.items
 
@@ -165,7 +169,7 @@ class EstimateRoute extends React.Component {
         {
           selectedEstimate ? (
             <div style={{width:"100%"}}>
-              <div className="EstimateTable">
+              <div className="EstimateRoute-EstimateTable">
                 <EstimateTable
                   data={estimateData}
                   expanded={props.estimates.expanded}
@@ -176,6 +180,7 @@ class EstimateRoute extends React.Component {
                   select_estimate_item = {this.onSelectEstimateItem}
                   estimate_item_selected = {EI_ID}
                 /> 
+                {state.is_model_visible && <Viewer/>}
               </div>
               <div>
                 <EstimateDetailTable
@@ -183,8 +188,7 @@ class EstimateRoute extends React.Component {
                   save_line_item_detail={props.updateLineItemDetailById}
                 />  
               </div>
-              {/* <button onClick={this.onClearEstimate}>Chose another</button> */}
-
+              
             </div>
             
 
@@ -220,7 +224,6 @@ const mapDispatchToProps = (dispatch) => ({
   selectEstimate: id => dispatch(selectEstimate(id)),
   selectEstimateItem: id => dispatch(selectEstimateItem(id)),
   updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
-  clearEstimate: () => dispatch(clearEstimate()),
   saveExpanded: expanded => dispatch(saveExpanded(expanded)),
   loadLineItemById: id => dispatch(loadLineItemById(id))
 })

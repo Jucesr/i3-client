@@ -5,6 +5,8 @@ import {Route} from 'react-router-dom';
 import ToolBar from "./components/ToolBar";
 import SubHeader from "./components/SubHeader";
 
+import { clearEstimate } from "actions/estimates";
+
 import EstimateRoute from "./routes/estimate";
 
 class ProjectRoute extends React.Component {
@@ -36,11 +38,15 @@ class ProjectRoute extends React.Component {
             this.setState((prevState) => ({
               isToolBarOpen: !prevState.isToolBarOpen
             }))
+          
           }}
+          clearEstimate={props.clearEstimate}
         />
         
         <div className="ProjectRoute_container">
-          <ToolBar isOpen={state.isToolBarOpen} /> 
+          <ToolBar 
+            isOpen={state.isToolBarOpen} 
+          /> 
 
           <div className="ProjectRoute_subroute">
             <Route path="/projects/" component={overView} exact={true}/>
@@ -54,7 +60,7 @@ class ProjectRoute extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  // loadProjects: () => dispatch(loadProjects())
+  clearEstimate: () => dispatch(clearEstimate())
 })
 
 const mapStateToProps = (state) => ({  
