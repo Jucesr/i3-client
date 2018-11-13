@@ -11,23 +11,21 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
-    case 'ADD_ESTIMATE': {
-      return {
-        ...state,
-        items: {
-          ...items,
-          [action.payload.id]: {
-            ...action.payload
-          }
-        }
-      };
-    }
-
     case 'SELECT_ESTIMATE': {
       return {
         ...state,
         active: payload
         
+      }
+    }
+
+    case 'LOAD_ESTIMATE': {
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload.id]: payload
+        }
       }
     }
     
@@ -71,6 +69,21 @@ export default (state = initialState, action = {}) => {
         
       }  
     }
+
+    case 'ADD_ESTIMATE_ITEM_SUCCESS': {
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload]: {
+            ...state.items[payload],
+            items: state.items[payload].items.concat(response.id)
+            
+          }
+        }
+      };
+    }
+
     case 'SELECT_PROJECT': {
       return {
         ...state,

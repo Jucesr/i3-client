@@ -1,24 +1,55 @@
-import { loadEstimateItemById } from "./estimate_items";
+import { loadEstimateItem } from "./estimate_items";
 
 export const addEstimate = (estimate) => ({
   type    : 'ADD_ESTIMATE',
   payload : estimate
 })
 
-export const selectEstimate = (id) => {
-  return (dispatch, getState) => {
-    dispatch({
-      type    : 'SELECT_ESTIMATE',
-      payload : id
-    })
-    let state = getState().estimates
-    let estimate_items = state.items[id].items
+export const loadEstimateItems = () => ({
+  type: 'LOAD_ESTIMATE_ITEMS',
+  payload: id,
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${API_URL}/project/${id}/estimates`)
+        .then(
+          response => {
+            if(response.status != 200)
+              reject(response)
+          return response.json() 
+          }
+        )
+        .then(estimates => {
 
-    estimate_items.forEach(element => {
-      dispatch(loadEstimateItemById(element))
-    });
+          let estimate_ids = estimates.map(
+            item => {
+              let estimate = pick(item, [
+                'id',
+                'code',
+                'name',
+                'description',
+                'currency'
+              ])
+
+              //  Fire action in estimate reducer.
+              dispatch(loadEstimate(estimate))
+
+              return estimate.id
+              
+            }
+          )
+
+          
+
+          resolve(estimate_ids) 
+          })
+    })
   }
-}
+})
+
+export const selectEstimate = (id) => ({
+  type    : 'SELECT_ESTIMATE',
+  payload : id
+})
 
 export const clearEstimate = () => ({
   type    : 'CLEAR_ESTIMATE',
@@ -28,6 +59,12 @@ export const clearEstimate = () => ({
 export const saveExpanded = (expanded) => ({
   type    : 'SAVE_EXPANDED',
   payload : expanded
+})
+
+
+export const loadEstimate = estimate => ({
+  type    : 'LOAD_ESTIMATE',
+  payload : estimate
 })
 
 export const loadEstimates = () => {
@@ -93,7 +130,8 @@ export const loadEstimates = () => {
             31,
             242,
             243,
-            244
+            244,
+            246,
           ]
         },{
           id: 3,

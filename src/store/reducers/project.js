@@ -63,6 +63,19 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'LOAD_PROJECT_ESTIMATES_SUCCESS': {
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload]: {
+            ...state.items[payload],
+            estimates: response
+          }
+        }
+      }
+    }
+
     case 'ADD_ESTIMATE': {
       const active_project = state.items[state.active]
       return {

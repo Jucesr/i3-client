@@ -6,6 +6,7 @@ import ToolBar from "./components/ToolBar";
 import SubHeader from "./components/SubHeader";
 
 import { clearEstimate } from "actions/estimates";
+import { toggleModel, toggleEstimateDetails } from "actions/ui";
 
 import EstimateRoute from "./routes/estimate";
 
@@ -41,6 +42,8 @@ class ProjectRoute extends React.Component {
           
           }}
           clearEstimate={props.clearEstimate}
+          toggleModel={props.toggleModel}
+          toggleEstimateDetails={props.toggleEstimateDetails}
         />
         
         <div className="ProjectRoute_container">
@@ -60,7 +63,9 @@ class ProjectRoute extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  clearEstimate: () => dispatch(clearEstimate())
+  clearEstimate: () => dispatch(clearEstimate()),
+  toggleModel: () => dispatch(toggleModel()),
+  toggleEstimateDetails : () => dispatch(toggleEstimateDetails()),
 })
 
 const mapStateToProps = (state) => ({  

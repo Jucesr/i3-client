@@ -7,6 +7,7 @@ This file is used to explain in detail changes I make to this app as I am buidin
   - [V0.1](#v01)
   - [V0.2](#v02)
   - [V0.3](#v03)
+  - [V0.4](#v04)
   - [Glossary](#glossary)
 
 <!-- /TOC -->
@@ -41,7 +42,13 @@ Date: Nov 10, 2018
     * Button to select another estimate
     * Button to show model.
   * Add Viewer component to render a 3D model.
-  
+
+## V0.4
+Date: Nov 12, 2018
+  * Add actions and reducer to handle user interface options.
+    * Actions to show/hide estimate model.
+    * Actions to show/hide estimate details.
+  * Add funcionality to add a new EI.  
 
 ## Glossary
 

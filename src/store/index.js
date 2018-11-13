@@ -3,6 +3,7 @@ import projectReducer from './reducers/project'
 import estimateReducer from './reducers/estimate'
 import estimateItemsReducer from './reducers/estimate_items'
 import lineItemsReducer from './reducers/line_item'
+import UIReducer from "./reducers/ui";
 
 
 //Middleware
@@ -19,7 +20,8 @@ export default () => {
       projects: projectReducer,
       estimates: estimateReducer,
       estimate_items: estimateItemsReducer,
-      line_items: lineItemsReducer
+      line_items: lineItemsReducer,
+      ui: UIReducer
     }),
     persistedState,
     composeEnhancers(applyMiddleware(thunk), applyMiddleware(callAPI))

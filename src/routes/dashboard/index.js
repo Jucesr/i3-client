@@ -43,7 +43,7 @@ class DashboardRoute extends React.Component {
               id={item.id}
               name={item.name}
               uen={item.uen}
-              picture={item.picture}
+              picture={item.picture_url}
               progress={item.progress}
             />
           )

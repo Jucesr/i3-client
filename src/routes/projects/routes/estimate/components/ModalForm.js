@@ -23,18 +23,18 @@ export default class ModalForm extends React.Component {
           { ({ formApi }) => (
             <div>
               <CustomInput
-                field='reference_number'
+                field='code'
                 raw={false}
                 options={{
                   delimiter: '.',
                   delimiterLazyShow: true,
-                  blocks: [2, 2, 2],
+                  blocks: [2, 2, 2, 2],
                   uppercase: true
                 }}
               />
               <RegularInput textarea={true} field='description'/>
 
-              <RegularInput field='unit_of_mesurement'/>
+              <RegularInput field='uom'/>
 
               <CustomInput
                 field='quantity'

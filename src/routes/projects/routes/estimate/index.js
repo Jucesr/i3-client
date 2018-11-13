@@ -6,9 +6,11 @@ import EstimateDetailTable from "./components/EstimateDetailTable";
 import EstimateCard from "./components/EstimateCard";
 import Viewer from "./components/Viewer";
 
-import { loadEstimates, selectEstimate, saveExpanded } from "actions/estimates";
+import { loadProjectEstimates } from "actions/projects";
 
-import { selectEstimateItem, updateEstimateItemById } from "actions/estimate_items";
+import { loadEstimateItems, selectEstimate, saveExpanded } from "actions/estimates";
+
+import { addEstimateItem, selectEstimateItem, updateEstimateItemById } from "actions/estimate_items";
 
 import { loadLineItemDetailsById, updateLineItemDetailById } from "actions/line_item";
 
@@ -17,20 +19,16 @@ class EstimateRoute extends React.Component {
   constructor(props){
     super(props)
 
-    this.state = {
-      is_model_visible: false
-    }
   }
 
   componentDidMount = () => {
-    this.props.loadEstimates()
-
-    //  Load tools for estimate
-    console.log('I am mounted')
+    this.props.loadProjectEstimates(this.props.projects.active)
   }
 
   onSelectEstimate = (id) =>{
     this.props.selectEstimate(id)
+
+    this.props.loadEstimateItems(id)
   }
 
   parseEstimateItems = (raw) => {
@@ -138,6 +136,24 @@ class EstimateRoute extends React.Component {
 
   }
 
+  onAddEstimateItem = item => {
+    //  Add meta data.
+    const estimate_item = {
+      ...item,
+      wbs_item_id: null,
+      line_item_id: null,
+      is_line_item: true,
+      is_disable: false,
+      hierachy_level: 1,
+      indirect_percentage: 0,
+      project_id: this.props.active_project.id,
+      estimate_id: this.props.estimates.active
+    }
+
+    // console.log(estimate_item)
+    this.props.addEstimateItem(estimate_item)
+  }
+
   render(){
 
     const {props, state} = this
@@ -150,7 +166,9 @@ class EstimateRoute extends React.Component {
 
     //  Take only the estimates of the active project
 
-    let estimateCardsArray = props.active_project.estimates.map( id => estimateCards[id] )
+    let active_project = props.active_project
+
+    let estimateCardsArray = active_project.estimates ? props.active_project.estimates.map( id => estimateCards[id] ) : []
 
     //  Line item details
 
@@ -164,32 +182,41 @@ class EstimateRoute extends React.Component {
 
     LIDs = LIDs.map(lid => ({...lid, line_item_id: LI.id}))
 
+    //  Classname
+
+    const estimate_table_classname = props.is_estimate_detail_visible ? 'EstimateTable' : 'EstimateTable--Full'
+    const model_viewer_classname = props.is_estimate_detail_visible ? 'Viewer-container' : 'Viewer-container--Full'
+
     return (
       <div id="EstimateRoute" className="EstimateRoute">
         {
           selectedEstimate ? (
-            <div style={{width:"100%"}}>
+            <div className = "EstimateRoute-Active"> 
+            
               <div className="EstimateRoute-EstimateTable">
                 <EstimateTable
+                  className={estimate_table_classname}
                   data={estimateData}
                   expanded={props.estimates.expanded}
                   save_expanded={props.saveExpanded}
                   delete_line_item={() => {}}
-                  add_line_item={() => {}}
+                  addEstimateItem={this.onAddEstimateItem}
                   save_line_item={props.updateEstimateItemById}
                   select_estimate_item = {this.onSelectEstimateItem}
                   estimate_item_selected = {EI_ID}
+                  is_model_visible = {props.is_model_visible}
                 /> 
-                {state.is_model_visible && <Viewer/>}
+                {props.is_model_visible && <Viewer className={model_viewer_classname}/>}
               </div>
-              <div>
-                <EstimateDetailTable
-                  data={LIDs}
-                  save_line_item_detail={props.updateLineItemDetailById}
-                />  
-              </div>
+              { props.is_estimate_detail_visible && 
               
-            </div>
+              <EstimateDetailTable
+                data={LIDs}
+                save_line_item_detail={props.updateLineItemDetailById}
+              />
+              
+              }  
+            </div> 
             
 
           ) : 
@@ -218,9 +245,11 @@ class EstimateRoute extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
-  loadEstimates: () => dispatch(loadEstimates()),
+  
+  loadProjectEstimates: id => dispatch(loadProjectEstimates(id)),
   loadLineItemDetailsById: id => dispatch(loadLineItemDetailsById(id)),
   updateLineItemDetailById: (ids, item) => dispatch(updateLineItemDetailById(ids, item)),
+  addEstimateItem: item => dispatch(addEstimateItem(item)),
   selectEstimate: id => dispatch(selectEstimate(id)),
   selectEstimateItem: id => dispatch(selectEstimateItem(id)),
   updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
@@ -229,11 +258,14 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mapStateToProps = (state) => ({  
+  projects: state.projects,
   estimates: state.estimates,
   estimate_items: state.estimate_items,
   line_items: state.line_items,
   line_item_details: state.line_item_details,
-  active_project: state.projects.items[state.projects.active]
+  active_project: state.projects.items[state.projects.active],
+  is_model_visible: state.ui.is_model_visible,
+  is_estimate_detail_visible: state.ui.is_estimate_detail_visible
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(EstimateRoute);

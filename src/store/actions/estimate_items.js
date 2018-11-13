@@ -18,7 +18,49 @@ const shouldCallAPI = (stateProperty, _id) => {
 
 export const addEstimateItem = (estimate_item) => ({
   type    : 'ADD_ESTIMATE_ITEM',
-  payload : estimate_item
+  payload : estimate_item.estimate_id,
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+          `${API_URL}/estimate_item/`, 
+          {
+            method: 'POST',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(estimate_item)
+          }
+        )
+        .then(
+          response => {
+            if(response.status == 400)
+              reject(response)
+          return response.json() 
+          }
+        )
+        .then(response => {
+          let estimate_item = pick(response, [
+            'id',
+            'parent_id',
+            'is_disable',
+            'is_line_item',
+            'line_item_id',
+            'code',
+            'description',
+            'quantity',
+            'indirect_percentage',
+          ])
+
+          // //  If the Estimate item is a LI and it has changed it should fetch the new one
+          // if(estimate_item.is_line_item){
+          //   dispatch(loadLineItemById(estimate_item.line_item_id))
+          // }
+
+          resolve(estimate_item) 
+          })
+    })
+  }
 })
 
 export const updateEstimateItemById = (id, estimate_item) => ({
@@ -49,6 +91,7 @@ export const updateEstimateItemById = (id, estimate_item) => ({
             'id',
             'line_item_id',
             'parent_id',
+            'is_disable',
             'code',
             'description',
             'quantity',
@@ -71,13 +114,6 @@ export const selectEstimateItem = (id) => ({
   type    : 'SELECT_ESTIMATE_ITEM',
   payload : id
 })
-
-
-export const clearEstimateItem = () => ({
-  type    : 'CLEAR_ESTIMATE_ITEM',
-  payload : {}
-})
-
 
 export const loadEstimateItemById = (id) => {
   return {

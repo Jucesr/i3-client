@@ -2,6 +2,12 @@
   display: flex;
 }
 
+.EstimateRoute-Active{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .EstimateRoute-EstimateTable{
   display: flex;
   width : calc(100vw - 1px);
@@ -9,14 +15,14 @@
   *{
     flex: 50%;
   }
-  // position: absolute;
 }
 
 .EstimateTable{
-  // height: calc(100vh - #{$header_height} - #{$sub_header_height});
   height: calc( #{$route_page_heigth} * 70 / 100);
-  
+}
 
+.EstimateTable--Full{
+  height: calc( #{$route_page_heigth});
 }
 
 .EstimateDetailTable{
@@ -48,7 +54,12 @@
   height: calc( #{$route_page_heigth} * 70 / 100);
   background-color: #dadada;
   position: relative;
-  // width: 100vw;
+}
+
+.Viewer-container-Full {
+  height: calc( #{$route_page_heigth});
+  background-color: #dadada;
+  position: relative;
 }
 
 .Viewer{

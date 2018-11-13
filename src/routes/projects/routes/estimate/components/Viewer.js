@@ -64,7 +64,7 @@ class Viewer extends React.Component {
           //   onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MTg4MTQwNiwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJYRFVoMjE5ZjNiTWE3OU00Z09SMFkzWnRIRjFBbDdVTThGeVpYVjNKaGxXVlVrY3BadXk5REZKTlNXbFNvRVdWIn0.2C-hROTxMkd1Ble2tkID1vUs-jd-U68gtCyGqgrwvXc", 3599);
           // })
 
-          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MTg4NTM4OCwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiclkybWFKWTVhR0I5T2ZGbWc4cG9BcU51Z2lqWGI4VDRJUkVSY0xPdUl5elA2dFU3bW1EcmpZUjBWVGk5Z1FzbiJ9.a3x_GKeSf2elVdO2r5UxoOvQpjAmLXpf5SVNbBRLl2A", 3599);
+          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MjA1NDI5OCwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiR3hDZVAyVWh1T25nQkhWUlluUFhrNEszZTFIZWpCbkl3UVFpczZtbGRmaTN4N3RxeGpSaDE0ZmZUYVIxT0NMVCJ9.mIS8b56VpV06a4h09NquiGUfYo8ZQg-2drms1VeptQo", 3599);
           
 
           
@@ -172,7 +172,7 @@ class Viewer extends React.Component {
   render() {
 
     return (
-      <div className="Viewer-container">
+      <div className={this.props.className}>
         <div 
           className="Viewer"
           id="MyViewerDiv" 

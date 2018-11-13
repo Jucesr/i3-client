@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import ReactTable from "react-table"
 import ReactModal from 'react-modal'
 import _ from 'lodash'
-// import ModalForm from './ModalForm'
+import ModalForm from './ModalForm'
 import QuantityInput from './QuantityInput'
 import RowActionsModal from './RowActionsModal'
 import { formatColumn } from "utils";
@@ -38,7 +38,10 @@ class EstimateTable extends React.Component {
         this.setState((prevState) => ({
           showEditForm: true,
           onSubmitModal: this.onAddItem,
-          line_item: {code}
+          line_item: {
+            code,
+            parent_id: row.parent_id
+          }
         }))
       }),
       add_header: (row) => this.generateAction('Add header', () => {
@@ -66,10 +69,6 @@ class EstimateTable extends React.Component {
       })
     }
 
-    //Binding
-
-    this.handleCloseModal = this.handleCloseModal.bind(this)
-
   }
 
   getParent = () => {
@@ -90,7 +89,7 @@ class EstimateTable extends React.Component {
     }
   }
 
-  handleCloseModal() {
+  handleCloseModal = () => {
     this.setState( () => ({
       showEditForm: false
     }) );
@@ -129,23 +128,33 @@ class EstimateTable extends React.Component {
      let className
      switch (rowInfo.row._pivotID) {
        case "level_0":
-       styles.background = 'rgb(190,190,190)'
+          styles.background = 'rgb(190,190,190)'
+          actions = [
+            [add_header(row), add_sub_header(row)]
+          ]
        break;
        case "level_1":
-         row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
-         styles.background = 'rgb(215,215,215)'
-         actions = [
-           [add_item(row), add_header(row), add_sub_header(row)]
-         ]
+          row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
+          styles.background = 'rgb(215,215,215)'
+          actions = [
+            [add_header(row), add_sub_header(row)]
+          ]
        break;
        case "level_2":
-        styles.background = 'rgb(235,235,235)'
+          styles.background = 'rgb(235,235,235)'
+          actions = [
+            [add_header(row), add_sub_header(row)]
+          ]
        break;
        case "level_3":
-        styles.background = 'rgb(245,245,245)'
+          styles.background = 'rgb(245,245,245)'
+          row = rowInfo.subRows[rowInfo.subRows.length - 1]._original
+          actions = [
+            [add_item(row), add_header(row), add_sub_header(row)]
+          ]
        break;
        default:
-         //Line items
+         // Estimate items
          row = rowInfo.original
          let path = rowInfo.nestingPath
          let parent_row = state.resolvedData[path.shift()]
@@ -154,7 +163,6 @@ class EstimateTable extends React.Component {
          }
          let last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
 
-         //color = 'rgb(255,255,255)'
          className = `EstimateItemRow ${row.id == this.props.estimate_item_selected ? 'EstimateItemRow--Selected ': ''}`
          actions = [
            [add_item(last_row)],
@@ -195,13 +203,9 @@ class EstimateTable extends React.Component {
   }
 
   onAddItem = (values) =>{
-    let levels = values.code.split('.')
-    levels = _.reverse(_.tail(_.reverse(levels))) //Remove last element of array
-    levels.map( (lv, i) => {
-      values[`level_${i+1}`] = lv
-    })
+    
 
-    this.props.addLineItem(values)
+    this.props.addEstimateItem(values)
     this.handleCloseModal()
   }
 
@@ -237,15 +241,40 @@ class EstimateTable extends React.Component {
       PivotValue: () => (<div></div>),
       pivot: true
     }))
+    
+    const ur_columns = this.props.is_model_visible ? [
+      {
+        Header: 'Unit price',
+        accessor: 'unit_rate',
+        Aggregated: row => false,
+        Cell: formatColumn('currency')
+      }
+    ] : [
+      {
+        Header: 'UR MXN',
+        accessor: 'unit_rate_mxn',
+        Aggregated: row => false,
+        Cell: formatColumn('currency')
+      },{
+        Header: 'UR USD',
+        accessor: 'unit_rate_usd',
+        Aggregated: row => false,
+        Cell: formatColumn('currency')
+      },{
+        Header: 'Unit price',
+        accessor: 'unit_rate',
+        Aggregated: row => false,
+        Cell: formatColumn('currency')
+      }
+    ]
 
     return (
       <div>
         <ReactTable
-          className="EstimateTable"//"-striped -highlight"
+          className={this.props.className}
           data={this.transformData(this.props.data)}
           pivotBy={levelDepth}
           showPagination={false}
-          // defaultPageSize={this.props.data.length}
           columns={[
             ...pivotColums,
             {
@@ -312,22 +341,9 @@ class EstimateTable extends React.Component {
                               this.props.save_line_item(row.original.id, {quantity})
                             }}
                             /> //formatColumn('number')
-            },{
-              Header: 'UR MXN',
-              accessor: 'unit_rate_mxn',
-              Aggregated: row => false,
-              Cell: formatColumn('currency')
-            },{
-              Header: 'UR USD',
-              accessor: 'unit_rate_usd',
-              Aggregated: row => false,
-              Cell: formatColumn('currency')
-            },{
-              Header: 'Unit price',
-              accessor: 'unit_rate',
-              Aggregated: row => false,
-              Cell: formatColumn('currency')
-            },{
+            },
+            ...ur_columns
+            ,{
               Header: 'Total',
               accessor: 'total',
               aggregate: vals => _.sum(vals),
@@ -358,7 +374,7 @@ class EstimateTable extends React.Component {
           />
         }
 
-        {/* <ReactModal
+        <ReactModal
           className="Modal_form_wrapper"
           isOpen={this.state.showEditForm}
           onRequestClose={this.handleCloseModal}
@@ -371,7 +387,7 @@ class EstimateTable extends React.Component {
             onSubmit={this.state.onSubmitModal}
             onSubmitText="Save"
           />
-        </ReactModal> */}
+        </ReactModal>
 
 
       </div>
@@ -383,7 +399,7 @@ EstimateTable.propTypes = {
   data: PropTypes.array.isRequired,
   expanded: PropTypes.object.isRequired,
   delete_line_item: PropTypes.func.isRequired,
-  add_line_item: PropTypes.func.isRequired,
+  addEstimateItem: PropTypes.func.isRequired,
   save_line_item: PropTypes.func.isRequired,
   save_expanded: PropTypes.func.isRequired
 }
