@@ -23,6 +23,7 @@ class EstimateTable extends React.Component {
         y: 0,
         actions: []
       },
+      is_item: false,
       line_item: null,
       showEditForm: false,
       onSubmitModal: null
@@ -38,6 +39,7 @@ class EstimateTable extends React.Component {
         this.setState((prevState) => ({
           showEditForm: true,
           onSubmitModal: this.onAddItem,
+          is_item: true,
           line_item: {
             code,
             parent_id: row.parent_id
@@ -47,13 +49,21 @@ class EstimateTable extends React.Component {
       add_header: (row) => this.generateAction('Add header', () => {
         console.log('It will add a header')
         console.log(row)
+
+        this.setState((prevState) => ({
+          showEditForm: true,
+          onSubmitModal: this.onAddItem,
+          is_item: false
+        }))
+
+        
       }),
       add_sub_header: (row) => this.generateAction('Add sub header', () => {
         console.log('It will add a sub header ')
         console.log(row)
       }),
       delete_item: row => this.generateAction('Delete item', () => {
-        this.props.deleteLineItem(row._id)
+        this.props.deleteEstimateItem(row)
       }),
       edit_item: row => this.generateAction('Edit item', () => {
         this.setState((prevState) => ({
@@ -148,9 +158,10 @@ class EstimateTable extends React.Component {
        break;
        case "level_3":
           styles.background = 'rgb(245,245,245)'
+          //console.log(rowInfo.row)
           row = rowInfo.subRows[rowInfo.subRows.length - 1]._original
           actions = [
-            [add_item(row), add_header(row), add_sub_header(row)]
+            [add_item(row), add_header(rowInfo.row), add_sub_header(row)]
           ]
        break;
        default:
@@ -203,11 +214,13 @@ class EstimateTable extends React.Component {
   }
 
   onAddItem = (values) =>{
-    
-
     this.props.addEstimateItem(values)
     this.handleCloseModal()
   }
+
+  // onAddHeader = (values) => {
+
+  // }
 
   transformData = (data) => {
     data = data.map(d => {
@@ -383,6 +396,7 @@ class EstimateTable extends React.Component {
           closeTimeoutMS={200}
         >
           <ModalForm
+            is_item={this.state.is_item}
             line_item={this.state.line_item}
             onSubmit={this.state.onSubmitModal}
             onSubmitText="Save"
@@ -398,7 +412,7 @@ class EstimateTable extends React.Component {
 EstimateTable.propTypes = {
   data: PropTypes.array.isRequired,
   expanded: PropTypes.object.isRequired,
-  delete_line_item: PropTypes.func.isRequired,
+  deleteEstimateItem: PropTypes.func.isRequired,
   addEstimateItem: PropTypes.func.isRequired,
   save_line_item: PropTypes.func.isRequired,
   save_expanded: PropTypes.func.isRequired

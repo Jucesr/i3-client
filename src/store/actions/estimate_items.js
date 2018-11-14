@@ -63,9 +63,37 @@ export const addEstimateItem = (estimate_item) => ({
   }
 })
 
+export const deleteEstimateItem = (estimate_item) => ({
+  type    : 'DELETE_ESTIMATE_ITEM',
+  payload : estimate_item.estimate_id,
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(
+          `${API_URL}/estimate_item/${estimate_item.id}`, 
+          {
+            method: 'DELETE',
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+            }
+          }
+        )
+        .then(
+          response => {
+            if(response.status == 400)
+              reject(response)
+          return response.json() 
+          }
+        )
+        .then(response => {
+          resolve(estimate_item.id) 
+        })
+    })
+  }
+})
+
 export const updateEstimateItemById = (id, estimate_item) => ({
   type: 'UPDATE_ESTIMATE_ITEM',
-  // shouldCallAPI: shouldCallAPI('estimate_items', id),
   callAPI: (dispatch) => {
     return new Promise((resolve, reject) => {
       fetch(
@@ -156,3 +184,45 @@ export const loadEstimateItemById = (id) => {
 
   }
 }
+
+export const loadEstimateItems = (estimate_id) => ({
+  type: 'LOAD_ESTIMATE_ITEMS',
+  payload: estimate_id,
+  callAPI: (dispatch) => {
+    return new Promise((resolve, reject) => {
+      fetch(`${API_URL}/estimate/${estimate_id}/estimate_items`)
+        .then(
+          response => {
+            if(response.status != 200)
+              reject(response)
+          return response.json() 
+          }
+        )
+        .then(estimate_items => {
+
+          estimate_items = estimate_items.map(
+            item => {
+              let estimate_item = pick(item, [
+                'id',
+                'line_item_id',
+                'parent_id',
+                'code',
+                'description',
+                'quantity',
+                'indirect_percentage',
+                'is_line_item'
+              ])
+
+              //  If the Estimate item is a LI it should get the LI from the database.
+              if(estimate_item.is_line_item && !!estimate_item.line_item_id){
+                dispatch(loadLineItemById(estimate_item.line_item_id))
+              }
+
+              return estimate_item   
+            }
+          )
+          resolve(estimate_items) 
+          })
+    })
+  }
+})

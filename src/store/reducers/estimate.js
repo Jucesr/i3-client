@@ -11,24 +11,6 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
-    case 'SELECT_ESTIMATE': {
-      return {
-        ...state,
-        active: payload
-        
-      }
-    }
-
-    case 'LOAD_ESTIMATE': {
-      return {
-        ...state,
-        items: {
-          ...state.items,
-          [payload.id]: payload
-        }
-      }
-    }
-    
     case 'LOAD_ESTIMATES_REQUEST': {
       return {
         ...state,
@@ -62,6 +44,14 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'SELECT_ESTIMATE': {
+      return {
+        ...state,
+        active: payload
+        
+      }
+    }
+
     case 'CLEAR_ESTIMATE': {
       return {
         ...state,
@@ -70,18 +60,54 @@ export default (state = initialState, action = {}) => {
       }  
     }
 
-    case 'ADD_ESTIMATE_ITEM_SUCCESS': {
+    /*
+      These actions are dispatched from Estimate_Item reducer but it has to be handle here to add those the estimate items
+      loaded in to the estimate Only add the ids of the estimate items.
+    */
+    case 'LOAD_ESTIMATE_ITEMS_SUCCESS': {
+      
       return {
         ...state,
         items: {
           ...state.items,
           [payload]: {
             ...state.items[payload],
-            items: state.items[payload].items.concat(response.id)
+            estimate_items: response.map(r => r.id)
+          }
+        }
+      }
+    }
+
+    case 'ADD_ESTIMATE_ITEM_SUCCESS': {
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [payload]: {
+            ...state.items[payload],
+            estimate_items: state.items[payload].estimate_items.concat(response.id)
             
           }
         }
       };
+    }
+
+    case 'DELETE_ESTIMATE_ITEM_SUCCESS': {
+
+      let estimate_id = payload
+      let estimate_item_id = response
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          [estimate_id]: {
+            ...state.items[estimate_id],
+            estimate_items: state.items[estimate_id].estimate_items.filter(item => item != estimate_item_id)
+          }
+        }
+      }
     }
 
     case 'SELECT_PROJECT': {
@@ -91,14 +117,7 @@ export default (state = initialState, action = {}) => {
         
       }
     }
-
-    case 'SAVE_EXPANDED' : {
-      return {
-        ...state,
-        expanded: payload
-      }
-    }
-
+    
     default: {
       return state;
     }

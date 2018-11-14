@@ -8,6 +8,7 @@ This file is used to explain in detail changes I make to this app as I am buidin
   - [V0.2](#v02)
   - [V0.3](#v03)
   - [V0.4](#v04)
+  - [V0.5](#v05)
   - [Glossary](#glossary)
 
 <!-- /TOC -->
@@ -49,6 +50,12 @@ Date: Nov 12, 2018
     * Actions to show/hide estimate model.
     * Actions to show/hide estimate details.
   * Add funcionality to add a new EI.  
+
+## V0.5
+Date: Nov 13, 2018
+  * Change actions to fetch all items insted of fetching 1 by 1. Had to to this because it's easier to fetch all items of a resource.
+  * Ability to delete an estimate item.
+  * Move expanted state of estimate table to UI state.
 
 ## Glossary
 

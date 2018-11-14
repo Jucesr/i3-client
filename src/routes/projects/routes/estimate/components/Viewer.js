@@ -64,15 +64,18 @@ class Viewer extends React.Component {
           //   onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MTg4MTQwNiwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJYRFVoMjE5ZjNiTWE3OU00Z09SMFkzWnRIRjFBbDdVTThGeVpYVjNKaGxXVlVrY3BadXk5REZKTlNXbFNvRVdWIn0.2C-hROTxMkd1Ble2tkID1vUs-jd-U68gtCyGqgrwvXc", 3599);
           // })
 
-          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MjA1NDI5OCwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiR3hDZVAyVWh1T25nQkhWUlluUFhrNEszZTFIZWpCbkl3UVFpczZtbGRmaTN4N3RxeGpSaDE0ZmZUYVIxT0NMVCJ9.mIS8b56VpV06a4h09NquiGUfYo8ZQg-2drms1VeptQo", 3599);
+          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MjE2MjE0Niwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJ5dkR4SVJGS1Q2dFB4UlA5c0FmcjUxc3BEbDJ6bHM1TjRpamd3U1FYd0Nad0FjTWRCa1RCdzRzMU9haElTS3pCIn0.4d-DA102eVC4Y1vcTvp8egCVB3eg34noAd5syT4HJQQ", 3599);
           
 
           
     }
 
     };
-    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2FyY2EucnZ0';
-
+    //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2FyY2EucnZ0';
+    //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL3ZlbnVzLmR3Zw' // Venus
+    //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2NhbHphZGEuZHdn' //Constelation
+    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2NvbnN0ZWxhdHRpb24yLnBkZg' //Constalation PDF
+    
     Autodesk.Viewing.Initializer(options, () => {
       this.viewerApp = new Autodesk.Viewing.ViewingApplication('MyViewerDiv');
       this.viewerApp.registerViewer(this.viewerApp.k3D, Autodesk.Viewing.Private.GuiViewer3D);

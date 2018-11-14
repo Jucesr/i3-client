@@ -5,3 +5,8 @@ export const toggleModel = () => ({
 export const toggleEstimateDetails = () => ({
   type: 'TOGGLE_ESTIMATE_DETAILS'
 })
+
+export const saveExpanded = (expanded) => ({
+  type    : 'SAVE_EXPANDED',
+  payload : expanded
+})

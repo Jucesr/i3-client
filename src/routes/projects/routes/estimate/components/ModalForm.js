@@ -11,7 +11,7 @@ export default class ModalForm extends React.Component {
   }
 
   render(){
-    const {line_item, onSubmit, onSubmitText} = this.props
+    const {is_item, line_item, onSubmit, onSubmitText} = this.props
     return (
       <Form
         initialValues={line_item}
@@ -33,23 +33,26 @@ export default class ModalForm extends React.Component {
                 }}
               />
               <RegularInput textarea={true} field='description'/>
+              
+              {is_item && <RegularInput field='uom'/>}
+              
+              {is_item && 
+                <CustomInput
+                  field='quantity'
+                  options={{
+                    numeral: true,
+                    numeralDecimalScale: 5,
+                    numeralThousandsGroupStyle: 'thousand'
+                  }}
+                  onValueChange={quantity => {
+                    let unit_price = formApi.getValue('unit_price')
+                    formApi.setValue('total', quantity * unit_price)
+                  }}
+                />
+              }
+              
 
-              <RegularInput field='uom'/>
-
-              <CustomInput
-                field='quantity'
-                options={{
-                  numeral: true,
-                  numeralDecimalScale: 5,
-                  numeralThousandsGroupStyle: 'thousand'
-                }}
-                onValueChange={quantity => {
-                  let unit_price = formApi.getValue('unit_price')
-                  formApi.setValue('total', quantity * unit_price)
-                }}
-              />
-
-              <CustomInput
+              {/* <CustomInput
                 field='unit_price'
                 options={{
                  prefix: '$',
@@ -72,7 +75,7 @@ export default class ModalForm extends React.Component {
                  rawValueTrimPrefix: true
                 }}
                 disabled={true}
-               />
+               /> */}
             <div className="Modal_form_section">
               <button className="Modal_form_submit" type="submit">
                 {onSubmitText}

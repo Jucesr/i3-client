@@ -37,6 +37,21 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'DELETE_ESTIMATE_ITEM_SUCCESS': {
+
+      let new_items = {
+        ...state.items
+      }
+      delete new_items[response]
+
+      return {
+        ...state,
+        items: new_items,
+        error: null,
+        isFetching: false
+      };
+    }
+
     case 'SELECT_ESTIMATE_ITEM': {
       return {
         ...state,
@@ -52,6 +67,23 @@ export default (state = initialState, action = {}) => {
         items: {
           ...state.items,
           [response.id]: response
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
+    case 'LOAD_ESTIMATE_ITEMS_SUCCESS': {
+      const estimate_items = response.reduce((current, ei) => {
+        current[ei.id] = ei
+        return current
+      }, {})
+
+      return {
+        ...state,
+        items: {
+          ...state.items,
+          ...estimate_items
         },
         error: null,
         isFetching: false

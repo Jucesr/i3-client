@@ -63,14 +63,16 @@ export default (state = initialState, action = {}) => {
       };
     }
 
-    case 'LOAD_PROJECT_ESTIMATES_SUCCESS': {
+    case 'LOAD_ESTIMATES_SUCCESS': {
+      //  This actions it's dispatched from Estimate reducer but it has to be handle here to add those the estimates
+      //  loaded in to the project Only add the ids of the estimates.
       return {
         ...state,
         items: {
           ...state.items,
           [payload]: {
             ...state.items[payload],
-            estimates: response
+            estimates: response.map(r => r.id)
           }
         }
       }
