@@ -213,7 +213,8 @@ export const loadEstimateItems = (estimate_id) => ({
                 'is_line_item'
               ])
 
-              //  If the Estimate item is a LI it should get the LI from the database.
+              // //  If the Estimate item is a LI it should get the LI from the database.
+              
               if(estimate_item.is_line_item && !!estimate_item.line_item_id){
                 dispatch(loadLineItemById(estimate_item.line_item_id))
               }

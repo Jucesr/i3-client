@@ -9,6 +9,7 @@ This file is used to explain in detail changes I make to this app as I am buidin
   - [V0.3](#v03)
   - [V0.4](#v04)
   - [V0.5](#v05)
+  - [V0.6](#v06)
   - [Glossary](#glossary)
 
 <!-- /TOC -->
@@ -56,6 +57,16 @@ Date: Nov 13, 2018
   * Change actions to fetch all items insted of fetching 1 by 1. Had to to this because it's easier to fetch all items of a resource.
   * Ability to delete an estimate item.
   * Move expanted state of estimate table to UI state.
+
+## V0.6
+Date: Nov 15, 2018
+  * [FIX]: Ui estimate_table_expanded now it's updated by the action handler in reducer
+  * Split estimate route in 2 different. One to handle estimate and other to hanlde estimate items (table, line items, etc).
+  * Change routes. 
+    * Each route includes its ID for example '/projects/estimates' became '/projects/1/estimates/2'
+    * '/dashboard' --> '/projects'
+    * If a user try to reach a route by typing the URL directly in the Browser it validates data exists.
+  * Tools in sub header now appear or disappear based on page.
 
 ## Glossary
 

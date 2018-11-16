@@ -8,14 +8,14 @@ const initialState = {
 export default (state = initialState, action = {}) => {
   const { error, type, response, payload} = action;
 
-  if(type.includes('REQUEST')){
+  if(type.includes('REQUEST') && type.includes('ESTIMATE_ITEM')){
     return {
       ...state,
       isFetching: true
     }
   }
 
-  if(type.includes('FAILURE')){
+  if(type.includes('FAILURE') && type.includes('ESTIMATE_ITEM')){
     return {
       ...state,
       error,

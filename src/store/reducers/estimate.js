@@ -2,8 +2,7 @@ const initialState = {
   items: {},
   error: null,
   isFetching: false,
-  active: undefined,
-  expanded: {},
+  active: undefined
 }
 
 export default (state = initialState, action = {}) => {

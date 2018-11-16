@@ -16,7 +16,6 @@ class EstimateTable extends React.Component {
     super(props);
     this.header_height = 0
     this.state = {
-      expanded: this.props.expanded,
       row_actions_modal: {
         visible: false,
         x: 0,
@@ -218,10 +217,6 @@ class EstimateTable extends React.Component {
     this.handleCloseModal()
   }
 
-  // onAddHeader = (values) => {
-
-  // }
-
   transformData = (data) => {
     data = data.map(d => {
       let {structure} = d;
@@ -285,6 +280,7 @@ class EstimateTable extends React.Component {
       <div>
         <ReactTable
           className={this.props.className}
+          loading={this.props.loading}
           data={this.transformData(this.props.data)}
           pivotBy={levelDepth}
           showPagination={false}
@@ -366,9 +362,9 @@ class EstimateTable extends React.Component {
           getTrProps={this.getTrProps.bind(this)}
           onExpandedChange={expanded => {
             this.props.save_expanded(expanded)
-            this.setState({ expanded })
+            // this.setState({ expanded })
           }}
-          expanded={this.state.expanded}
+          expanded={this.props.expanded}
         />
         {
           this.state.row_actions_modal.visible &&

@@ -6,9 +6,7 @@ const SubHeader = (props) => {
     projectName,
     estimateName,
     onClickMenuHandler,
-    clearEstimate,
-    toggleModel,
-    toggleEstimateDetails
+    tools
   } = props
   
   return (
@@ -31,9 +29,12 @@ const SubHeader = (props) => {
       </div>
 
       <div className="SubHeader-toolbar">
-        <ToolItem action={clearEstimate}  src="calculator.png"/>
+        {tools.map(tool => (
+          <ToolItem key={tool.name} action={tool.action}  src={tool.avatar}/>
+        ))}
+        {/* <ToolItem action={clearEstimate}  src="calculator.png"/>
         <ToolItem action={toggleEstimateDetails} src="edit.png"/>
-        <ToolItem action={toggleModel} src="cubes.png"/>
+        <ToolItem action={toggleModel} src="cubes.png"/> */}
       </div>
 
     </div>

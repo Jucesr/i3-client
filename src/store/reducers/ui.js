@@ -2,7 +2,8 @@ const initialState = {
   is_model_visible: false,
   is_estimate_detail_visible: true,
   is_sidebar_open: false,
-  estimate_table_expanded: {}
+  estimate_table_expanded: {},
+  sub_header_tools: []
 }
 
 export default (state = initialState, action = {}) => {
@@ -24,7 +25,21 @@ export default (state = initialState, action = {}) => {
     case 'SAVE_EXPANDED' : {
       return {
         ...state,
-        expanded: payload
+        estimate_table_expanded: payload
+      }
+    }
+
+    case 'ADD_SUBHEADER_TOOLS': {
+      return {
+        ...state,
+        sub_header_tools: state.sub_header_tools.concat(payload)
+      }
+    }
+
+    case 'CLEAR_SUBHEADER_TOOLS': {
+      return {
+        ...state,
+        sub_header_tools: []
       }
     }
   

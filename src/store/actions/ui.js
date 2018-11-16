@@ -10,3 +10,12 @@ export const saveExpanded = (expanded) => ({
   type    : 'SAVE_EXPANDED',
   payload : expanded
 })
+
+export const addSubHeaderTools = (tools) => ({
+  type    : 'ADD_SUBHEADER_TOOLS',
+  payload : tools
+})
+
+export const clearSubHeaderTools = () => ({
+  type    : 'CLEAR_SUBHEADER_TOOLS'
+})

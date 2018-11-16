@@ -18,7 +18,7 @@ class DashboardRoute extends React.Component {
   onSelectProject(id){
     
     this.props.selectProject(id)
-    this.props.history.push(`/projects/`)
+    this.props.history.push(`/projects/${id}`)
     
   }
 

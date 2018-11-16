@@ -13,7 +13,7 @@ export const Header = () => (
 
         <NavItem 
           name="Projects" 
-          to="/dashboard"
+          to="/projects"
         />
 
         <div className="nav-item-wrapper">

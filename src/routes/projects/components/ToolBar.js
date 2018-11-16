@@ -8,12 +8,12 @@ const ToolBar = (props) => {
 
   const toolBarClass = `ToolBar ${isOpen ? 'ToolBar_open' : 'ToolBar_close'}`;
 
-  
+  const id = props.project_id;
   return (
     <div className={toolBarClass}>
         <div className="ToolBar-container">
-          <ToolBarItem to="/projects" name="Overview" />
-          <ToolBarItem to="/projects/estimates" name="Estimates" />
+          <ToolBarItem to={`/projects/${id}`} name="Overview" />
+          <ToolBarItem to={`/projects/${id}/estimates`} name="Estimates" />
           <ToolBarItem name="Line Items" />
           <ToolBarItem name="Materials" />
           <ToolBarItem name="WBS" />

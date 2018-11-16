@@ -11,10 +11,10 @@ export const loadState =  () => {
 }
 
 export const saveState = (state) => {
-    try{
-        const serializedState = JSON.stringify(state)
-        localStorage.setItem('i3_state', serializedState)
-    } catch (err){
-        console.log(err)
-    }
+    // try{
+    //     const serializedState = JSON.stringify(state)
+    //     localStorage.setItem('i3_state', serializedState)
+    // } catch (err){
+    //     console.log(err)
+    // }
 }
