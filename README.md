@@ -1,18 +1,7 @@
 # I3-WEB-CLIENT.
 This file is used to explain in detail changes I make to this app as I am buiding it.
 
-<!-- TOC -->
-
-- [I3-WEB-CLIENT.](#i3-web-client)
-  - [V0.1](#v01)
-  - [V0.2](#v02)
-  - [V0.3](#v03)
-  - [V0.4](#v04)
-  - [V0.5](#v05)
-  - [V0.6](#v06)
-  - [Glossary](#glossary)
-
-<!-- /TOC -->
+<!-- TOC -->autoauto- [I3-WEB-CLIENT.](#i3-web-client)auto  - [V0.1](#v01)auto  - [V0.2](#v02)auto  - [V0.3](#v03)auto  - [V0.4](#v04)auto  - [V0.5](#v05)auto  - [V0.6](#v06)auto  - [V0.7](#v07)auto  - [Glossary](#glossary)autoauto<!-- /TOC -->
 
 ## V0.1
 Date: Nov 8, 2018
@@ -67,6 +56,10 @@ Date: Nov 15, 2018
     * '/dashboard' --> '/projects'
     * If a user try to reach a route by typing the URL directly in the Browser it validates data exists.
   * Tools in sub header now appear or disappear based on page.
+
+## V0.7
+Date: Nov 16, 2018
+  * Headers and subheaders can be added in the estimate table
 
 ## Glossary
 

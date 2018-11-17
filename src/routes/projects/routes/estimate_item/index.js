@@ -70,7 +70,8 @@ class EstimateRoute extends React.Component {
 
           current[`level_${index + 1}`] = {
             code: item.code,
-            description: item.description
+            description: item.description,
+            parent_id: item.parent_id
           }
     
           return current
@@ -190,7 +191,7 @@ class EstimateRoute extends React.Component {
     const active_estimate = estimates[estimate_id] 
 
     let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : []) : []
-
+    
     estimate_items = this.estimateItemConnector(estimate_items)
 
     //  Line item details

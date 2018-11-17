@@ -32,7 +32,7 @@ export default (state = initialState, action = {}) => {
     case 'ADD_SUBHEADER_TOOLS': {
       return {
         ...state,
-        sub_header_tools: state.sub_header_tools.concat(payload)
+        sub_header_tools: payload
       }
     }
 

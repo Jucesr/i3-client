@@ -46,20 +46,38 @@ class EstimateTable extends React.Component {
         }))
       }),
       add_header: (row) => this.generateAction('Add header', () => {
-        console.log('It will add a header')
+        let code = row._pivotVal
+        let levels = code.split('.')
+        let pos = levels.length - 1;
+        levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
+        code = levels.join('.')
         console.log(row)
-
         this.setState((prevState) => ({
           showEditForm: true,
           onSubmitModal: this.onAddItem,
-          is_item: false
+          is_item: false,
+          line_item: {
+            code
+          }
         }))
 
         
       }),
       add_sub_header: (row) => this.generateAction('Add sub header', () => {
-        console.log('It will add a sub header ')
-        console.log(row)
+        let code = row._pivotVal
+        let levels = code.split('.')
+        let pos = levels.length - 1;
+        levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
+        code = levels.join('.')
+        
+        this.setState((prevState) => ({
+          showEditForm: true,
+          onSubmitModal: this.onAddItem,
+          is_item: false,
+          line_item: {
+            code
+          }
+        }))
       }),
       delete_item: row => this.generateAction('Delete item', () => {
         this.props.deleteEstimateItem(row)
@@ -135,43 +153,118 @@ class EstimateTable extends React.Component {
      let row
      let actions = []
      let className
+     let path
+     let parent_row
+     let last_row
+     let parent_id;
      switch (rowInfo.row._pivotID) {
        case "level_0":
           styles.background = 'rgb(190,190,190)'
-          actions = [
-            [add_header(row), add_sub_header(row)]
-          ]
        break;
        case "level_1":
-          row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
+          row = rowInfo.row
+          
+          for (let index = 0; index < state.data.length; index++) {
+            const element = state.data[index];
+
+            if(element["level_1"] == row._pivotVal){
+              parent_id = element.level_1_parent_id
+            }
+            
+          }
+          last_row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
           styles.background = 'rgb(215,215,215)'
+
+          row = {
+            ...row,
+            parent_id
+          }
+
+          last_row = {
+            ...last_row,
+            parent_id
+          }
+
           actions = [
-            [add_header(row), add_sub_header(row)]
+            [add_header(row), add_sub_header(last_row)]
           ]
        break;
        case "level_2":
           styles.background = 'rgb(235,235,235)'
+          row = rowInfo.row
+          
+          last_row = row._subRows[row._subRows.length - 1]
+
+          for (let index = 0; index < state.data.length; index++) {
+            const element = state.data[index];
+
+            if(element["level_2"] == row._pivotVal){
+              parent_id = element.level_2_parent_id
+            }
+            
+          }
+
+          row = {
+            ...row,
+            parent_id
+          }
+
+          last_row = {
+            ...last_row,
+            parent_id
+          }
+
           actions = [
-            [add_header(row), add_sub_header(row)]
+            [add_header(row), add_sub_header(last_row)]
           ]
        break;
        case "level_3":
           styles.background = 'rgb(245,245,245)'
-          //console.log(rowInfo.row)
           row = rowInfo.subRows[rowInfo.subRows.length - 1]._original
+          path = [
+            ...rowInfo.nestingPath
+          ]
+          parent_row = state.resolvedData[path.shift()]
+  
+          for (var i = 0; i < path.length - 1; i++) {
+            parent_row = parent_row._subRows[path[i]]
+          }
+          
+          parent_row = parent_row._subRows[parent_row._subRows.length - 1]
+
+
+          for (let index = 0; index < state.data.length; index++) {
+            const element = state.data[index];
+
+            if(element["level_3"] == parent_row._pivotVal){
+              parent_id = element.level_3_parent_id
+            }
+            
+          }
+
+          row = {
+            ...row,
+            parent_id
+          }
+
+          parent_row = {
+            ...parent_row,
+            parent_id
+          }
+
           actions = [
-            [add_item(row), add_header(rowInfo.row), add_sub_header(row)]
+            [add_item(row), add_header(parent_row)]
           ]
        break;
        default:
          // Estimate items
          row = rowInfo.original
-         let path = rowInfo.nestingPath
-         let parent_row = state.resolvedData[path.shift()]
+         path = [...rowInfo.nestingPath]
+         parent_row = state.resolvedData[path.shift()]
          for (var i = 0; i < path.length - 1; i++) {
            parent_row = parent_row._subRows[path[i]]
          }
-         let last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
+         last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
 
          className = `EstimateItemRow ${row.id == this.props.estimate_item_selected ? 'EstimateItemRow--Selected ': ''}`
          actions = [
@@ -224,6 +317,7 @@ class EstimateTable extends React.Component {
       Object.keys(structure).map(key => {
         d[key] = structure[key].code;
         d[`${key}_description`] = structure[key].description
+        d[`${key}_parent_id`] = structure[key].parent_id
       })
 
       d['level_0'] = '00';
