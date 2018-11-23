@@ -44,10 +44,10 @@ export default class ModalForm extends React.Component {
                     numeralDecimalScale: 5,
                     numeralThousandsGroupStyle: 'thousand'
                   }}
-                  onValueChange={quantity => {
-                    let unit_price = formApi.getValue('unit_price')
-                    formApi.setValue('total', quantity * unit_price)
-                  }}
+                  // onValueChange={quantity => {
+                  //   let unit_price = formApi.getValue('unit_price')
+                  //   formApi.setValue('total', quantity * unit_price)
+                  // }}
                 />
               }
               

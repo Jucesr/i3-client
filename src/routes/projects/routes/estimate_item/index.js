@@ -155,7 +155,6 @@ class EstimateRoute extends React.Component {
       ...item,
       wbs_item_id: null,
       line_item_id: null,
-      is_line_item: true,
       is_disable: false,
       hierachy_level: 1,
       indirect_percentage: 0,
@@ -163,7 +162,7 @@ class EstimateRoute extends React.Component {
       estimate_id: this.props.estimates.active
     }
 
-    this.props.addEstimateItem(estimate_item)
+    return this.props.addEstimateItem(estimate_item)
   }
 
   onDeleteEstimateItem = item => {
@@ -191,7 +190,7 @@ class EstimateRoute extends React.Component {
     const active_estimate = estimates[estimate_id] 
 
     let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : []) : []
-    
+
     estimate_items = this.estimateItemConnector(estimate_items)
 
     //  Line item details

@@ -1,3 +1,5 @@
+import { mergeDeep } from "utils";
+
 const initialState = {
   is_model_visible: false,
   is_estimate_detail_visible: true,
@@ -25,7 +27,7 @@ export default (state = initialState, action = {}) => {
     case 'SAVE_EXPANDED' : {
       return {
         ...state,
-        estimate_table_expanded: payload
+        estimate_table_expanded: mergeDeep(state.estimate_table_expanded, payload)
       }
     }
 

@@ -58,8 +58,9 @@ Date: Nov 15, 2018
   * Tools in sub header now appear or disappear based on page.
 
 ## V0.7
-Date: Nov 16, 2018
+Date: Nov 22, 2018
   * Headers and subheaders can be added in the estimate table
+  * Change the way the table is expanted and contracted. OnExpantedChanged is no longer used instead when a user click on a row the expanted state changes, this allow me to expanted more than 1 level at the time.
 
 ## Glossary
 

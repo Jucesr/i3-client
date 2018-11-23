@@ -29,7 +29,32 @@ class EstimateTable extends React.Component {
     }
     this.actions = {
       add_item: (row) => this.generateAction('Add line item', () => {
-        let {code} = row
+        let {code, level_3} = row
+        
+        if(code == '-'){
+          code = level_3 + '.01'
+        }else{
+        
+          let levels = code.split('.')
+          let pos = levels.length - 1;
+          levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
+          code = levels.join('.')
+
+        }
+        this.setState((prevState) => ({
+          showEditForm: true,
+          onSubmitModal: this.onAddItem,
+          is_item: true,
+          line_item: {
+            code,
+            parent_id: row.parent_id,
+            is_line_item: true,
+          }
+        }))
+      }),
+      add_header: (row) => this.generateAction('Add header', () => {
+        
+        let code = row._pivotVal
         let levels = code.split('.')
         let pos = levels.length - 1;
         levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
@@ -37,27 +62,30 @@ class EstimateTable extends React.Component {
 
         this.setState((prevState) => ({
           showEditForm: true,
-          onSubmitModal: this.onAddItem,
-          is_item: true,
-          line_item: {
-            code,
-            parent_id: row.parent_id
-          }
-        }))
-      }),
-      add_header: (row) => this.generateAction('Add header', () => {
-        let code = row._pivotVal
-        let levels = code.split('.')
-        let pos = levels.length - 1;
-        levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
-        code = levels.join('.')
-        console.log(row)
-        this.setState((prevState) => ({
-          showEditForm: true,
-          onSubmitModal: this.onAddItem,
+          onSubmitModal: (values) => {
+            //  Add Header
+            this.props.addEstimateItem(values).then(res => {
+              const parent_id = res.response.id
+
+              //  Add line item
+              this.props.addEstimateItem({
+                ...values,
+                code: '-',
+                is_line_item: true,
+                description: `${values.description} - empty line item`,
+                parent_id
+              })
+
+              this.handleCloseModal()
+            })
+            
+          },
           is_item: false,
           line_item: {
-            code
+            code,
+            parent_id: row.parent_id,
+            quantity: 0,
+            is_line_item: false
           }
         }))
 
@@ -96,6 +124,24 @@ class EstimateTable extends React.Component {
       })
     }
 
+  }
+
+  getNextCode = (code) => {
+
+    if(code != '-'){
+      let levels = code.split('.')
+      let pos = levels.length - 1;
+      levels[pos] = (parseInt(levels[pos]) + 1).toString().padStart(2,'0')
+      code = levels.join('.')
+    }else{
+      return code
+    }
+
+    
+  }
+
+  componentDidMount = () => {
+    ReactModal.setAppElement('body');
   }
 
   getParent = () => {
@@ -146,24 +192,98 @@ class EstimateTable extends React.Component {
   getTrProps(state, rowInfo, column){
     let props = {}
 
+    const onHeaderClick = rowInfo => {
+      return () => {
+        let subRows = rowInfo.subRows
+        let nestingPath = rowInfo.nestingPath
+
+        //  Check if subrows are undefined it means all levels were not used.
+
+        const calculateExpanted = (subRows) => {
+          return subRows.reduce((current, item, index) => {
+            let v
+            if(item._pivotVal == 'undefined'){
+              if(item._subRows.length > 0){
+                v = calculateExpanted(item._subRows)
+              }else{
+                v = {}
+              }
+            }else{
+              v = false
+            }
+
+            return {
+              ...current,
+              [index]: v
+            }
+          }, {})
+        }
+
+        let expanted_based_on_subrows = calculateExpanted(subRows)
+
+        //  Get current value of the row to tell whether is open. 
+        //    Expanted = {},
+        //    Not Expanded = false
+
+        let current_expanted = this.props.expanded
+
+        let current_value = nestingPath.reduce( (current, item) => {
+          current = current[item]
+
+          return current
+        }, current_expanted);
+        
+        let isExpanted = typeof(current_value) == 'object'
+        
+        let new_value = isExpanted ? false : expanted_based_on_subrows
+
+        let calculated_expanded = nestingPath.reduceRight( (current, item, index) => {
+
+          //  Last Item
+          if(index == nestingPath.length - 1)
+            return{
+              [item]: new_value
+            }
+
+          return {
+            [item]: current
+          }
+        }, {})
+
+        this.props.save_expanded(calculated_expanded)
+
+      }
+    }
+
     let {add_item, add_header, add_sub_header, delete_item, edit_item, quantity_takeoff} = this.actions
    if(rowInfo ){
     
-    let styles = {}
+     let styles = {}
      let row
      let actions = []
      let className
      let path
      let parent_row
      let last_row
-     let parent_id;
+     let parent_id, parent_id2;
+
+     // Check the kind of row. Header level 1, Header level 2 ....
      switch (rowInfo.row._pivotID) {
+
        case "level_0":
           styles.background = 'rgb(190,190,190)'
+          //styles.height = '10px'
+
+          props.onClick = onHeaderClick(rowInfo)
        break;
+
        case "level_1":
           row = rowInfo.row
-          
+          console.log(rowInfo)
+          // let line_item_row = {
+          //   code: rowInfo.row.level_1
+          //   parent_id
+          // }
           for (let index = 0; index < state.data.length; index++) {
             const element = state.data[index];
 
@@ -188,8 +308,16 @@ class EstimateTable extends React.Component {
           actions = [
             [add_header(row), add_sub_header(last_row)]
           ]
+
+          props.onClick = onHeaderClick(rowInfo)
        break;
+
        case "level_2":
+
+          
+          if(rowInfo.row._pivotVal == "undefined"){
+            styles.height = '0px'
+          }
           styles.background = 'rgb(235,235,235)'
           row = rowInfo.row
           
@@ -199,7 +327,9 @@ class EstimateTable extends React.Component {
             const element = state.data[index];
 
             if(element["level_2"] == row._pivotVal){
+
               parent_id = element.level_2_parent_id
+              parent_id2 = element.parent_id
             }
             
           }
@@ -211,14 +341,22 @@ class EstimateTable extends React.Component {
 
           last_row = {
             ...last_row,
-            parent_id
+            parent_id2
           }
 
           actions = [
             [add_header(row), add_sub_header(last_row)]
           ]
+
+          props.onClick = onHeaderClick(rowInfo)
        break;
+
        case "level_3":
+
+          if(rowInfo.row._pivotVal == "undefined"){
+            styles.height = '0px'
+          }
+
           styles.background = 'rgb(245,245,245)'
           row = rowInfo.subRows[rowInfo.subRows.length - 1]._original
           path = [
@@ -238,13 +376,9 @@ class EstimateTable extends React.Component {
 
             if(element["level_3"] == parent_row._pivotVal){
               parent_id = element.level_3_parent_id
+              parent_id2 = element.parent_id
             }
             
-          }
-
-          row = {
-            ...row,
-            parent_id
           }
 
           parent_row = {
@@ -255,27 +389,38 @@ class EstimateTable extends React.Component {
           actions = [
             [add_item(row), add_header(parent_row)]
           ]
+
+          props.onClick = onHeaderClick(rowInfo)
        break;
+
        default:
          // Estimate items
          row = rowInfo.original
-         path = [...rowInfo.nestingPath]
-         parent_row = state.resolvedData[path.shift()]
-         for (var i = 0; i < path.length - 1; i++) {
-           parent_row = parent_row._subRows[path[i]]
-         }
-         last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
+         if(row.code == '-'){
+          styles.height = '0px'
+          styles.overflow = 'hidden'
+          
+         }else{
+          path = [...rowInfo.nestingPath]
+          parent_row = state.resolvedData[path.shift()]
+          for (var i = 0; i < path.length - 1; i++) {
+            parent_row = parent_row._subRows[path[i]]
+          }
+          last_row = parent_row._subRows[parent_row._subRows.length - 1]._original
 
-         className = `EstimateItemRow ${row.id == this.props.estimate_item_selected ? 'EstimateItemRow--Selected ': ''}`
-         actions = [
-           [add_item(last_row)],
-           [edit_item(row), delete_item(row) , quantity_takeoff(row)]
-         ]
+          className = `EstimateItemRow ${row.id == this.props.estimate_item_selected ? 'EstimateItemRow--Selected ': ''}`
+          actions = [
+            [add_item(last_row)],
+            [edit_item(row), delete_item(row) , quantity_takeoff(row)]
+          ]
 
-         props.onClick = () => {
-           // Should call an action to bring the line item details.
-           this.props.select_estimate_item(row.id)
+          props.onClick = () => {
+            // Should call an action to bring the line item details.
+            this.props.select_estimate_item(row.id)
+          }
          }
+
+         
 
        break;
      }
@@ -376,6 +521,37 @@ class EstimateTable extends React.Component {
           className={this.props.className}
           loading={this.props.loading}
           data={this.transformData(this.props.data)}
+          // resolveData = {data => {
+          //  return[
+          //       {
+          //         code: "01.01.01.01",
+          //         description: "SUMINISTRO Y COLOCACION DE BLOCK LIZO DE 20X20X20 40CMS CON CASTILLOS AHOGADOS, ACERO DE REFUERZO No. 4",
+          //         id: 22,
+          //         indirect_percentage: 0,
+          //         is_line_item: true,
+          //         level_0: "00",
+          //         level_0_description: "Estimate",
+          //         level_1: "01",
+          //         level_1_description: "ARQUITECTURA",
+          //         level_1_parent_id: null,
+          //         level_2: "01.01",
+          //         level_2_description: "AUDITORIO",
+          //         level_2_parent_id: 19,
+          //         level_3: "01.01.01",
+          //         level_3_description: "MUROS",
+          //         level_3_parent_id: 20,
+          //         line_item_id: 2,
+          //         parent_id: 21,
+          //         quantity: 274.65,
+          //         total: 232790.59,
+          //         unit_rate: 847.59,
+          //         unit_rate_mxn: 847.59,
+          //         unit_rate_usd: 0,
+          //         uom: "m2"
+          //       }
+          //     ]
+           
+          // }}
           pivotBy={levelDepth}
           showPagination={false}
           columns={[
@@ -454,8 +630,8 @@ class EstimateTable extends React.Component {
             }
           ]}
           getTrProps={this.getTrProps.bind(this)}
-          onExpandedChange={expanded => {
-            this.props.save_expanded(expanded)
+          onExpandedChange={(expanded, index, event) => {
+            // this.props.save_expanded(expanded)
             // this.setState({ expanded })
           }}
           expanded={this.props.expanded}
