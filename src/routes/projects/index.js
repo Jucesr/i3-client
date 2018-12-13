@@ -50,7 +50,7 @@ class ProjectRoute extends React.Component {
     
     const projectName = !!projects.active ? projects.items[projects.active].name : 'Undefined'
 
-    const estimateName = estimates.active && estimates.items[estimates.active].name 
+    const estimateName = estimates.active && estimates.entities[estimates.active].name 
 
     const overView = () => <div></div>
 

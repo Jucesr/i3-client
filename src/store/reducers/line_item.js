@@ -22,20 +22,20 @@ export default (state = initialState, action = {}) => {
       };
     }
     
-    case 'LOAD_LINE_ITEMS_REQUEST': {
-      return {
-        ...state,
-        isFetching: true
-      };
-    }
+    // case 'LOAD_LINE_ITEMS_REQUEST': {
+    //   return {
+    //     ...state,
+    //     isFetching: true
+    //   };
+    // }
 
-    case 'LOAD_LINE_ITEMS_FAILURE': {
-      return {
-        ...state,
-        error,
-        isFetching: false
-      };
-    }
+    // case 'LOAD_LINE_ITEMS_FAILURE': {
+    //   return {
+    //     ...state,
+    //     error,
+    //     isFetching: false
+    //   };
+    // }
 
     case 'LOAD_LINE_ITEMS_SUCCESS': {
 

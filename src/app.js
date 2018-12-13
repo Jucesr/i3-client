@@ -5,6 +5,9 @@ import configureStore from './store/';
 import AppRouter from './routes/'
 import LoadingPage from './components/LoadingPage'
 
+import { DragDropContextProvider } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
+
 import configureSocketIO from './services/socket'
 
 import 'normalize.css/normalize.css'
@@ -15,9 +18,12 @@ const store = configureStore()
 configureSocketIO(store)
 
 const app = (
-  <Provider store={store}>
-    <AppRouter/>
-  </Provider>
+  <DragDropContextProvider backend={HTML5Backend}>
+    <Provider store={store}>
+      <AppRouter/>
+    </Provider>
+  </DragDropContextProvider>
+  
 );
 
 ReactDom.render(<LoadingPage/>, document.getElementById('app'));

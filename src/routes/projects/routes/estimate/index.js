@@ -39,7 +39,7 @@ class EstimateRoute extends React.Component {
 
     const {props, state} = this
 
-    const estimates = props.estimates.items  
+    const estimates = props.estimates.entities  
 
 
     const active_project = props.projects.items[this.getProjectId()] 

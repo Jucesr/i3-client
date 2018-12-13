@@ -1,7 +1,6 @@
 import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 import projectReducer from './reducers/project'
 import estimateReducer from './reducers/estimate'
-import estimateItemsReducer from './reducers/estimate_items'
 import lineItemsReducer from './reducers/line_item'
 import UIReducer from "./reducers/ui";
 
@@ -19,7 +18,6 @@ export default () => {
     combineReducers({
       projects: projectReducer,
       estimates: estimateReducer,
-      estimate_items: estimateItemsReducer,
       line_items: lineItemsReducer,
       ui: UIReducer
     }),

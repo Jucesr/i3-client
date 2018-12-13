@@ -1,0 +1,22 @@
+
+.RowActionsModal_container ul {
+  margin: 0;
+  padding: 5px 0;
+  border-bottom: 1px solid rgb(230, 230, 230)
+}
+
+.RowActionsModal_container ul:last-child {
+  border-bottom: none
+}
+
+.RowActionsModal_container ul li {
+  text-decoration: none;
+  list-style-type: none;
+  text-align: left;
+  padding: 5px 30px;
+
+}
+
+.RowActionsModal_container ul li:hover{
+  background-color: rgb(235, 235, 235)
+}

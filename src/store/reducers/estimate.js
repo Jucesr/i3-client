@@ -1,5 +1,5 @@
 const initialState = {
-  items: {},
+  entities: {},
   error: null,
   isFetching: false,
   active: undefined
@@ -34,8 +34,8 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           ...estimates
         },
         error: null,
@@ -60,18 +60,18 @@ export default (state = initialState, action = {}) => {
     }
 
     /*
-      These actions are dispatched from Estimate_Item reducer but it has to be handle here to add those the estimate items
-      loaded in to the estimate Only add the ids of the estimate items.
+      These actions are dispatched from Estimate_Item reducer but it has to be handle here to add those the estimate entities
+      loaded in to the estimate Only add the ids of the estimate entities.
     */
     case 'LOAD_ESTIMATE_ITEMS_SUCCESS': {
       
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [payload]: {
-            ...state.items[payload],
-            estimate_items: response.map(r => r.id)
+            ...state.entities[payload],
+            estimate_items: response
           }
         }
       }
@@ -81,11 +81,11 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [payload]: {
-            ...state.items[payload],
-            estimate_items: state.items[payload].estimate_items.concat(response.id)
+            ...state.entities[payload],
+            estimate_items: state.entities[payload].estimate_items.concat(response.id)
             
           }
         }
@@ -99,11 +99,11 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [estimate_id]: {
-            ...state.items[estimate_id],
-            estimate_items: state.items[estimate_id].estimate_items.filter(item => item != estimate_item_id)
+            ...state.entities[estimate_id],
+            estimate_items: state.entities[estimate_id].estimate_items.filter(item => item != estimate_item_id)
           }
         }
       }

@@ -5,6 +5,8 @@ import EstimateTable from "../estimate_item/components/EstimateTable";
 import EstimateDetailTable from "../estimate_item/components/EstimateDetailTable";
 import Viewer from "../estimate_item/components/Viewer";
 
+import Table from "components/Table/Table";
+
 import { 
   loadEstimateItems, 
   addEstimateItem,
@@ -21,6 +23,9 @@ class EstimateRoute extends React.Component {
 
   constructor(props){
     super(props)
+    this.state = {
+      estimate_item_selected: null
+    }
   }
 
   getEstimateId = () => {
@@ -137,6 +142,70 @@ class EstimateRoute extends React.Component {
     
   }
 
+  convertRowsInTree = (rows) => {
+    //  A couple of rules to add rows.
+    //  1.- If parent_id is null it means the row goes to the higher level.
+    //  2.- If parent_id is not found
+    //  TODO: if parent_id is not found it may have not been added yet. We can create a pending rows array and loop until its empty
+
+    let treeRows = []
+    rows.forEach(row => {
+      
+      if(!row.hasOwnProperty('is_selected')){
+        row.is_selected = false
+      }
+
+      if(!row.hasOwnProperty('is_open')){
+        row.is_open = false
+      }
+
+      if(!row.hasOwnProperty('subrows')){
+        row.subrows = []
+      }
+
+
+      if(row.parent_id == null){
+        treeRows.push(row)
+      }else{
+        treeRows = this.findRowByIdAndUpdated(treeRows, row.parent_id, element => {
+          if(!element.hasOwnProperty('subrows')){
+            element = {
+              ...element,
+              subrows : []
+            }
+          }
+          element.subrows.push(row) 
+
+          return element
+        })        
+      }
+      
+    })
+
+    return treeRows
+    
+  }
+
+  findRowByIdAndUpdated = (rows, id, action) => {
+    let result 
+    return rows.map(element => {
+      if(element.id === id){
+  
+        element = action(element)
+        result = true
+      }
+      
+      if(!result){
+  
+        if(element.hasOwnProperty('subrows')){
+          element.subrows = this.findRowByIdAndUpdated(element.subrows, id, action)
+        }    
+      }
+  
+      return element
+    });
+  }
+
   onSelectEstimateItem = id => {
     this.props.selectEstimateItem(id)
 
@@ -145,8 +214,6 @@ class EstimateRoute extends React.Component {
     if(!!EI.line_item_id){
       this.props.loadLineItemDetailsById(EI.line_item_id)
     }
-    
-
   }
 
   onAddEstimateItem = item => {
@@ -183,7 +250,7 @@ class EstimateRoute extends React.Component {
     const url_parts = this.props.location.pathname.split('/');
     const estimate_id = url_parts[4] 
 
-    const estimates = props.estimates.items  
+    const estimates = props.estimates.entities  
     
     //  Check if an estimate has already been selected then take it from estimate collection.
 
@@ -191,13 +258,18 @@ class EstimateRoute extends React.Component {
 
     let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : []) : []
 
-    estimate_items = this.estimateItemConnector(estimate_items)
+    // console.log(estimate_items)
+
+    estimate_items = this.convertRowsInTree(estimate_items)
+
+    console.log(estimate_items)
 
     //  Line item details
+    //  It checks if an estimate item has been selected. If it is it will take the details of the line item that belongs to the estimate item
 
-    let EI_ID = props.estimate_items.active ? props.estimate_items.active : undefined
+    let EI_ID = state.estimate_item_selected ? state.estimate_item_selected : undefined
 
-    let EI = EI_ID ? props.estimate_items.items[EI_ID] : undefined
+    let EI = EI_ID ? estimate_items[EI_ID] : undefined
     
     let LI = EI ? props.line_items.items[EI.line_item_id] : undefined
 
@@ -216,7 +288,48 @@ class EstimateRoute extends React.Component {
         <div className = "EstimateRoute-Active"> 
             
               <div className="EstimateRoute-EstimateTable">
-                <EstimateTable
+
+
+                <Table
+                  isLoading={estimate_items.length == 0}
+                  columns={[{
+                    Header: 'Code',
+                    assesor: 'code',
+                    width: 100
+                    //filter: true
+                  },{
+                    Header: 'Description',
+                    assesor: 'description',
+                    editable: true,
+                    format: 'textarea',
+                    width: 800
+                    //filter: true
+                  },{
+                    Header: 'UOM',
+                    assesor: 'uom',
+                    width: 100,
+                  },{
+                    Header: 'Quantity',
+                    assesor: 'quantity',
+                    editable: true,
+                    format: {
+                      type: 'number',
+                      decimals: 2
+                    },
+                    width: 150,
+                    onlyItems: true
+                  },{
+                    Header: 'Unit rate',
+                    assesor: 'unit_rate',
+                    format: 'currency'
+                  },{
+                    Header: 'Total',
+                    assesor: 'total',
+                    format: 'currency' 
+                  }]}
+                  rows={estimate_items}
+                />
+                {/* <EstimateTable
                   className={estimate_table_classname}
                   loading={props.estimate_items.isFetching}
                   data={estimate_items}
@@ -228,7 +341,7 @@ class EstimateRoute extends React.Component {
                   select_estimate_item = {this.onSelectEstimateItem}
                   estimate_item_selected = {EI_ID}
                   is_model_visible = {props.is_model_visible}
-                /> 
+                />  */}
                 {props.is_model_visible && <Viewer className={model_viewer_classname}/>}
               </div>
               { props.is_estimate_detail_visible && 
@@ -274,7 +387,6 @@ const mapDispatchToProps = (dispatch) => ({
 const mapStateToProps = (state) => ({  
   ui: state.ui,
   estimates: state.estimates,
-  estimate_items: state.estimate_items,
   line_items: state.line_items,
   line_item_details: state.line_item_details,
   active_project: state.projects.items[state.projects.active],

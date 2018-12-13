@@ -62,6 +62,12 @@ Date: Nov 22, 2018
   * Headers and subheaders can be added in the estimate table
   * Change the way the table is expanted and contracted. OnExpantedChanged is no longer used instead when a user click on a row the expanted state changes, this allow me to expanted more than 1 level at the time.
 
+## V0.7.1
+Date: Dec 12, 2018
+  * Add a complete new custom table. It allows me to handle easier. Each row in the table may have a property called 'subrows' and can be used to handle any level of depth.
+  * Add react-dnd so I had to wrap App component in the html backend.
+  * Remove estimate_item reducer from redux store. No longer need it, it will be store in each estimate.
+
 ## Glossary
 
 * DB = Database

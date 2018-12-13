@@ -263,6 +263,7 @@ class EstimateTable extends React.Component {
      let actions = []
      let className
      let path
+     let add_item_row, add_header_row, add_sub_header_row
      let parent_row
      let last_row
      let parent_id, parent_id2;
@@ -272,41 +273,49 @@ class EstimateTable extends React.Component {
 
        case "level_0":
           styles.background = 'rgb(190,190,190)'
-          //styles.height = '10px'
-
           props.onClick = onHeaderClick(rowInfo)
        break;
 
        case "level_1":
+          styles.background = 'rgb(215,215,215)'
           row = rowInfo.row
+          let element_id
           console.log(rowInfo)
-          // let line_item_row = {
-          //   code: rowInfo.row.level_1
-          //   parent_id
-          // }
+
           for (let index = 0; index < state.data.length; index++) {
             const element = state.data[index];
 
             if(element["level_1"] == row._pivotVal){
               parent_id = element.level_1_parent_id
+              element_id = element.parent_id
             }
             
           }
-          last_row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
-          styles.background = 'rgb(215,215,215)'
+          add_sub_header_row = rowInfo.row._subRows[rowInfo.row._subRows.length - 1]
 
-          row = {
+          add_item_row = {
+            code: rowInfo.row.level_1,
+            parent_id: element_id
+          }
+
+          // console.log(add_item_row)
+
+          add_header_row = {
             ...row,
             parent_id
           }
 
-          last_row = {
+          add_sub_header_row = {
             ...last_row,
             parent_id
           }
 
           actions = [
-            [add_header(row), add_sub_header(last_row)]
+            [
+              add_header(add_header_row), 
+              add_sub_header(add_sub_header_row),
+              add_item(add_item_row)
+            ]
           ]
 
           props.onClick = onHeaderClick(rowInfo)
@@ -584,6 +593,12 @@ class EstimateTable extends React.Component {
               accessor: 'description',
               Cell: formatColumn('text'),
               minWidth: 600,
+              aggregate: (values, rows, row) => {
+                // console.log('------------')
+                // console.log(rows)
+                // console.log('------------')
+                return 'Something'
+              },
               Aggregated: row => {
 
                 let arrayOfLevels = levelDepth
