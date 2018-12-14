@@ -168,6 +168,7 @@ class Row extends React.Component {
       canDrop, 
       index,
       row,
+      is_open,
       columns,
       depth,
       onRowContextMenu,
@@ -229,7 +230,7 @@ class Row extends React.Component {
               flex: `25 0 auto`,
             }}
           >
-            {!row.is_line_item && <div className={`Table-Column-${row.is_open ? 'Expanded' : 'Contracted'}`}></div> }
+            {!row.is_line_item && <div className={`Table-Column-${is_open ? 'Expanded' : 'Contracted'}`}></div> }
           </td>
 
         {columns.map((col, index) => (

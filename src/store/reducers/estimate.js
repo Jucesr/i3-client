@@ -1,3 +1,5 @@
+import tree from "utils/Tree.js";
+
 const initialState = {
   entities: {},
   error: null,
@@ -63,6 +65,14 @@ export default (state = initialState, action = {}) => {
       These actions are dispatched from Estimate_Item reducer but it has to be handle here to add those the estimate entities
       loaded in to the estimate Only add the ids of the estimate entities.
     */
+
+    case 'LOAD_ESTIMATE_ITEMS_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
+
     case 'LOAD_ESTIMATE_ITEMS_SUCCESS': {
       
       return {
@@ -71,9 +81,10 @@ export default (state = initialState, action = {}) => {
           ...state.entities,
           [payload]: {
             ...state.entities[payload],
-            estimate_items: response
+            estimate_items: tree.convertArrayInTree(response)
           }
-        }
+        },
+        isFetching: false
       }
     }
 

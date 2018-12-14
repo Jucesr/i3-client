@@ -5,6 +5,8 @@ import EstimateTable from "../estimate_item/components/EstimateTable";
 import EstimateDetailTable from "../estimate_item/components/EstimateDetailTable";
 import Viewer from "../estimate_item/components/Viewer";
 
+import tree from "utils/Tree";
+
 import Table from "components/Table/Table";
 
 import { 
@@ -24,8 +26,11 @@ class EstimateRoute extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      estimate_item_selected: null
+      estimate_item_selected: null,
+      windows_width: 0
     }
+
+    this.container = React.createRef();
   }
 
   getEstimateId = () => {
@@ -39,10 +44,25 @@ class EstimateRoute extends React.Component {
     
     //  Load tools for this route
     this.props.addSubHeaderTools(['ClearEstimate', 'ToggleModel', 'ToogleEstimateDetails'])
-
-
     this.props.loadEstimateItems(this.getEstimateId())
 
+    this.setState(prevState => ({
+      windows_width: this.container.current.offsetWidth
+    }))
+
+  }
+
+  shouldComponentUpdate = (nextProps, nextState) => {
+    // Object.entries(this.props).forEach(([key, val]) =>
+    //   nextProps[key] !== val && console.log(`Prop '${key}' changed`)
+    // );
+
+    //  Do not render if it has not finished to load al the line items.
+    if(nextProps.line_items !== this.props.line_items && nextProps.isLoadingEstimateItems){
+      return false
+    }
+
+    return true
   }
 
   parseEstimateItems = (raw) => {
@@ -87,7 +107,7 @@ class EstimateRoute extends React.Component {
         //  Get Line item.
         let id = estimate_item.line_item_id
 
-        let line_item = this.props.line_items.items[id]
+        let line_item = this.props.line_items[id]
 
         
         if(line_item){
@@ -142,70 +162,6 @@ class EstimateRoute extends React.Component {
     
   }
 
-  convertRowsInTree = (rows) => {
-    //  A couple of rules to add rows.
-    //  1.- If parent_id is null it means the row goes to the higher level.
-    //  2.- If parent_id is not found
-    //  TODO: if parent_id is not found it may have not been added yet. We can create a pending rows array and loop until its empty
-
-    let treeRows = []
-    rows.forEach(row => {
-      
-      if(!row.hasOwnProperty('is_selected')){
-        row.is_selected = false
-      }
-
-      if(!row.hasOwnProperty('is_open')){
-        row.is_open = false
-      }
-
-      if(!row.hasOwnProperty('subrows')){
-        row.subrows = []
-      }
-
-
-      if(row.parent_id == null){
-        treeRows.push(row)
-      }else{
-        treeRows = this.findRowByIdAndUpdated(treeRows, row.parent_id, element => {
-          if(!element.hasOwnProperty('subrows')){
-            element = {
-              ...element,
-              subrows : []
-            }
-          }
-          element.subrows.push(row) 
-
-          return element
-        })        
-      }
-      
-    })
-
-    return treeRows
-    
-  }
-
-  findRowByIdAndUpdated = (rows, id, action) => {
-    let result 
-    return rows.map(element => {
-      if(element.id === id){
-  
-        element = action(element)
-        result = true
-      }
-      
-      if(!result){
-  
-        if(element.hasOwnProperty('subrows')){
-          element.subrows = this.findRowByIdAndUpdated(element.subrows, id, action)
-        }    
-      }
-  
-      return element
-    });
-  }
-
   onSelectEstimateItem = id => {
     this.props.selectEstimateItem(id)
 
@@ -247,20 +203,26 @@ class EstimateRoute extends React.Component {
 
     const {props, state} = this
 
-    const url_parts = this.props.location.pathname.split('/');
-    const estimate_id = url_parts[4] 
-
-    const estimates = props.estimates.entities  
     
     //  Check if an estimate has already been selected then take it from estimate collection.
 
-    const active_estimate = estimates[estimate_id] 
+    const active_estimate = props.estimate
 
     let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : []) : []
 
-    // console.log(estimate_items)
-
-    estimate_items = this.convertRowsInTree(estimate_items)
+    estimate_items = tree.map(estimate_items, (estimate_item => {
+      if(estimate_item.is_line_item && !!estimate_item.line_item_id){
+        let line_item = props.line_items[estimate_item.line_item_id]
+        estimate_item = {
+          ...estimate_item,
+          uom: line_item.uom,
+          unit_rate_mxn: line_item.unit_rate_mxn,
+          unit_rate_usd: line_item.unit_rate_usd,
+          total: (line_item.unit_rate_mxn + (line_item.unit_rate_usd * 20)) * estimate_item.quantity
+        }
+      }
+      return estimate_item
+    }))
 
     console.log(estimate_items)
 
@@ -271,78 +233,82 @@ class EstimateRoute extends React.Component {
 
     let EI = EI_ID ? estimate_items[EI_ID] : undefined
     
-    let LI = EI ? props.line_items.items[EI.line_item_id] : undefined
+    let LI = EI ? props.line_items[EI.line_item_id] : undefined
 
     let LIDs = LI ? (LI.line_item_details ? LI.line_item_details : []) : []
 
     LIDs = LIDs.map(lid => ({...lid, line_item_id: LI.id}))
 
-    //  Classname
+    //  Styles
+
+    const tableStyle = {
+      width: props.is_model_visible ? state.windows_width / 2 : state.windows_width,
+      //height: props.is_estimate_detail_visible ? 
+    }
 
     const estimate_table_classname = props.is_estimate_detail_visible ? 'EstimateTable' : 'EstimateTable--Full'
     const model_viewer_classname = props.is_estimate_detail_visible ? 'Viewer-container' : 'Viewer-container--Full'
     
     return (
-      <div id="EstimateRoute" className="EstimateRoute">
+      <div ref={this.container} id="EstimateRoute" className="EstimateRoute">
         
         <div className = "EstimateRoute-Active"> 
             
               <div className="EstimateRoute-EstimateTable">
-
-
-                <Table
-                  isLoading={estimate_items.length == 0}
-                  columns={[{
-                    Header: 'Code',
-                    assesor: 'code',
-                    width: 100
-                    //filter: true
-                  },{
-                    Header: 'Description',
-                    assesor: 'description',
-                    editable: true,
-                    format: 'textarea',
-                    width: 800
-                    //filter: true
-                  },{
-                    Header: 'UOM',
-                    assesor: 'uom',
-                    width: 100,
-                  },{
-                    Header: 'Quantity',
-                    assesor: 'quantity',
-                    editable: true,
-                    format: {
-                      type: 'number',
-                      decimals: 2
-                    },
-                    width: 150,
-                    onlyItems: true
-                  },{
-                    Header: 'Unit rate',
-                    assesor: 'unit_rate',
-                    format: 'currency'
-                  },{
-                    Header: 'Total',
-                    assesor: 'total',
-                    format: 'currency' 
-                  }]}
-                  rows={estimate_items}
-                />
-                {/* <EstimateTable
+                <div 
+                  style={tableStyle}
                   className={estimate_table_classname}
-                  loading={props.estimate_items.isFetching}
-                  data={estimate_items}
-                  expanded={props.ui.estimate_table_expanded}
-                  save_expanded={props.saveExpanded}
-                  deleteEstimateItem={this.onDeleteEstimateItem}
-                  addEstimateItem={this.onAddEstimateItem}
-                  save_line_item={props.updateEstimateItemById}
-                  select_estimate_item = {this.onSelectEstimateItem}
-                  estimate_item_selected = {EI_ID}
-                  is_model_visible = {props.is_model_visible}
-                />  */}
-                {props.is_model_visible && <Viewer className={model_viewer_classname}/>}
+                  >
+                  <Table
+                    
+                    appElement="#app"
+                    loaderAvatar="/images/loader.gif"
+                    isLoading={estimate_items.length == 0}
+                    columns={[{
+                      Header: 'Code',
+                      assesor: 'code',
+                      width: 100
+                      //filter: true
+                    },{
+                      Header: 'Description',
+                      assesor: 'description',
+                      editable: true,
+                      format: 'textarea',
+                      width: 800
+                      //filter: true
+                    },{
+                      Header: 'UOM',
+                      assesor: 'uom',
+                      width: 100,
+                    },{
+                      Header: 'Quantity',
+                      assesor: 'quantity',
+                      editable: true,
+                      format: {
+                        type: 'number',
+                        decimals: 2
+                      },
+                      width: 150,
+                      onlyItems: true
+                    },{
+                      Header: 'UR MXN',
+                      assesor: 'unit_rate_mxn',
+                      format: 'currency'
+                    },{
+                      Header: 'UR_USD',
+                      assesor: 'unit_rate_usd',
+                      format: 'currency'
+                    },{
+                      Header: 'Total',
+                      assesor: 'total',
+                      format: 'currency' 
+                    }]}
+                    rows={estimate_items}
+                  />
+                </div>
+              
+                {props.is_model_visible && <div>Aqui va el modelo</div>}  
+                {/* <Viewer className={model_viewer_classname}/> */}
               </div>
               { props.is_estimate_detail_visible && 
               
@@ -368,10 +334,6 @@ const mapDispatchToProps = (dispatch) => ({
   selectEstimateItem: id => dispatch(selectEstimateItem(id)),
   updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
 
-  //  Line Item
-
-  loadLineItemById: id => dispatch(loadLineItemById(id)),
-
   //  Line item details
 
   loadLineItemDetailsById: id => dispatch(loadLineItemDetailsById(id)),
@@ -386,8 +348,9 @@ const mapDispatchToProps = (dispatch) => ({
 
 const mapStateToProps = (state) => ({  
   ui: state.ui,
-  estimates: state.estimates,
-  line_items: state.line_items,
+  estimate: state.estimates.entities[state.estimates.active],
+  isLoadingEstimateItems: state.estimates.isFetching,
+  line_items: state.line_items.entities,
   line_item_details: state.line_item_details,
   active_project: state.projects.items[state.projects.active],
   is_model_visible: state.ui.is_model_visible,

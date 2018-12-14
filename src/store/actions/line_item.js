@@ -2,13 +2,13 @@ import pick from 'lodash/pick'
 
 const shouldCallAPI = (stateProperty, _id) => {
   return state => {
-    if(!state[stateProperty].items[_id])
+    if(!state[stateProperty].entities[_id])
       return true
 
     const days = 3;
     const miliseconds_in_day = 86400000;  
     const timeToStale = days * miliseconds_in_day;  
-    const timeSinceLastFetch = Date.now() - state[stateProperty].items[_id].lastFetched;
+    const timeSinceLastFetch = Date.now() - state[stateProperty].entities[_id].lastFetched;
     const shouldFetch = (timeSinceLastFetch) > timeToStale;
     return shouldFetch 
 
@@ -65,13 +65,13 @@ export const loadLineItemById = (id, options = {}) => {
 export const loadLineItemDetailsById = (id) => ({
   type: 'LOAD_LINE_ITEM_DETAILS',
   shouldCallAPI: state => {
-      if(!state['line_items'].items[id].line_item_details)
+      if(!state['line_items'].entities[id].line_item_details)
         return true
   
       const days = 3;
       const miliseconds_in_day = 86400000;  
       const timeToStale = days * miliseconds_in_day;  
-      const timeSinceLastFetch = Date.now() - state['line_items'].items[id].lastFetched;
+      const timeSinceLastFetch = Date.now() - state['line_items'].entities[id].lastFetched;
       const shouldFetch = (timeSinceLastFetch) > timeToStale;
       return shouldFetch 
   
@@ -138,7 +138,7 @@ export const updateLineItemDetailById = (ids, line_item_detail) => ({
             'formula'
           ])
 
-          //  TODO: Should fetch all Line items that were affected
+          //  TODO: Should fetch all Line entities that were affected
           // if(estimate_item.is_line_item){
           
           dispatch(loadLineItemById(ids.line_item, {force: true}))

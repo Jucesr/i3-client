@@ -128,9 +128,9 @@ export const updateEstimateItemById = (id, estimate_item) => ({
           ])
 
           //  If the Estimate item is a LI and it has changed it should fetch the new one
-          if(estimate_item.is_line_item){
-            dispatch(loadLineItemById(estimate_item.line_item_id))
-          }
+          // if(estimate_item.is_line_item){
+          //   dispatch(loadLineItemById(estimate_item.line_item_id))
+          // }
 
           resolve(estimate_item) 
           })
@@ -185,6 +185,7 @@ export const loadEstimateItemById = (id) => {
   }
 }
 
+//  It fetches all the estimate items of an Estimate at once. 
 export const loadEstimateItems = (estimate_id) => ({
   type: 'LOAD_ESTIMATE_ITEMS',
   payload: estimate_id,
@@ -199,6 +200,8 @@ export const loadEstimateItems = (estimate_id) => ({
           }
         )
         .then(estimate_items => {
+          //  Once it has fetched all the estimate items, It will check if it needs to fetch a line item
+          let array_of_line_items_request = []
 
           estimate_items = estimate_items.map(
             item => {
@@ -213,16 +216,23 @@ export const loadEstimateItems = (estimate_id) => ({
                 'is_line_item'
               ])
 
-              // //  If the Estimate item is a LI it should get the LI from the database.
+              //  If the Estimate item is a LI it should fetch the LI from the database.
               
-              // if(estimate_item.is_line_item && !!estimate_item.line_item_id){
-              //   dispatch(loadLineItemById(estimate_item.line_item_id))
-              // }
+              if(estimate_item.is_line_item && !!estimate_item.line_item_id){
+                let action = loadLineItemById(estimate_item.line_item_id)
+                
+                array_of_line_items_request.push(dispatch(action))
+              }
 
               return estimate_item   
             }
           )
-          resolve(estimate_items) 
+          //  Once al line items have been fetched it resolve the action.
+          Promise.all(array_of_line_items_request).then( items => {
+            resolve(estimate_items) 
+          })
+
+          
           })
     })
   }

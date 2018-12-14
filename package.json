@@ -9,7 +9,7 @@
     "build-dev": "webpack",
     "build": "webpack -p --env production",
     "dev-server": "webpack-dev-server",
-    "local-server": "webpack-dev-server --port 8080 --host 172.16.19.131"
+    "local-server": "webpack-dev-server --port 8080 --host 172.16.17.245"
   },
   "author": "Julio Ojeda",
   "license": "ISC",

@@ -15,7 +15,7 @@ import './styles/styles.scss'
 
 const store = configureStore()
 
-configureSocketIO(store)
+// configureSocketIO(store)
 
 const app = (
   <DragDropContextProvider backend={HTML5Backend}>

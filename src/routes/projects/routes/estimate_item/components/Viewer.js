@@ -64,17 +64,17 @@ class Viewer extends React.Component {
           //   onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MTg4MTQwNiwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJYRFVoMjE5ZjNiTWE3OU00Z09SMFkzWnRIRjFBbDdVTThGeVpYVjNKaGxXVlVrY3BadXk5REZKTlNXbFNvRVdWIn0.2C-hROTxMkd1Ble2tkID1vUs-jd-U68gtCyGqgrwvXc", 3599);
           // })
 
-          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MjIxNzkxOCwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJaWTRncW84NHZPb3hkaHdQQVJIcHpwOUtjWnhPREU1TDBZMmhaTXVWSTZFWHNVYmowMHZZQXlHY1hkeEM2QXZLIn0.-VbdbpYFlK2BdbNbLg_dxwWBP-FjD1QCxaa4yck8qy8", 3599);
+          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0NDgxOTQ0Niwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiOFVic1FVNGg5ZEhmZ0lva1d1d0hQSGl1NmVXUVF1aDQzeWI1b1RRNWFMenlZYnNudWFtRWJwVFNnUklXQjJzTyJ9.saW1KUwddHgVs-4RK9Unq0KsOPVzfwSkIgNt2tF8JwQ", 3599);
           
-
+        
           
     }
 
     };
-    //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2FyY2EucnZ0';
+    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2FyY2EucnZ0';
     //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL3ZlbnVzLmR3Zw' // Venus
     //var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2NhbHphZGEuZHdn' //Constelation
-    var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2NvbnN0ZWxhdHRpb24yLnBkZg' //Constalation PDF
+    // var documentId = 'urn:dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6aTMtbW9kZWxzL2NvbnN0ZWxhdHRpb24yLnBkZg' //Constalation PDF
     
     Autodesk.Viewing.Initializer(options, () => {
       this.viewerApp = new Autodesk.Viewing.ViewingApplication('MyViewerDiv');
@@ -135,7 +135,6 @@ class Viewer extends React.Component {
   componentDidUpdate = () => {
 
     if (this.viewer && this.viewer.impl) {
-
       if (this.viewerContainer.offsetHeight !== this.height || this.viewerContainer.offsetWidth !== this.width) {
 
         this.height = this.viewerContainer.offsetHeight

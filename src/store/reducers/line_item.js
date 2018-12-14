@@ -1,5 +1,5 @@
 const initialState = {
-  items: {},
+  entities: {},
   error: null,
   isFetching: false,
   active: undefined
@@ -13,8 +13,8 @@ export default (state = initialState, action = {}) => {
     case 'ADD_LINE_ITEM': {
       return {
         ...state,
-        items: {
-          ...items,
+        entities: {
+          ...entities,
           [action.payload.id]: {
             ...action.payload
           }
@@ -22,12 +22,12 @@ export default (state = initialState, action = {}) => {
       };
     }
     
-    // case 'LOAD_LINE_ITEMS_REQUEST': {
-    //   return {
-    //     ...state,
-    //     isFetching: true
-    //   };
-    // }
+    case 'LOAD_LINE_ITEMS_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
 
     // case 'LOAD_LINE_ITEMS_FAILURE': {
     //   return {
@@ -46,8 +46,8 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           ...estimates
         },
         error: null,
@@ -72,11 +72,11 @@ export default (state = initialState, action = {}) => {
 
     case 'LOAD_LINE_ITEM_SUCCESS': {
 
-      let li = state.items[response.id] ? state.items[response.id] : {} 
+      let li = state.entities[response.id] ? state.entities[response.id] : {} 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [response.id]: {
             ...li,
             ...response, 
@@ -107,10 +107,10 @@ export default (state = initialState, action = {}) => {
     case 'LOAD_LINE_ITEM_DETAILS_SUCCESS': {
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [payload]: {
-            ...state.items[payload],
+            ...state.entities[payload],
             line_item_details: [
               ...response
             ],
@@ -140,11 +140,11 @@ export default (state = initialState, action = {}) => {
     case 'UPDATE_LINE_ITEM_DETAIL_SUCCESS': {
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [payload]: {
-            ...state.items[payload],
-            line_item_details: state.items[payload].line_item_details.map( lid => {
+            ...state.entities[payload],
+            line_item_details: state.entities[payload].line_item_details.map( lid => {
               if(lid.id == response.id){
                 lid = {
                   ...lid,

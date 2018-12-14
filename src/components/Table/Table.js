@@ -5,8 +5,6 @@ import RowActionsModal from './RowActionsModal'
 import Row  from "./Row"
 import "./Table.css"
 
-Modal.setAppElement('#app');
-
 export default class Table extends React.Component {
 
   constructor(props){
@@ -18,8 +16,9 @@ export default class Table extends React.Component {
         }
         return column
       }),
+      open_rows: {},
       splitter_start: 0,
-      hasInitializedColumns: false,
+      tableWidth: 0,
       is_setting_open: false,
       row_actions_modal: {
         visible: false,
@@ -28,6 +27,8 @@ export default class Table extends React.Component {
         actions: []
       }
     }
+
+    Modal.setAppElement(this.props.appElement);
 
     this.container = React.createRef();
   }
@@ -40,11 +41,23 @@ export default class Table extends React.Component {
     
   }
 
+  componentDidUpdate = (prevProps, prevState) => {
+    console.log('Did update Table')
+    if(this.container.current.offsetWidth != this.state.tableWidth){
+      console.log(`There is a diference ${this.container.current.offsetWidth} - ${this.state.tableWidth}`)
+      this.updateColumnsWidth()
+      
+      // console.log(this.container.current.offsetWidth)
+    }
+    
+  }
+
   updateColumnsWidth = () => {
     //  This width is the sum of all columns that were not set by the user. Such as Expanded column, Selected column, etc.
-    const widthOfDummyColumns = 55
+    const scrollWidth = 17
+    const widthOfDummyColumns = 55 + scrollWidth
     const maxWidth = this.container.current.offsetWidth
-
+    
     const column_width_taken = this.state.columns.reduce((acum, item) => {
       const hasWidth = item.hasOwnProperty('width')
       const isVisible = item.hasOwnProperty('is_visible') ? item.is_visible : true
@@ -59,7 +72,8 @@ export default class Table extends React.Component {
 
     let new_columns
     if(column_width_taken.visible_columns === column_width_taken.number){
-
+      //  All the columns have width already
+      
       //  Check if there are invisible columns 
 
       if(column_width_taken.visible_columns < this.state.columns.length){
@@ -100,13 +114,9 @@ export default class Table extends React.Component {
 
     this.setState(prevState => ({
       columns: new_columns,
-      hasInitializedColumns: true
+      tableWidth: this.container.current.offsetWidth
     }))
   }
-
-  // componentDidUpdate = () => {
-  //   console.log('Hey')
-  // }
 
   onRowSelect = (row, isCtrlPress) => {
 
@@ -127,6 +137,25 @@ export default class Table extends React.Component {
       }
       
     }
+  }
+
+  onRowExpand = (row) => {
+
+    //  Check if there is an extra hanlder in the parent
+    if(this.props.hasOwnProperty('onRowExpand')){
+      this.props.onRowExpand(row)
+    }
+
+    if(!row.is_line_item && row.hasOwnProperty('subrows')){
+      this.setState(prevState => ({
+        open_rows: {
+          ...prevState.open_rows,
+          [row.id]: prevState.open_rows.hasOwnProperty(row.id) ? !prevState.open_rows[row.id] : true
+        }
+      }))      
+    }
+    
+
   }
 
   onRowContextMenu = (row, depth) => {
@@ -270,13 +299,14 @@ export default class Table extends React.Component {
             row={{
               ...row
             }}
+            is_open={this.state.open_rows.hasOwnProperty(row.id) ? this.state.open_rows[row.id] : false}
             isSelected={isSelected}
             columns={columns}
             depth={depth}
             onRowClick={this.props.onRowClick}
             onUpdateRow={this.props.onUpdateRow}
             onRowContextMenu={this.onRowContextMenu}
-            onRowExpand={this.props.onRowExpand}
+            onRowExpand={this.onRowExpand}
             onRowSelect={this.onRowSelect}
             onMoveRow={this.props.onMoveRow}
             allowToDragRows={this.props.allowToDragRows}
@@ -285,8 +315,9 @@ export default class Table extends React.Component {
         )
 
       }
+      //  Check if it has subrows and it's open to render subrows.
 
-      if((!!row.subrows ) && (filter_active || row.is_open)){
+      if((!!row.subrows ) && (filter_active || !!this.state.open_rows[row.id] )){
         renderedRows.push(
           this.generateRows(row.subrows, depth + 1)
         )
@@ -391,7 +422,7 @@ export default class Table extends React.Component {
   }
 
   render(){
-    const {rows, isLoading} = this.props
+    const {rows, isLoading, loaderAvatar} = this.props
 
     const isEmpty = rows.length == 0 &&!isLoading
 
@@ -404,9 +435,11 @@ export default class Table extends React.Component {
         <table 
           style={{
             height: isLoading ? '10%' : '100%',
+            // width: '100%',
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            fontSize: '12px',
+            fontSize: '12px'
           }}
           ref={this.container}
         >
@@ -491,7 +524,7 @@ export default class Table extends React.Component {
           </tr>
         </thead>
         <tbody style={{
-          overflow: 'auto'
+          overflowY: 'scroll',
           }}>
           {!isEmpty ? 
             this.generateRows(rows, 0) 
@@ -505,7 +538,7 @@ export default class Table extends React.Component {
         </tbody>
       </table>
 
-      {isLoading && <img alt='' src="/images/loader.gif"></img>}
+      {isLoading && ( !!loaderAvatar ? <img alt='' src={this.props.loaderAvatar} ></img> : <div>Loading...</div>)}
 
 
         {
@@ -586,6 +619,7 @@ export default class Table extends React.Component {
 }
 
 Table.propTypes = { 
+  appElement: PropTypes.string.isRequired,
   columns: PropTypes.array.isRequired,
   rows: PropTypes.array.isRequired,
   selected_rows: PropTypes.array,
@@ -602,14 +636,14 @@ Table.propTypes = {
   onMoveRow: PropTypes.func,
 
   allowToDragRows: PropTypes.bool,
-  isLoading: PropTypes.bool
+  isLoading: PropTypes.bool,
+  loaderAvatar: PropTypes.string
 };
 
 Table.defaultProps = {
   selected_rows: [],
 
   onRowClick: () => {},
-  onRowExpand: () => {},
   onRowSelect: () => {},
 
   onAddRow: () => {},

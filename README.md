@@ -68,6 +68,12 @@ Date: Dec 12, 2018
   * Add react-dnd so I had to wrap App component in the html backend.
   * Remove estimate_item reducer from redux store. No longer need it, it will be store in each estimate.
 
+## V0.7.2
+Date: Dec 14, 2018
+  * Update Table component to hold open rows in a different state. There is not need to implement the method onRowExpand in the parent component since the state it's stored in the Table.
+  * Change line items reducer prop items for entities.
+  * Add utility tree to hanlde tree operations.
+
 ## Glossary
 
 * DB = Database

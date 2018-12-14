@@ -11,9 +11,10 @@
 .EstimateRoute-EstimateTable{
   display: flex;
   width : calc(100vw - 1px);
-
+  
   *{
-    flex: 50%;
+    flex-grow: 1;
+  flex-basis: 0;
   }
 }
 
