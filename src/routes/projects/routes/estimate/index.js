@@ -2,8 +2,6 @@ import React from 'react'
 import {connect} from 'react-redux';
 import EstimateCard from "./components/EstimateCard";
 
-import { clearSubHeaderTools } from "actions/ui";
-
 import { loadEstimates, selectEstimate } from "actions/estimates";
 
 class EstimateRoute extends React.Component {
@@ -20,8 +18,6 @@ class EstimateRoute extends React.Component {
   }
 
   componentDidMount = () => {
-    
-    this.props.clearSubHeaderTools()
 
     //  Fetch estimates of the active project.
     this.props.loadEstimates(this.getProjectId())
@@ -78,10 +74,7 @@ class EstimateRoute extends React.Component {
 const mapDispatchToProps = (dispatch) => ({
   //  Estimate 
   loadEstimates: id => dispatch(loadEstimates(id)),
-  selectEstimate: id => dispatch(selectEstimate(id)),
-
-  //  UI
-  clearSubHeaderTools: () => dispatch(clearSubHeaderTools())
+  selectEstimate: id => dispatch(selectEstimate(id))
 })
 
 const mapStateToProps = (state) => ({  

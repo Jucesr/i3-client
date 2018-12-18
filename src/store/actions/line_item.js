@@ -1,4 +1,5 @@
 import pick from 'lodash/pick'
+import { fetchApi } from "utils/api";
 
 const shouldCallAPI = (stateProperty, _id) => {
   return state => {
@@ -62,6 +63,45 @@ export const loadLineItemById = (id, options = {}) => {
   }
 }
 
+export const loadLineItemWithDetailById = (id, options = {}) => {
+
+  const {force = false} = options
+  let line_items;
+  return {
+    type: 'LOAD_LINE_ITEM',
+    shouldCallAPI: force ? undefined : shouldCallAPI('line_items', id),
+    callAPI: async (dispatch) => {
+
+      let line_item = await fetchApi(`${API_URL}/line_item/${id}`)
+
+      line_item = pick(line_item, [
+        'id',
+        'code',
+        'spanish_description',
+        'english_description',
+        'uom',
+        'unit_rate_mxn',
+        'unit_rate_usd'
+      ])
+
+      line_item.description = {
+        es: line_item.spanish_description,
+        en: line_item.english_description,
+      }
+
+      //  Get details of the line item
+
+      let details = await fetchApi(`${API_URL}/line_item/${id}/detail`)
+      
+      line_item.line_item_details = details
+
+      return line_item
+
+      
+    }
+  }
+}
+
 export const loadLineItemDetailsById = (id) => ({
   type: 'LOAD_LINE_ITEM_DETAILS',
   shouldCallAPI: state => {
@@ -107,46 +147,58 @@ export const loadLineItemDetailsById = (id) => ({
   }
 })
 
-export const updateLineItemDetailById = (ids, line_item_detail) => ({
+// export const updateLineItemDetail = (ids, line_item_detail) => ({
+//   type: 'UPDATE_LINE_ITEM_DETAIL',
+//   // shouldCallAPI: shouldCallAPI('estimate_items', id),
+//   payload: ids.line_item,
+//   callAPI: (dispatch) => {
+//     return new Promise((resolve, reject) => {
+//       fetch(
+//           `${API_URL}/line_item/${ids.line_item}/detail/${ids.line_item_detail}`, 
+//           {
+//             method: 'PATCH',
+//             headers: {
+//               Accept: 'application/json',
+//               'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify(line_item_detail)
+//           }
+//         )
+//         .then(
+//           response => {
+//             if(response.status == 404)
+//               reject('Not found')
+//           return response.json() 
+//           }
+//         )
+//         .then(response => {
+//           let lid = pick(response, [
+//             'id',
+//             'quantity',
+//             'formula'
+//           ])
+
+//           //  TODO: Should fetch all Line entities that were affected
+//           // if(estimate_item.is_line_item){
+          
+//           dispatch(loadLineItemById(ids.line_item, {force: true}))
+//           // }
+
+//           resolve(lid) 
+//           })
+//     })
+//   }
+// })
+
+export const updateLineItemDetail = (line_item_id, line_item_detail) => ({
   type: 'UPDATE_LINE_ITEM_DETAIL',
   // shouldCallAPI: shouldCallAPI('estimate_items', id),
-  payload: ids.line_item,
+  payload: line_item_id,
   callAPI: (dispatch) => {
     return new Promise((resolve, reject) => {
-      fetch(
-          `${API_URL}/line_item/${ids.line_item}/detail/${ids.line_item_detail}`, 
-          {
-            method: 'PATCH',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(line_item_detail)
-          }
-        )
-        .then(
-          response => {
-            if(response.status == 404)
-              reject('Not found')
-          return response.json() 
-          }
-        )
-        .then(response => {
-          let lid = pick(response, [
-            'id',
-            'quantity',
-            'formula'
-          ])
-
-          //  TODO: Should fetch all Line entities that were affected
-          // if(estimate_item.is_line_item){
-          
-          dispatch(loadLineItemById(ids.line_item, {force: true}))
-          // }
-
-          resolve(lid) 
-          })
+      resolve(line_item_detail)
     })
+    
   }
 })
 

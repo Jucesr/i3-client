@@ -5,6 +5,14 @@ import EstimateTable from "../estimate_item/components/EstimateTable";
 import EstimateDetailTable from "../estimate_item/components/EstimateDetailTable";
 import Viewer from "../estimate_item/components/Viewer";
 
+import 'react-reflex/styles.css'
+
+import {
+  ReflexContainer,
+  ReflexSplitter,
+  ReflexElement
+} from 'react-reflex'
+
 import tree from "utils/Tree";
 
 import Table from "components/Table/Table";
@@ -17,9 +25,14 @@ import {
   updateEstimateItemById 
 } from "actions/estimate_items";
 
-import { loadLineItemDetailsById, updateLineItemDetailById } from "actions/line_item";
+import { 
+  loadLineItemById, 
+  loadLineItemWithDetailById,
+  loadLineItemDetailsById, 
+  updateLineItemDetail 
+} from "actions/line_item";
 
-import { addSubHeaderTools, saveExpanded } from "actions/ui";
+import { addSubHeaderTools, clearSubHeaderTools } from "actions/ui";
 
 class EstimateRoute extends React.Component {
 
@@ -27,7 +40,7 @@ class EstimateRoute extends React.Component {
     super(props)
     this.state = {
       estimate_item_selected: null,
-      windows_width: 0
+      windows_width: 1920
     }
 
     this.container = React.createRef();
@@ -46,10 +59,11 @@ class EstimateRoute extends React.Component {
     this.props.addSubHeaderTools(['ClearEstimate', 'ToggleModel', 'ToogleEstimateDetails'])
     this.props.loadEstimateItems(this.getEstimateId())
 
-    this.setState(prevState => ({
-      windows_width: this.container.current.offsetWidth
-    }))
+  }
 
+  componentWillUnmount = () => {
+    //  Remove any tool load by this route
+    this.props.clearSubHeaderTools()
   }
 
   shouldComponentUpdate = (nextProps, nextState) => {
@@ -57,7 +71,7 @@ class EstimateRoute extends React.Component {
     //   nextProps[key] !== val && console.log(`Prop '${key}' changed`)
     // );
 
-    //  Do not render if it has not finished to load al the line items.
+    //  Do not render if it has not finished to load all the line items.
     if(nextProps.line_items !== this.props.line_items && nextProps.isLoadingEstimateItems){
       return false
     }
@@ -65,110 +79,28 @@ class EstimateRoute extends React.Component {
     return true
   }
 
-  parseEstimateItems = (raw) => {
-
-    const getStructure = ( current, parent_id ) => {
-      if(parent_id != null){
-        let element = raw[parent_id]
-        if(!element){
-          return current
-        }
-        current.push(element)
-        return getStructure(current, element.parent_id)  
-      }else{
-        return current
-      }
+  onEstimateRowExpand = (row) => {
+    if(row.is_line_item){
+      this.props.loadLineItemDetailsById(row.line_item_id)
+      this.setState(prevState => ({
+        estimate_item_selected: row
+      }))
     }
-
-    const new_items = Object.keys(raw).reduce( (current, key) => {
-      let estimate_item = raw[key];
-    
-      //  If it is a line item and not a section
-      if(estimate_item && estimate_item.is_line_item == true){
-        //  Get the tree structure
-       
-        let structure = getStructure([], estimate_item.parent_id)
-    
-        structure = structure.reverse()
-    
-        let structure_object = structure.reduce((current, item, index) => {
-
-          current[`level_${index + 1}`] = {
-            code: item.code,
-            description: item.description,
-            parent_id: item.parent_id
-          }
-    
-          return current
-        }, {})
-    
-        estimate_item.structure = structure_object
-
-        //  Get Line item.
-        let id = estimate_item.line_item_id
-
-        let line_item = this.props.line_items[id]
-
-        
-        if(line_item){
-
-          let {unit_rate_mxn, unit_rate_usd} = line_item
-
-          //  Round values to 2 Decimals
-
-          let urm = new Decimal(unit_rate_mxn ? unit_rate_mxn : 0)
-          let urd = new Decimal(unit_rate_usd ? unit_rate_usd : 0)
-
-          let unit_rate = parseFloat (urm.plus(urd.times(19.5)).toFixed(2))
-          let total = parseFloat( new Decimal(unit_rate).times(estimate_item.quantity).toFixed(2) )
-          
-          // unit_rate_mxn = Math.round(unit_rate_mxn * 100) / 100
-          // unit_rate_usd = Math.round(unit_rate_usd * 100) / 100
-          // let unit_rate = unit_rate_mxn + (unit_rate_usd * 19.5)
-          // let total = unit_rate * estimate_item.quantity
-
-          // total = Math.round(total * 100) / 100
-
-          estimate_item.uom = line_item.uom
-          estimate_item.unit_rate_mxn = parseFloat (urm.toFixed(2)) 
-          estimate_item.unit_rate_usd = parseFloat (urd.toFixed(2)) 
-          estimate_item.unit_rate = unit_rate
-          estimate_item.total = total
-        }
-
-        current.push(estimate_item)
-      }
-      
-      return current
-    }, [])
-
-    return new_items
   }
 
-  estimateItemConnector = (itemsOfSelectedEstimate) => {
-    const estimate_items = this.props.estimate_items.items;
-    let keys = Object.keys(estimate_items)
-
-    if(keys.length == 0 || itemsOfSelectedEstimate.length == 0)
-      return []
-
-    const itemsOfSelectedEstimateObject = itemsOfSelectedEstimate.reduce( (current, id) => {
-      current[id] = estimate_items[id]
-      return current;  
-    }, {})
-
-    return this.parseEstimateItems(itemsOfSelectedEstimateObject)
-
-    
+  onDetailRowExpand = (row) => {
+    if(row.is_assembly){
+      this.props.loadLineItemWithDetailById(row.entity_id)
+    }
   }
 
-  onSelectEstimateItem = id => {
-    this.props.selectEstimateItem(id)
-
-    let EI = this.props.estimate_items.items[id]
-
-    if(!!EI.line_item_id){
-      this.props.loadLineItemDetailsById(EI.line_item_id)
+  onDetailRowUpdate = (column, row, value) => {
+    if(column.assesor == 'quantity'){
+      let quantity = parseFloat(value)
+      this.props.updateLineItemDetail(row.parent_id, {
+        id: row.id,
+        quantity
+      })
     }
   }
 
@@ -199,6 +131,57 @@ class EstimateRoute extends React.Component {
     this.props.deleteEstimateItem(estimate_item)
   }
 
+  prepareLIDs = (line_item_id, LIDs) => {
+    return LIDs.map(lid => {
+        
+      if(lid.is_assembly && !!this.props.line_items[lid.entity_id]){
+      //  It is a line item. It should fetch it from the state if its already load.
+        let line_item = this.props.line_items[lid.entity_id]
+        lid = {
+          ...lid,
+          line_item_id: line_item_id,
+          unit_rate_mxn: line_item.unit_rate_mxn,
+          unit_rate_usd: line_item.unit_rate_usd, 
+          
+          subrows: this.prepareLIDs(lid.entity_id, line_item.line_item_details)
+        }
+
+        debugger;
+      }
+
+      return {
+        ...lid, 
+        parent_id: line_item_id,
+        is_line_item: !lid.is_assembly,
+        code: lid.entity_code,
+        unit_rate: lid.unit_rate_mxn + (lid.unit_rate_usd * 20),
+        total: (lid.unit_rate_mxn + (lid.unit_rate_usd * 20)) * lid.quantity,
+        type: lid.is_assembly ? 'A': 'M'
+      }
+    })
+  }
+
+  calculateTotals = (rows) => {
+
+    return rows.map(row => {
+
+      //  Check if it is a header and have subrows, it means it needs to go deeper
+      if(row.hasOwnProperty('subrows') && !row.is_line_item){
+
+        row.subrows = this.calculateTotals(row.subrows)
+
+        row.total = row.subrows.reduce((acum, item) => {
+          return acum + (isNaN(item.total) ? 0 : item.total)
+        }, 0)
+
+      }
+        
+      return row
+
+    })
+
+  }
+
   render(){
 
     const {props, state} = this
@@ -220,106 +203,183 @@ class EstimateRoute extends React.Component {
           unit_rate_usd: line_item.unit_rate_usd,
           total: (line_item.unit_rate_mxn + (line_item.unit_rate_usd * 20)) * estimate_item.quantity
         }
+
+        if(line_item.hasOwnProperty('line_item_details')){
+          //Calculate unit_rate
+          const unit_rate = line_item.line_item_details.reduce((acum, detail) => {  
+            return {
+              mxn: acum.mxn + (detail.unit_rate_mxn * detail.quantity),
+              usd: acum.usd + (detail.unit_rate_usd * detail.quantity)
+            }
+          }, {mxn: 0, usd: 0})
+
+          estimate_item = {
+            ...estimate_item,
+            unit_rate_mxn: unit_rate.mxn,
+            unit_rate_usd: unit_rate.usd, 
+            total: (unit_rate.mxn + (unit_rate.usd * 20)) * estimate_item.quantity
+          }
+
+        }
       }
       return estimate_item
     }))
 
-    console.log(estimate_items)
+    estimate_items = this.calculateTotals(estimate_items)
 
     //  Line item details
     //  It checks if an estimate item has been selected. If it is it will take the details of the line item that belongs to the estimate item
 
-    let EI_ID = state.estimate_item_selected ? state.estimate_item_selected : undefined
+    let LIDs = []
 
-    let EI = EI_ID ? estimate_items[EI_ID] : undefined
-    
-    let LI = EI ? props.line_items[EI.line_item_id] : undefined
+    if(!!state.estimate_item_selected){
+      let EI = state.estimate_item_selected 
 
-    let LIDs = LI ? (LI.line_item_details ? LI.line_item_details : []) : []
+      let LI = props.line_items[EI.line_item_id] 
 
-    LIDs = LIDs.map(lid => ({...lid, line_item_id: LI.id}))
+      LIDs = LI.line_item_details ? LI.line_item_details : []
 
-    //  Styles
-
-    const tableStyle = {
-      width: props.is_model_visible ? state.windows_width / 2 : state.windows_width,
-      //height: props.is_estimate_detail_visible ? 
+      //  Prepare line item details for table component. Add value false to the prop is_line_item if it is an assembly
+      LIDs = this.prepareLIDs(EI.line_item_id, LIDs)
     }
 
-    const estimate_table_classname = props.is_estimate_detail_visible ? 'EstimateTable' : 'EstimateTable--Full'
+    console.log(LIDs)
+  
+    //  Styles
+    
     const model_viewer_classname = props.is_estimate_detail_visible ? 'Viewer-container' : 'Viewer-container--Full'
     
     return (
-      <div ref={this.container} id="EstimateRoute" className="EstimateRoute">
-        
-        <div className = "EstimateRoute-Active"> 
-            
-              <div className="EstimateRoute-EstimateTable">
-                <div 
-                  style={tableStyle}
-                  className={estimate_table_classname}
-                  >
-                  <Table
-                    
-                    appElement="#app"
-                    loaderAvatar="/images/loader.gif"
-                    isLoading={estimate_items.length == 0}
-                    columns={[{
-                      Header: 'Code',
-                      assesor: 'code',
-                      width: 100
-                      //filter: true
-                    },{
-                      Header: 'Description',
-                      assesor: 'description',
-                      editable: true,
-                      format: 'textarea',
-                      width: 800
-                      //filter: true
-                    },{
-                      Header: 'UOM',
-                      assesor: 'uom',
-                      width: 100,
-                    },{
-                      Header: 'Quantity',
-                      assesor: 'quantity',
-                      editable: true,
-                      format: {
-                        type: 'number',
-                        decimals: 2
-                      },
-                      width: 150,
-                      onlyItems: true
-                    },{
-                      Header: 'UR MXN',
-                      assesor: 'unit_rate_mxn',
-                      format: 'currency'
-                    },{
-                      Header: 'UR_USD',
-                      assesor: 'unit_rate_usd',
-                      format: 'currency'
-                    },{
-                      Header: 'Total',
-                      assesor: 'total',
-                      format: 'currency' 
-                    }]}
-                    rows={estimate_items}
-                  />
-                </div>
-              
-                {props.is_model_visible && <div>Aqui va el modelo</div>}  
-                {/* <Viewer className={model_viewer_classname}/> */}
-              </div>
-              { props.is_estimate_detail_visible && 
-              
-              <EstimateDetailTable
-                data={LIDs}
-                save_line_item_detail={props.updateLineItemDetailById}
-              />
-              }  
-            </div>
+      <ReflexContainer
+        className="EstimateItemRoute"
+        windowResizeAware={true} 
+        orientation="horizontal"
+      >
 
-      </div>
+        <ReflexElement onStopResize={() => console.log('Hey')} className="left-pane">
+
+          <ReflexContainer 
+            orientation="vertical"
+            windowResizeAware={true} 
+          >
+            <ReflexElement>
+                <Table 
+                  appElement="#app"
+                  loaderAvatar="/images/loader.gif"
+                  allowToDragRows={true}
+                  isLoading={estimate_items.length == 0}
+                  columns={[{
+                    Header: 'Code',
+                    assesor: 'code',
+                    width: 100
+                    //filter: true
+                  },{
+                    Header: 'Description',
+                    assesor: 'description',
+                    editable: true,
+                    format: 'textarea',
+                    width: 800
+                    //filter: true
+                  },{
+                    Header: 'UOM',
+                    assesor: 'uom',
+                    width: 100,
+                  },{
+                    Header: 'Quantity',
+                    assesor: 'quantity',
+                    editable: true,
+                    format: {
+                      type: 'number',
+                      decimals: 2
+                    },
+                    width: 150,
+                    onlyItems: true
+                  },{
+                    Header: 'UR MXN',
+                    assesor: 'unit_rate_mxn',
+                    format: 'currency'
+                  },{
+                    Header: 'UR_USD',
+                    assesor: 'unit_rate_usd',
+                    format: 'currency'
+                  },{
+                    Header: 'Total',
+                    assesor: 'total',
+                    format: 'currency' 
+                  }]}
+                  rows={estimate_items}
+                  onRowExpand={this.onEstimateRowExpand}
+                />
+              
+            </ReflexElement>
+            <ReflexSplitter/>
+            
+            {props.is_model_visible && <ReflexElement className="right-pane">
+              {/* <div>Aqui va el modelo</div> */}
+              <Viewer className={model_viewer_classname}/>
+            </ReflexElement>}        
+
+          </ReflexContainer>
+              
+        </ReflexElement>
+        <ReflexSplitter/>       
+        { props.is_estimate_detail_visible && 
+
+            <ReflexElement>
+              <Table 
+                appElement="#app"
+                loaderAvatar="/images/loader.gif"
+                isLoading={props.isLoadingLineItemDetails}
+                noRowsMessage="Select an estimate item to see details here."
+                columns={[{
+                  Header: 'Type',
+                  assesor: 'type',
+                  width: 35,
+                },{
+                  Header: 'Code',
+                  assesor: 'code',
+                  width: 100
+                },{
+                  Header: 'Description',
+                  assesor: 'description',
+                  editable: true,
+                  format: 'textarea',
+                  width: 700
+                },{
+                  Header: 'UOM',
+                  assesor: 'uom',
+                  width: 100,
+                },{
+                  Header: 'Quantity',
+                  assesor: 'quantity',
+                  editable: true,
+                  format: {
+                    type: 'number',
+                    decimals: 2
+                  },
+                  width: 150
+                },{
+                  Header: 'Unit Rate',
+                  assesor: 'unit_rate',
+                  format: 'currency'
+                },{
+                  Header: 'Currency',
+                  assesor: 'currency'
+                },{
+                  Header: 'Total',
+                  assesor: 'total',
+                  format: 'currency' 
+                }]}
+                rows={LIDs}
+                onRowExpand={this.onDetailRowExpand}
+                onUpdateRow={this.onDetailRowUpdate}
+              />
+            </ReflexElement>
+        
+        }
+            
+      </ReflexContainer>
+      
     )
   }
 }
@@ -334,22 +394,27 @@ const mapDispatchToProps = (dispatch) => ({
   selectEstimateItem: id => dispatch(selectEstimateItem(id)),
   updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
 
+  //  Line items
+
+  loadLineItemById: id => dispatch(loadLineItemById(id)),
+  loadLineItemWithDetailById: id => dispatch(loadLineItemWithDetailById(id)),
+
   //  Line item details
 
   loadLineItemDetailsById: id => dispatch(loadLineItemDetailsById(id)),
-  updateLineItemDetailById: (ids, item) => dispatch(updateLineItemDetailById(ids, item)),
+  updateLineItemDetail: (line_item_id, LID) => dispatch(updateLineItemDetail(line_item_id, LID)),
 
   //  UI
 
-  saveExpanded: expanded => dispatch(saveExpanded(expanded)),
-  addSubHeaderTools: tools => dispatch(addSubHeaderTools(tools))
-  
+  addSubHeaderTools: tools => dispatch(addSubHeaderTools(tools)),
+  clearSubHeaderTools: () => dispatch(clearSubHeaderTools())
 })
 
 const mapStateToProps = (state) => ({  
   ui: state.ui,
   estimate: state.estimates.entities[state.estimates.active],
   isLoadingEstimateItems: state.estimates.isFetching,
+  isLoadingLineItemDetails: state.line_items.isFetching,
   line_items: state.line_items.entities,
   line_item_details: state.line_item_details,
   active_project: state.projects.items[state.projects.active],

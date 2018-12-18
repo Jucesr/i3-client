@@ -64,7 +64,7 @@ class Viewer extends React.Component {
           //   onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0MTg4MTQwNiwic2NvcGUiOlsiYnVja2V0OnJlYWQiLCJidWNrZXQ6Y3JlYXRlIiwiZGF0YTp3cml0ZSIsImRhdGE6cmVhZCJdLCJhdWQiOiJodHRwczovL2F1dG9kZXNrLmNvbS9hdWQvand0ZXhwNjAiLCJqdGkiOiJYRFVoMjE5ZjNiTWE3OU00Z09SMFkzWnRIRjFBbDdVTThGeVpYVjNKaGxXVlVrY3BadXk5REZKTlNXbFNvRVdWIn0.2C-hROTxMkd1Ble2tkID1vUs-jd-U68gtCyGqgrwvXc", 3599);
           // })
 
-          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0NDgxOTQ0Niwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiOFVic1FVNGg5ZEhmZ0lva1d1d0hQSGl1NmVXUVF1aDQzeWI1b1RRNWFMenlZYnNudWFtRWJwVFNnUklXQjJzTyJ9.saW1KUwddHgVs-4RK9Unq0KsOPVzfwSkIgNt2tF8JwQ", 3599);
+          onGetAccessToken("eyJhbGciOiJIUzI1NiIsImtpZCI6Imp3dF9zeW1tZXRyaWNfa2V5In0.eyJjbGllbnRfaWQiOiI3RGpEMlRmRFZldGZvRFA2Y3Y4SUhlemNGSXd4RHNXSiIsImV4cCI6MTU0NTA2OTY1MSwic2NvcGUiOlsidmlld2FibGVzOnJlYWQiXSwiYXVkIjoiaHR0cHM6Ly9hdXRvZGVzay5jb20vYXVkL2p3dGV4cDYwIiwianRpIjoiS2NWcmFDdnlucHozTHVuOW80MlRFWDJtb25nSWhWSzZJSlNubXRWSkM4NlVtb3E4VnYxcGIzeFF3WlowMXBFUSJ9.xbh4_8dSMcuiwgW9w9q9kF-ziJjGFQTGi58M1srzHzQ", 3599);
           
         
           
@@ -133,7 +133,7 @@ class Viewer extends React.Component {
   //
   ///////////////////////////////////////////////////////////////////
   componentDidUpdate = () => {
-
+    console.log('Model updated')
     if (this.viewer && this.viewer.impl) {
       if (this.viewerContainer.offsetHeight !== this.height || this.viewerContainer.offsetWidth !== this.width) {
 

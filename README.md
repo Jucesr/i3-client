@@ -74,6 +74,11 @@ Date: Dec 14, 2018
   * Change line items reducer prop items for entities.
   * Add utility tree to hanlde tree operations.
 
+## V0.7.3
+Date: Dec 17, 2018
+  * Fix position of row action modal. Now it´s fixed so its based on body document.
+  * The total of each section is displayed in the Estimate item table.
+
 ## Glossary
 
 * DB = Database

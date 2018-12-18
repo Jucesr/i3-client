@@ -103,10 +103,12 @@
   flex-direction: row;
   flex-grow: 1;
   box-shadow: 0 2px 15px 0 rgba(0, 0, 0, 0.15);
+  z-index: 99;
 }
 
 .Table-Row-Header td{
   border-right: 1px solid rgba(0,0,0,0.09);
+  border-bottom: 1px solid rgba(0,0,0,0.09);
   padding: 3px;
 }
 

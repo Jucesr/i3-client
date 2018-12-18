@@ -15,7 +15,7 @@ class RowActionsModal extends React.Component {
           style={{
             top: `${props.y}px`,
             left: `${props.x}px`,
-            position: 'absolute',
+            position: 'fixed',
             background: 'rgb(255, 255, 255)',
             border: 'solid 1px rgb(180, 180, 180)',
             outline: 'none',

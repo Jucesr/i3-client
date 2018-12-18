@@ -35,9 +35,7 @@ export default class Table extends React.Component {
 
   componentDidMount = () => {
   
-    if(!this.state.hasInitializedColumns){
-      this.updateColumnsWidth()
-    }
+    this.updateColumnsWidth()
     
   }
 
@@ -46,8 +44,6 @@ export default class Table extends React.Component {
     if(this.container.current.offsetWidth != this.state.tableWidth){
       console.log(`There is a diference ${this.container.current.offsetWidth} - ${this.state.tableWidth}`)
       this.updateColumnsWidth()
-      
-      // console.log(this.container.current.offsetWidth)
     }
     
   }
@@ -141,18 +137,20 @@ export default class Table extends React.Component {
 
   onRowExpand = (row) => {
 
-    //  Check if there is an extra hanlder in the parent
-    if(this.props.hasOwnProperty('onRowExpand')){
-      this.props.onRowExpand(row)
-    }
+    
 
-    if(!row.is_line_item && row.hasOwnProperty('subrows')){
+    if(!row.is_line_item ){
       this.setState(prevState => ({
         open_rows: {
           ...prevState.open_rows,
           [row.id]: prevState.open_rows.hasOwnProperty(row.id) ? !prevState.open_rows[row.id] : true
         }
       }))      
+    }
+
+    //  Check if there is an extra hanlder in the parent
+    if(this.props.hasOwnProperty('onRowExpand')){
+      this.props.onRowExpand(row)
     }
     
 
@@ -164,7 +162,6 @@ export default class Table extends React.Component {
       let xpos = e.pageX
       let ypos = e.pageY
       let actions;
-
 
       if(row.is_line_item){
         //  Line items
@@ -229,7 +226,7 @@ export default class Table extends React.Component {
         row_actions_modal: {
           visible: true,
           x: xpos,
-          y: ypos, //- this.header_height,
+          y: ypos,
           actions: actions
         }
       }))
@@ -422,7 +419,7 @@ export default class Table extends React.Component {
   }
 
   render(){
-    const {rows, isLoading, loaderAvatar} = this.props
+    const {rows, isLoading, loaderAvatar, noRowsMessage} = this.props
 
     const isEmpty = rows.length == 0 &&!isLoading
 
@@ -434,7 +431,7 @@ export default class Table extends React.Component {
       }}>
         <table 
           style={{
-            height: isLoading ? '10%' : '100%',
+            height: isLoading ? '5%' : '100%',
             // width: '100%',
             overflow: 'hidden',
             display: 'flex',
@@ -465,7 +462,7 @@ export default class Table extends React.Component {
               row_actions_modal: {
                 visible: true,
                 x: xpos,
-                y: ypos, //- this.header_height,
+                y: ypos,
                 actions: actions
               }
             }))
@@ -532,13 +529,19 @@ export default class Table extends React.Component {
             <tr
               className='Table-Row Table-Row-Empty'
             >
-              <td colSpan={columns.length}><p>Empty table. Right click to add rows</p></td>
+              <td colSpan={columns.length}><p>{noRowsMessage}</p></td>
             </tr>
           }
         </tbody>
       </table>
 
-      {isLoading && ( !!loaderAvatar ? <img alt='' src={this.props.loaderAvatar} ></img> : <div>Loading...</div>)}
+      {isLoading && ( !!loaderAvatar ? 
+        <div >
+          <img style={{ display:'block', margin: 'auto'}} alt='' src={this.props.loaderAvatar} ></img>
+        </div> 
+        : 
+        <div>Loading...</div>)
+      }
 
 
         {
@@ -637,7 +640,8 @@ Table.propTypes = {
 
   allowToDragRows: PropTypes.bool,
   isLoading: PropTypes.bool,
-  loaderAvatar: PropTypes.string
+  loaderAvatar: PropTypes.string,
+  noRowsMessage: PropTypes.string
 };
 
 Table.defaultProps = {
@@ -649,7 +653,9 @@ Table.defaultProps = {
   onAddRow: () => {},
   onDeleteRow: () => {},
   onMoveRow: () => {},
+  onUpdateRow : () => {},
 
   allowToDragRows: false,
-  isLoading: false
+  isLoading: false,
+  noRowsMessage: "Empty table. Right click to add rows"
 };
