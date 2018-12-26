@@ -1,5 +1,5 @@
 const initialState = {
-  items: {},
+  entities: {},
   error: null,
   isFetching: false,
   active: undefined
@@ -13,8 +13,8 @@ export default (state = initialState, action = {}) => {
     case 'ADD_PROJECT': {
       return {
         ...state,
-        items: {
-          ...items,
+        entities: {
+          ...entities,
           [action.payload.id]: {
             ...action.payload
           }
@@ -54,8 +54,8 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           ...projects
         },
         error: null,
@@ -68,10 +68,10 @@ export default (state = initialState, action = {}) => {
       //  loaded in to the project Only add the ids of the estimates.
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [payload]: {
-            ...state.items[payload],
+            ...state.entities[payload],
             estimates: response.map(r => r.id)
           }
         }
@@ -79,11 +79,11 @@ export default (state = initialState, action = {}) => {
     }
 
     case 'ADD_ESTIMATE': {
-      const active_project = state.items[state.active]
+      const active_project = state.entities[state.active]
       return {
         ...state,
-        items: {
-          ...state.items,
+        entities: {
+          ...state.entities,
           [active_project.id]: {
             ...active_project,
             estimates: active_project.estimates.concat(payload.id)

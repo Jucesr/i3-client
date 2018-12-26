@@ -27,15 +27,14 @@ class DashboardRoute extends React.Component {
       projects
     } = this.props
 
-    const projectItems = projects.items
-    const projectArray = Object.keys(projectItems)
+    const projectArray = Object.keys(projects)
 
     return (
       <div className="ProjectList">
 
       {
         projectArray.length > 0 && projectArray.map(key => {
-          const item = projectItems[key]
+          const item = projects[key]
           return (
             <ProjectItem
               onClick={() => this.onSelectProject(item.id)}
@@ -66,7 +65,7 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mapStateToProps = (state) => ({
-  projects: state.projects
+  projects: state.projects.entities
 })
 
 

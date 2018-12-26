@@ -1,5 +1,6 @@
 import pick from 'lodash/pick'
-import { fetchApi } from "utils/api";
+import { fetchApi } from "utils/api"
+import { loadMaterial } from "./material";
 
 const shouldCallAPI = (stateProperty, _id) => {
   return state => {
@@ -102,7 +103,7 @@ export const loadLineItemWithDetailById = (id, options = {}) => {
   }
 }
 
-export const loadLineItemDetailsById = (id) => ({
+export const loadLineItemDetails = (id) => ({
   type: 'LOAD_LINE_ITEM_DETAILS',
   shouldCallAPI: state => {
       if(!state['line_items'].entities[id].line_item_details)
@@ -117,88 +118,80 @@ export const loadLineItemDetailsById = (id) => ({
   
   },
   payload : id,
-  callAPI: () => {
-    return new Promise((resolve, reject) => {
-      fetch(`${API_URL}/line_item/${id}/detail`)
-        .then(
-          response => {
-            if(response.status == 404)
-              reject('Not found')
-          return response.json() 
-          }
-        )
-        .then(response => {
+  callAPI: async (dispatch) => {
+    
+    let LIDs = await fetchApi(`${API_URL}/line_item/${id}/detail`)
 
-          // let line_item_detail = pick(response, [
-          //   'id',
-          //   'is_assembly',
-          //   'entity_id',
-          //   'entity_code',
-          //   'description',
-          //   'uom',
-          //   'quantity',
-          //   'unit_rate_mxn',
-          //   'unit_rate_usd'
-          // ])
+    LIDs = LIDs.map(async lid => {
+      
+      if(lid.is_assembly){
+        //  The lid is a line item
+        await dispatch(loadLineItemById(lid.entity_id))
+        
+      }else{
+        //  The lid is a material
+        await dispatch(loadMaterial(lid.entity_id))
+      }
+      
+      return pick(lid, [
+          'id',
+          'is_assembly',
+          'entity_id',
+          'entity_code',
+          'quantity'
+      ])
 
-          resolve(response) 
-          })
     })
+    return await Promise.all(LIDs)
+    
   }
 })
-
-// export const updateLineItemDetail = (ids, line_item_detail) => ({
-//   type: 'UPDATE_LINE_ITEM_DETAIL',
-//   // shouldCallAPI: shouldCallAPI('estimate_items', id),
-//   payload: ids.line_item,
-//   callAPI: (dispatch) => {
-//     return new Promise((resolve, reject) => {
-//       fetch(
-//           `${API_URL}/line_item/${ids.line_item}/detail/${ids.line_item_detail}`, 
-//           {
-//             method: 'PATCH',
-//             headers: {
-//               Accept: 'application/json',
-//               'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify(line_item_detail)
-//           }
-//         )
-//         .then(
-//           response => {
-//             if(response.status == 404)
-//               reject('Not found')
-//           return response.json() 
-//           }
-//         )
-//         .then(response => {
-//           let lid = pick(response, [
-//             'id',
-//             'quantity',
-//             'formula'
-//           ])
-
-//           //  TODO: Should fetch all Line entities that were affected
-//           // if(estimate_item.is_line_item){
-          
-//           dispatch(loadLineItemById(ids.line_item, {force: true}))
-//           // }
-
-//           resolve(lid) 
-//           })
-//     })
-//   }
-// })
 
 export const updateLineItemDetail = (line_item_id, line_item_detail) => ({
   type: 'UPDATE_LINE_ITEM_DETAIL',
   // shouldCallAPI: shouldCallAPI('estimate_items', id),
   payload: line_item_id,
-  callAPI: (dispatch) => {
-    return new Promise((resolve, reject) => {
-      resolve(line_item_detail)
-    })
+  callAPI: async (dispatch, state) => {
+    //  Steps to complete this action.
+    //  1.- Update entity of line item detail
+    //  2.- Update UR of line item that contains the LID.
+    //  3.- Update UR of all the line items that depend on the previous LI
+
+    // const line_item = state.line_items.entities[line_item_id]
+    // const materials = state.materials.entities
+    // const line_items = state.line_items.entities
     
+    // const new_details = line_item.line_item_details.map( lid => {
+
+    //   if(lid.id == line_item_detail.id){
+    //     lid = {
+    //       ...lid,
+    //       ...line_item_detail
+    //     }
+    //   }
+
+    //   if(lid.is_assembly){
+    //     let LI = line_items[lid.entity_id]
+    //     lid = {
+    //       ...lid,
+    //       unit_rate_mxn: LI.unit_rate_mxn,
+    //       unit_rate_usd: LI.unit_rate_usd
+    //     }
+    //   }else{
+    //     let material = materials[lid.entity_id]
+    //     lid = {
+    //       ...lid,
+    //       unit_rate_mxn: material.currency == "MXN" ? material.unit_rate : 0,
+    //       unit_rate_usd: material.currency == "USD" ? material.unit_rate : 0
+    //     }
+    //   }
+
+    //   return lid
+    // })
+
+    // return details
+
+    const new_detail = fetchApi(`${API_URL}/line_item/${lineItemID}/detail/${lineItemDetailID}`)
   }
 })
 

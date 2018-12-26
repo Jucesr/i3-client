@@ -38,7 +38,7 @@ class EstimateRoute extends React.Component {
     const estimates = props.estimates.entities  
 
 
-    const active_project = props.projects.items[this.getProjectId()] 
+    const active_project = props.projects.entities[this.getProjectId()] 
 
     //  Check if the estimates of the active projects have been loaded then take them from estimate collection.
 

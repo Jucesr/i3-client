@@ -2,6 +2,7 @@ import {createStore, combineReducers, applyMiddleware, compose} from 'redux';
 import projectReducer from './reducers/project'
 import estimateReducer from './reducers/estimate'
 import lineItemsReducer from './reducers/line_item'
+import materialReducer from './reducers/material'
 import UIReducer from "./reducers/ui";
 
 
@@ -19,6 +20,7 @@ export default () => {
       projects: projectReducer,
       estimates: estimateReducer,
       line_items: lineItemsReducer,
+      materials: materialReducer,
       ui: UIReducer
     }),
     persistedState,

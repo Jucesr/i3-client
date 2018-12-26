@@ -28,7 +28,7 @@ import {
 import { 
   loadLineItemById, 
   loadLineItemWithDetailById,
-  loadLineItemDetailsById, 
+  loadLineItemDetails, 
   updateLineItemDetail 
 } from "actions/line_item";
 
@@ -81,7 +81,7 @@ class EstimateRoute extends React.Component {
 
   onEstimateRowExpand = (row) => {
     if(row.is_line_item){
-      this.props.loadLineItemDetailsById(row.line_item_id)
+      this.props.loadLineItemDetails(row.line_item_id)
       this.setState(prevState => ({
         estimate_item_selected: row
       }))
@@ -90,7 +90,7 @@ class EstimateRoute extends React.Component {
 
   onDetailRowExpand = (row) => {
     if(row.is_assembly){
-      this.props.loadLineItemWithDetailById(row.entity_id)
+      this.props.loadLineItemDetails(row.entity_id)
     }
   }
 
@@ -132,25 +132,43 @@ class EstimateRoute extends React.Component {
   }
 
   prepareLIDs = (line_item_id, LIDs) => {
+    
     return LIDs.map(lid => {
         
-      if(lid.is_assembly && !!this.props.line_items[lid.entity_id]){
+      if(lid.is_assembly){
       //  It is a line item. It should fetch it from the state if its already load.
         let line_item = this.props.line_items[lid.entity_id]
         lid = {
           ...lid,
-          line_item_id: line_item_id,
           unit_rate_mxn: line_item.unit_rate_mxn,
-          unit_rate_usd: line_item.unit_rate_usd, 
-          
-          subrows: this.prepareLIDs(lid.entity_id, line_item.line_item_details)
+          unit_rate_usd: line_item.unit_rate_usd,
+          description: line_item.spanish_description,
+          currency: "MXN", // TODO: This has to be the currency of the project
+          uom: line_item.uom, 
+          subrows: line_item.hasOwnProperty('line_item_details') ? this.prepareLIDs(lid.entity_id, line_item.line_item_details) : []
         }
 
-        debugger;
+        //  If the line item has subrows it means it could have been changed the unit rate so it will need to calculated
+        // if(lid.hasOwnProperty('subrows')){
+
+        // }
+
+      }else{
+      //  It is a material.
+        let material = this.props.materials[lid.entity_id]
+        lid = {
+          ...lid,
+          unit_rate_mxn: material.currency == 'MXN' ? material.unit_rate : 0,
+          unit_rate_usd: material.currency == 'USD' ? material.unit_rate : 0,
+          description: material.description,
+          currency: material.currency,
+          uom: material.uom, 
+        }
       }
 
       return {
-        ...lid, 
+        ...lid,
+        line_item_id: line_item_id,
         parent_id: line_item_id,
         is_line_item: !lid.is_assembly,
         code: lid.entity_code,
@@ -203,24 +221,6 @@ class EstimateRoute extends React.Component {
           unit_rate_usd: line_item.unit_rate_usd,
           total: (line_item.unit_rate_mxn + (line_item.unit_rate_usd * 20)) * estimate_item.quantity
         }
-
-        if(line_item.hasOwnProperty('line_item_details')){
-          //Calculate unit_rate
-          const unit_rate = line_item.line_item_details.reduce((acum, detail) => {  
-            return {
-              mxn: acum.mxn + (detail.unit_rate_mxn * detail.quantity),
-              usd: acum.usd + (detail.unit_rate_usd * detail.quantity)
-            }
-          }, {mxn: 0, usd: 0})
-
-          estimate_item = {
-            ...estimate_item,
-            unit_rate_mxn: unit_rate.mxn,
-            unit_rate_usd: unit_rate.usd, 
-            total: (unit_rate.mxn + (unit_rate.usd * 20)) * estimate_item.quantity
-          }
-
-        }
       }
       return estimate_item
     }))
@@ -243,7 +243,6 @@ class EstimateRoute extends React.Component {
       LIDs = this.prepareLIDs(EI.line_item_id, LIDs)
     }
 
-    console.log(LIDs)
   
     //  Styles
     
@@ -401,7 +400,7 @@ const mapDispatchToProps = (dispatch) => ({
 
   //  Line item details
 
-  loadLineItemDetailsById: id => dispatch(loadLineItemDetailsById(id)),
+  loadLineItemDetails: id => dispatch(loadLineItemDetails(id)),
   updateLineItemDetail: (line_item_id, LID) => dispatch(updateLineItemDetail(line_item_id, LID)),
 
   //  UI
@@ -417,7 +416,8 @@ const mapStateToProps = (state) => ({
   isLoadingLineItemDetails: state.line_items.isFetching,
   line_items: state.line_items.entities,
   line_item_details: state.line_item_details,
-  active_project: state.projects.items[state.projects.active],
+  materials: state.materials.entities,
+  active_project: state.projects.entities[state.projects.active],
   is_model_visible: state.ui.is_model_visible,
   is_estimate_detail_visible: state.ui.is_estimate_detail_visible
 })

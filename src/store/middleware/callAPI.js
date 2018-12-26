@@ -29,7 +29,7 @@ const callAPIMiddleware = ({ dispatch, getState }) => {
         type: `${type}_REQUEST`
       })
       
-      return callAPI(dispatch).then(
+      return callAPI(dispatch, getState()).then(
         response => 
             dispatch({
               payload,

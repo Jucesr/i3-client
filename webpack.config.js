@@ -53,7 +53,7 @@ module.exports = (env) => {
     plugins: [
       CSSExtract,
       new webpack.DefinePlugin({
-        'API_URL': JSON.stringify('http://172.16.17.245:3000'),
+        'API_URL': JSON.stringify('http://localhost:3000'),
         'process.env.FIREBASE_API_KEY': JSON.stringify(process.env.FIREBASE_API_KEY),
         'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(process.env.FIREBASE_AUTH_DOMAIN),
         'process.env.FIREBASE_DATABASE_URL': JSON.stringify(process.env.FIREBASE_DATABASE_URL),

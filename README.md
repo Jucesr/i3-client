@@ -79,6 +79,14 @@ Date: Dec 17, 2018
   * Fix position of row action modal. Now it´s fixed so its based on body document.
   * The total of each section is displayed in the Estimate item table.
 
+## V0.7.4
+Date: Dec 26, 2018
+  * Add state to store materials. Every time LIDs are loaded material are loaded as well.
+  * Change name of function to load LIDs loadLineItemDetailsById => loadLineItemDetails.
+  * Change the property 'items' for 'entitites' in projects global state.
+  * Add fav icon.
+  * Add global state in the second argument to the callAPI mmiddleware.
+
 ## Glossary
 
 * DB = Database

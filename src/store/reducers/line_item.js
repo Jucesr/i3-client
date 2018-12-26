@@ -139,23 +139,15 @@ export default (state = initialState, action = {}) => {
 
     case 'UPDATE_LINE_ITEM_DETAIL_SUCCESS': {
 
-      const new_details = state.entities[payload].line_item_details.map( lid => {
-        if(lid.id == response.id){
-          lid = {
-            ...lid,
-            ...response
-          }
-        }
-        return lid
-      })
-
-      //Calculate unit_rate
-      const unit_rate = new_details.reduce((acum, detail) => {  
-        return {
-          mxn: acum.mxn + (detail.unit_rate_mxn * detail.quantity),
-          usd: acum.usd + (detail.unit_rate_usd * detail.quantity)
-        }
-      }, {mxn: 0, usd: 0})
+      // const new_details = state.entities[payload].line_item_details.map( lid => {
+      //   if(lid.id == response.id){
+      //     lid = {
+      //       ...lid,
+      //       ...response
+      //     }
+      //   }
+      //   return lid
+      // })
 
       return {
         ...state,
@@ -163,7 +155,7 @@ export default (state = initialState, action = {}) => {
           ...state.entities,
           [payload]: {
             ...state.entities[payload],
-            line_item_details: new_details,
+            line_item_details: response,
             unit_rate_mxn: unit_rate.mxn,
             unit_rate_usd: unit_rate.usd,
             lastFetched: Date.now()

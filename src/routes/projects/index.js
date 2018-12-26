@@ -48,7 +48,7 @@ class ProjectRoute extends React.Component {
 
     const {projects, estimates} = props
     
-    const projectName = !!projects.active ? projects.items[projects.active].name : 'Undefined'
+    const projectName = !!projects.active ? projects.entities[projects.active].name : 'Undefined'
 
     const estimateName = estimates.active && estimates.entities[estimates.active].name 
 
