@@ -75,13 +75,33 @@ export default (state = initialState, action = {}) => {
 
     case 'LOAD_ESTIMATE_ITEMS_SUCCESS': {
       
+      let data = response.reduce((acum, current) => {
+        return {
+          ...acum,
+          [current.id]: current
+        }
+      }, {})
+
+      // //  It adds the property child to entities based on parent id.
+      Object.keys(data).forEach(key => {
+          if(data[key].parent_id !== null){
+            const parent_id = data[key].parent_id
+            //  The material belongs to a category material. It needs to add it as it's child
+            if(!data[parent_id].hasOwnProperty('_children')){
+              data[parent_id]._children = []
+            }
+
+            data[parent_id]._children.push(key)
+          }
+      })
+
       return {
         ...state,
         entities: {
           ...state.entities,
           [payload]: {
             ...state.entities[payload],
-            estimate_items: tree.convertArrayInTree(response)
+            estimate_items: data
           }
         },
         isFetching: false

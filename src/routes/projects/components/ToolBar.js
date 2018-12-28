@@ -15,7 +15,7 @@ const ToolBar = (props) => {
           <ToolBarItem to={`/projects/${id}`} name="Overview" />
           <ToolBarItem to={`/projects/${id}/estimates`} name="Estimates" />
           <ToolBarItem name="Line Items" />
-          <ToolBarItem name="Materials" />
+          <ToolBarItem to={`/projects/${id}/materials`} name="Materials" />
           <ToolBarItem name="WBS" />
           <ToolBarItem name="Packages" />
           <ToolBarItem name="Gallery" />

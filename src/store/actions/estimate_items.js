@@ -44,7 +44,7 @@ export const addEstimateItem = (estimate_item) => ({
             'id',
             'parent_id',
             'is_disable',
-            'is_line_item',
+            'is_item',
             'line_item_id',
             'code',
             'description',
@@ -53,7 +53,7 @@ export const addEstimateItem = (estimate_item) => ({
           ])
 
           // //  If the Estimate item is a LI and it has changed it should fetch the new one
-          // if(estimate_item.is_line_item){
+          // if(estimate_item.is_item){
           //   dispatch(loadLineItemById(estimate_item.line_item_id))
           // }
 
@@ -124,11 +124,11 @@ export const updateEstimateItemById = (id, estimate_item) => ({
             'description',
             'quantity',
             'indirect_percentage',
-            'is_line_item'
+            'is_item'
           ])
 
           //  If the Estimate item is a LI and it has changed it should fetch the new one
-          // if(estimate_item.is_line_item){
+          // if(estimate_item.is_item){
           //   dispatch(loadLineItemById(estimate_item.line_item_id))
           // }
 
@@ -169,11 +169,11 @@ export const loadEstimateItemById = (id) => {
               'description',
               'quantity',
               'indirect_percentage',
-              'is_line_item'
+              'is_item'
             ])
 
             //  If the Estimate item is a LI it should get the LI from the database.
-            // if(estimate_item.is_line_item){
+            // if(estimate_item.is_item){
             //   dispatch(loadLineItemById(estimate_item.line_item_id))
             // }
 
@@ -213,12 +213,12 @@ export const loadEstimateItems = (estimate_id) => ({
                 'description',
                 'quantity',
                 'indirect_percentage',
-                'is_line_item'
+                'is_item'
               ])
 
               //  If the Estimate item is a LI it should fetch the LI from the database.
               
-              if(estimate_item.is_line_item && !!estimate_item.line_item_id){
+              if(estimate_item.is_item && !!estimate_item.line_item_id){
                 let action = loadLineItemById(estimate_item.line_item_id)
                 
                 array_of_line_items_request.push(dispatch(action))

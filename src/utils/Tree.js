@@ -40,19 +40,10 @@
 
     let treeRows = []
     rows.forEach(row => {
-      
-      if(!row.hasOwnProperty('is_selected')){
-        row.is_selected = false
-      }
-
-      if(!row.hasOwnProperty('is_open')){
-        row.is_open = false
-      }
 
       if(!row.hasOwnProperty('subrows')){
         row.subrows = []
       }
-
 
       if(row.parent_id == null){
         treeRows.push(row)

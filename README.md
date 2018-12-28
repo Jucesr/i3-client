@@ -87,6 +87,17 @@ Date: Dec 26, 2018
   * Add fav icon.
   * Add global state in the second argument to the callAPI mmiddleware.
 
+## V0.7.5
+Date: Dec 26, 2018
+  * Add default picture to projects when picture_url is not provided.
+  * Modify method convertArrayInTree. Removed addtion of is_open and is_selected properties
+
+## V0.7.6
+Date: Dec 28, 2018
+  * Change behevior of Table component. It receivies an object as props instead of an array. This makes it more usable. It holds the tree structure internally.
+  * Add Material route, it loads the material of the project.
+  * Add unloadMaterial and loadMaterials actions to Material reducer.
+
 ## Glossary
 
 * DB = Database

@@ -7,9 +7,11 @@ import SubHeader from "./components/SubHeader";
 
 import { clearEstimate } from "actions/estimates";
 import { toggleModel, toggleEstimateDetails } from "actions/ui";
+import { unloadMaterials } from "actions/material";
 
 import EstimateRoute from "./routes/estimate";
 import EstimateItemRoute from "./routes/estimate_item";
+import MaterialRoute from "./routes/material";
 
 class ProjectRoute extends React.Component {
 
@@ -41,6 +43,10 @@ class ProjectRoute extends React.Component {
     this.setState((prevState) => ({
       isToolBarOpen: !prevState.isToolBarOpen
     }))
+  }
+
+  componentWillUnmount = () => {
+    this.props.unloadMaterials()
   }
 
   render(){
@@ -83,6 +89,7 @@ class ProjectRoute extends React.Component {
               <Route path="/projects/:id" component={overView} exact={true}/>
               <Route path="/projects/:id/estimates" component={EstimateRoute} exact={true}/>
               <Route path="/projects/:id/estimates/:id" component={EstimateItemRoute} exact={true}/>
+              <Route path="/projects/:id/materials/" component={MaterialRoute} exact={true}/>
             </div> 
           </div>
   
@@ -100,6 +107,7 @@ const mapDispatchToProps = (dispatch) => ({
   clearEstimate: () => dispatch(clearEstimate()),
   toggleModel: () => dispatch(toggleModel()),
   toggleEstimateDetails : () => dispatch(toggleEstimateDetails()),
+  unloadMaterials: () => dispatch(unloadMaterials())
 })
 
 const mapStateToProps = (state) => ({  

@@ -16,6 +16,7 @@ export default class Table extends React.Component {
         }
         return column
       }),
+      structure: [],
       open_rows: {},
       splitter_start: 0,
       tableWidth: 0,
@@ -34,8 +35,9 @@ export default class Table extends React.Component {
   }
 
   componentDidMount = () => {
-  
+
     this.updateColumnsWidth()
+    this.generateTableStructure()
     
   }
 
@@ -45,7 +47,57 @@ export default class Table extends React.Component {
       console.log(`There is a diference ${this.container.current.offsetWidth} - ${this.state.tableWidth}`)
       this.updateColumnsWidth()
     }
+
+    if(prevProps.rows != this.props.rows){
+      // console.log('rows has changed!')
+      // const start = Date.now()
+      this.generateTableStructure()
+      // const end = Date.now()
+      // console.log(end - start)
+    }
     
+  }
+
+  generateTableStructure = () => {
+    //  Look for root elements
+    const rows = this.props.rows
+    let rootElements = Object.keys(rows).reduce((acum, key) => {
+      if(rows[key].parent_id == null){
+        return [
+          ...acum,
+          key
+        ]
+      }
+      return acum
+    }, [])
+
+    const generateTree = (elements) => {
+
+      return elements.reduce( (acum, element_id) => {
+        const element = rows[element_id]
+
+        if(element.hasOwnProperty('_children')){
+          return [
+            ...acum,
+            {
+              id: element_id,
+              subrows: element.hasOwnProperty('_children') ? generateTree(element._children) : undefined
+            }
+          ]
+        }
+        
+        return [
+          ...acum,
+          {
+            id: element_id
+          }
+        ]
+
+      },[])
+    }
+    this.setState(prevState => ({
+      structure: generateTree(rootElements)
+    }))    
   }
 
   updateColumnsWidth = () => {
@@ -139,7 +191,7 @@ export default class Table extends React.Component {
 
     
 
-    if(!row.is_line_item ){
+    if(!row.is_item ){
       this.setState(prevState => ({
         open_rows: {
           ...prevState.open_rows,
@@ -163,7 +215,7 @@ export default class Table extends React.Component {
       let ypos = e.pageY
       let actions;
 
-      if(row.is_line_item){
+      if(row.is_item){
         //  Line items
         actions = [
           [
@@ -182,7 +234,7 @@ export default class Table extends React.Component {
         let hasSubrows = row.hasOwnProperty('subrows')
         //  Do not allow to add line items if subrows are headers.
         if(
-          (hasSubrows && row.subrows.length > 0 && row.subrows[0].is_line_item) ||
+          (hasSubrows && row.subrows.length > 0 && row.subrows[0].is_item) ||
           (!hasSubrows) ||
           (hasSubrows && row.subrows.length === 0)
           ){
@@ -195,7 +247,7 @@ export default class Table extends React.Component {
           }
 
         if(
-          (hasSubrows && row.subrows.length > 0 && !row.subrows[0].is_line_item) ||
+          (hasSubrows && row.subrows.length > 0 && !row.subrows[0].is_item) ||
           (!hasSubrows) ||
           (hasSubrows && row.subrows.length === 0)
           ){
@@ -251,7 +303,13 @@ export default class Table extends React.Component {
     const columns = this.getVisibleColumns()
     let filter_active = false
 
-    return rows.map((row, index) => {
+    return rows.map((table_row, index) => {
+      const row = this.props.rows[table_row.id]
+
+      if(!row){
+        return 
+      }
+
       let renderedRows = [];
 
       let isSelected = this.props.selected_rows.includes(row.id)
@@ -314,9 +372,9 @@ export default class Table extends React.Component {
       }
       //  Check if it has subrows and it's open to render subrows.
 
-      if((!!row.subrows ) && (filter_active || !!this.state.open_rows[row.id] )){
+      if((!!table_row.subrows ) && (filter_active || !!this.state.open_rows[row.id] )){
         renderedRows.push(
-          this.generateRows(row.subrows, depth + 1)
+          this.generateRows(table_row.subrows, depth + 1)
         )
       }
 
@@ -421,7 +479,7 @@ export default class Table extends React.Component {
   render(){
     const {rows, isLoading, loaderAvatar, noRowsMessage} = this.props
 
-    const isEmpty = rows.length == 0 &&!isLoading
+    const isEmpty = Object.keys(rows).length == 0 && !isLoading
 
     const columns = this.getVisibleColumns()
 
@@ -524,7 +582,7 @@ export default class Table extends React.Component {
           overflowY: 'scroll',
           }}>
           {!isEmpty ? 
-            this.generateRows(rows, 0) 
+            this.generateRows(this.state.structure, 0) 
             : 
             <tr
               className='Table-Row Table-Row-Empty'
@@ -624,7 +682,7 @@ export default class Table extends React.Component {
 Table.propTypes = { 
   appElement: PropTypes.string.isRequired,
   columns: PropTypes.array.isRequired,
-  rows: PropTypes.array.isRequired,
+  rows: PropTypes.object.isRequired,
   selected_rows: PropTypes.array,
 
   onRowClick: PropTypes.func,

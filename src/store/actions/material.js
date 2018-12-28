@@ -7,6 +7,8 @@ export const loadMaterial = (id) => ({
     let material = await fetchApi(`${API_URL}/material/${id}`)
     return pick(material, [
       "id",
+      'parent_id',
+      'is_item',
       "is_service",
       "code",
       "description",
@@ -15,4 +17,27 @@ export const loadMaterial = (id) => ({
       "unit_rate",
     ])
   }
+})
+
+export const loadMaterials = (project_id) => ({
+  type    : 'LOAD_MATERIALS',
+  callAPI: async dispatch => {
+    let materials = await fetchApi(`${API_URL}/project/${project_id}/materials/`)
+    return materials.map(material => pick(material, [
+      "id",
+      'parent_id',
+      'is_item',
+      "is_service",
+      "code",
+      "description",
+      "uom",
+      "currency",
+      "unit_rate",
+    ]))
+     
+  }
+})
+
+export const unloadMaterials = () => ({
+  type    : 'UNLOAD_MATERIALS'
 })

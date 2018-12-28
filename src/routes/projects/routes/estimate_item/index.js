@@ -80,7 +80,7 @@ class EstimateRoute extends React.Component {
   }
 
   onEstimateRowExpand = (row) => {
-    if(row.is_line_item){
+    if(row.is_item){
       this.props.loadLineItemDetails(row.line_item_id)
       this.setState(prevState => ({
         estimate_item_selected: row
@@ -131,10 +131,10 @@ class EstimateRoute extends React.Component {
     this.props.deleteEstimateItem(estimate_item)
   }
 
-  prepareLIDs = (line_item_id, LIDs) => {
+  prepareLIDs = (LIDs, parent_id, parent_line_item_id) => {
     
-    return LIDs.map(lid => {
-        
+    return LIDs.reduce((acum, lid) => {
+      let _children = {} 
       if(lid.is_assembly){
       //  It is a line item. It should fetch it from the state if its already load.
         let line_item = this.props.line_items[lid.entity_id]
@@ -144,14 +144,18 @@ class EstimateRoute extends React.Component {
           unit_rate_usd: line_item.unit_rate_usd,
           description: line_item.spanish_description,
           currency: "MXN", // TODO: This has to be the currency of the project
-          uom: line_item.uom, 
-          subrows: line_item.hasOwnProperty('line_item_details') ? this.prepareLIDs(lid.entity_id, line_item.line_item_details) : []
+          uom: line_item.uom
         }
 
-        //  If the line item has subrows it means it could have been changed the unit rate so it will need to calculated
-        // if(lid.hasOwnProperty('subrows')){
-
-        // }
+        //  Check if the line item has already loaded its detail.
+        if(line_item.hasOwnProperty('line_item_details')){
+          _children = this.prepareLIDs(line_item.line_item_details, lid.id, lid.entity_id)
+          
+          lid = {
+            ...lid,
+            _children: line_item.line_item_details.map(li => li.id)
+          }
+        }
 
       }else{
       //  It is a material.
@@ -167,36 +171,50 @@ class EstimateRoute extends React.Component {
       }
 
       return {
-        ...lid,
-        line_item_id: line_item_id,
-        parent_id: line_item_id,
-        is_line_item: !lid.is_assembly,
-        code: lid.entity_code,
-        unit_rate: lid.unit_rate_mxn + (lid.unit_rate_usd * 20),
-        total: (lid.unit_rate_mxn + (lid.unit_rate_usd * 20)) * lid.quantity,
-        type: lid.is_assembly ? 'A': 'M'
+        ...acum,
+        ..._children,
+        [lid.id]: {
+          ...lid,
+          parent_line_item_id: parent_line_item_id,
+          parent_id: parent_id,
+          is_item: !lid.is_assembly,
+          code: lid.entity_code,
+          unit_rate: lid.unit_rate_mxn + (lid.unit_rate_usd * 20),
+          total: (lid.unit_rate_mxn + (lid.unit_rate_usd * 20)) * lid.quantity,
+          type: lid.is_assembly ? 'A': 'M'
+          }
       }
-    })
+    }, {})
   }
 
   calculateTotals = (rows) => {
 
-    return rows.map(row => {
-
-      //  Check if it is a header and have subrows, it means it needs to go deeper
-      if(row.hasOwnProperty('subrows') && !row.is_line_item){
-
-        row.subrows = this.calculateTotals(row.subrows)
-
-        row.total = row.subrows.reduce((acum, item) => {
-          return acum + (isNaN(item.total) ? 0 : item.total)
-        }, 0)
-
-      }
+    const getTotal = (children => {
+      return children.reduce((acum, id) => {
+        let row = rows[id]
         
-      return row
+        if(row.hasOwnProperty('_children')){
+          return acum + getTotal(row._children)
+        }
+        return acum + !isNaN(row.total) ? row.total: 0
+        
+      }, 0)
 
     })
+
+    return Object.keys(rows).reduce((acum, key) => {
+      let row = rows[key]
+      //  Check if it is a header and have subrows, it means it needs to go deeper
+      if(row.hasOwnProperty('_children') && !row.is_item){
+        row.total = getTotal(row._children)
+      }
+        
+      return {
+        ...acum,
+        [key]: row
+      }
+
+    }, {})
 
   }
 
@@ -209,12 +227,13 @@ class EstimateRoute extends React.Component {
 
     const active_estimate = props.estimate
 
-    let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : []) : []
+    let estimate_items = active_estimate ? (active_estimate.estimate_items ? active_estimate.estimate_items : {}) : {}
 
-    estimate_items = tree.map(estimate_items, (estimate_item => {
-      if(estimate_item.is_line_item && !!estimate_item.line_item_id){
+    Object.keys(estimate_items).forEach(key => {
+      let estimate_item = estimate_items[key] 
+      if(estimate_item.is_item && !!estimate_item.line_item_id){
         let line_item = props.line_items[estimate_item.line_item_id]
-        estimate_item = {
+        estimate_items[key] = {
           ...estimate_item,
           uom: line_item.uom,
           unit_rate_mxn: line_item.unit_rate_mxn,
@@ -222,25 +241,26 @@ class EstimateRoute extends React.Component {
           total: (line_item.unit_rate_mxn + (line_item.unit_rate_usd * 20)) * estimate_item.quantity
         }
       }
-      return estimate_item
-    }))
+    })
 
     estimate_items = this.calculateTotals(estimate_items)
-
+    
     //  Line item details
     //  It checks if an estimate item has been selected. If it is it will take the details of the line item that belongs to the estimate item
 
-    let LIDs = []
+    let table_detail_rows = {}
 
     if(!!state.estimate_item_selected){
       let EI = state.estimate_item_selected 
 
       let LI = props.line_items[EI.line_item_id] 
 
-      LIDs = LI.line_item_details ? LI.line_item_details : []
+      const LIDs = LI.line_item_details ? LI.line_item_details : []
 
-      //  Prepare line item details for table component. Add value false to the prop is_line_item if it is an assembly
-      LIDs = this.prepareLIDs(EI.line_item_id, LIDs)
+      //  Prepare line item details for table component. Add value false to the prop is_item if it is an assembly
+      //table_detail_rows = this.prepareLIDs(EI.line_item_id, LIDs)
+      table_detail_rows = this.prepareLIDs(LIDs, null, EI.line_item_id)
+    
     }
 
   
@@ -298,7 +318,7 @@ class EstimateRoute extends React.Component {
                     assesor: 'unit_rate_mxn',
                     format: 'currency'
                   },{
-                    Header: 'UR_USD',
+                    Header: 'UR USD',
                     assesor: 'unit_rate_usd',
                     format: 'currency'
                   },{
@@ -369,7 +389,7 @@ class EstimateRoute extends React.Component {
                   assesor: 'total',
                   format: 'currency' 
                 }]}
-                rows={LIDs}
+                rows={table_detail_rows}
                 onRowExpand={this.onDetailRowExpand}
                 onUpdateRow={this.onDetailRowUpdate}
               />

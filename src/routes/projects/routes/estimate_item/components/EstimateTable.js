@@ -48,7 +48,7 @@ class EstimateTable extends React.Component {
           line_item: {
             code,
             parent_id: row.parent_id,
-            is_line_item: true,
+            is_item: true,
           }
         }))
       }),
@@ -71,7 +71,7 @@ class EstimateTable extends React.Component {
               this.props.addEstimateItem({
                 ...values,
                 code: '-',
-                is_line_item: true,
+                is_item: true,
                 description: `${values.description} - empty line item`,
                 parent_id
               })
@@ -85,7 +85,7 @@ class EstimateTable extends React.Component {
             code,
             parent_id: row.parent_id,
             quantity: 0,
-            is_line_item: false
+            is_item: false
           }
         }))
 
@@ -537,7 +537,7 @@ class EstimateTable extends React.Component {
           //         description: "SUMINISTRO Y COLOCACION DE BLOCK LIZO DE 20X20X20 40CMS CON CASTILLOS AHOGADOS, ACERO DE REFUERZO No. 4",
           //         id: 22,
           //         indirect_percentage: 0,
-          //         is_line_item: true,
+          //         is_item: true,
           //         level_0: "00",
           //         level_0_description: "Estimate",
           //         level_1: "01",

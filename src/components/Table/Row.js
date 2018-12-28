@@ -12,9 +12,9 @@ const RowTarget = {
   },
   canDrop(props){
     const {row} = props
-    return !row.is_line_item && 
+    return !row.is_item && 
     (
-      (row.hasOwnProperty('subrows') && row.subrows.length > 0 && row.subrows[0].is_line_item) || 
+      (row.hasOwnProperty('subrows') && row.subrows.length > 0 && row.subrows[0].is_item) || 
       (row.hasOwnProperty('subrows') && row.subrows.length === 0) ||
       (!row.hasOwnProperty('subrows'))
     )
@@ -115,7 +115,7 @@ class Row extends React.Component {
     let shouldRender = false
     
     if(column.onlyItems){
-      if(row.is_line_item){
+      if(row.is_item){
         shouldRender = true
       }else{
         shouldRender = false
@@ -195,7 +195,7 @@ class Row extends React.Component {
     if(this.props.isSelected){
       className += ' Table-Row-Selected'
     }else{
-      className += `${row.is_line_item ? ' Table-Row-Item': ` Table-Row--depth-${depth}`}`
+      className += `${row.is_item ? ' Table-Row-Item': ` Table-Row--depth-${depth}`}`
       className += isOver && canDrop ? ' Table-Row-Over': '';
     }
     
@@ -230,7 +230,7 @@ class Row extends React.Component {
               flex: `25 0 auto`,
             }}
           >
-            {!row.is_line_item && <div className={`Table-Column-${is_open ? 'Expanded' : 'Contracted'}`}></div> }
+            {!row.is_item && <div className={`Table-Column-${is_open ? 'Expanded' : 'Contracted'}`}></div> }
           </td>
 
         {columns.map((col, index) => (

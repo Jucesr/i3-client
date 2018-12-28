@@ -8,7 +8,7 @@ export const ProjectItem = (props) => {
     name,
     uen,
     picture,
-    progress,
+    progress = 0,
     onClick
   } = props
   let progressColor;
@@ -27,11 +27,11 @@ export const ProjectItem = (props) => {
       </div> 
 
       <div className="ProjectItem-picture">
-        <img width="250px" src={`/images/projects/${picture}`} />
+        <img width="250px" src={`/images/projects/${!!picture ? picture: 'warehouse.png'}`} />
       </div>
 
       <div className="ProjectItem-progress">
-        <p>{`${progress}%`}</p> 
+        <p>{`${!!progress ? progress : 0}%`}</p> 
         <Line percent={progress} strokeWidth="4" strokeColor={progressColor} />
       </div>
       
