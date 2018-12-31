@@ -107,6 +107,10 @@ Date: Dec 30, 2018
     * To delete headers
   * Remove old EstimateTable that uses React-Table.
 
+## V0.7.8
+Date: Dec 31, 2018
+  * Estimate items can be updated. (Quantity and Description)
+
 ## Glossary
 
 * DB = Database

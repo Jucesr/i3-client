@@ -111,7 +111,7 @@ class Row extends React.Component {
   }
 
   shouldRenderCell = (column, row) => {
-    let isValueValid = typeof row[column.assesor] === "number" ? true : (!!row[column.assesor])
+    let isValueValid = typeof row[column.assesor] === "number" ? true : (column.editable ? true : !!row[column.assesor])
     let shouldRender = false
     
     if(column.onlyItems){

@@ -91,15 +91,11 @@ class EstimateRoute extends React.Component {
   }
 
   onEstimateRowUpdate = (column, row, value) => {
-    // if(column.assesor == 'quantity'){
-    //   let quantity = parseFloat(value)
-    //   this.props.updateLineItemDetail(row.parent_id, {
-    //     id: row.id,
-    //     quantity
-    //   })
-    // }
-
-    console.log(row, value)
+    this.props.updateEstimateItem({
+      id: row.id,
+      estimate_id: this.getEstimateId(),
+      [column.assesor]: value
+    })
   }
 
   onDetailRowExpand = (row) => {
@@ -499,6 +495,8 @@ class EstimateRoute extends React.Component {
                   },{
                     Header: 'UOM',
                     assesor: 'uom',
+                    editable: true,
+                    onlyItems: true,
                     width: 100,
                   },{
                     Header: 'Quantity',

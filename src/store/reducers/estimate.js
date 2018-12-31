@@ -1,5 +1,3 @@
-import tree from "utils/Tree.js";
-
 const initialState = {
   entities: {},
   error: null,
@@ -155,6 +153,28 @@ export default (state = initialState, action = {}) => {
 
       delete newEstimateItems[estimate_item.id]
 
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          [estimate_id]: {
+            ...state.entities[estimate_id],
+            estimate_items: newEstimateItems
+          }
+        }
+      }
+    }
+
+    case 'UPDATE_ESTIMATE_ITEM_SUCCESS': {
+
+      let estimate_id = payload
+      let newEstimateItems = {
+        ...state.entities[estimate_id].estimate_items,
+        [response.id]: {
+          ...state.entities[estimate_id].estimate_items[response.id],
+          ...response
+        }
+      }
       return {
         ...state,
         entities: {
