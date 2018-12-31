@@ -1,9 +1,8 @@
 import React from 'react'
 import {connect} from 'react-redux';
 import {Decimal} from 'decimal.js';
-import EstimateTable from "../estimate_item/components/EstimateTable";
-import EstimateDetailTable from "../estimate_item/components/EstimateDetailTable";
-import Viewer from "../estimate_item/components/Viewer";
+import Viewer from "./components/Viewer";
+import Toolbar from "./components/Toolbar";
 
 import 'react-reflex/styles.css'
 
@@ -13,16 +12,13 @@ import {
   ReflexElement
 } from 'react-reflex'
 
-import tree from "utils/Tree";
-
 import Table from "components/Table/Table";
 
 import { 
   loadEstimateItems, 
   addEstimateItem,
   deleteEstimateItem, 
-  selectEstimateItem, 
-  updateEstimateItemById 
+  updateEstimateItem 
 } from "actions/estimate_items";
 
 import { 
@@ -39,7 +35,7 @@ class EstimateRoute extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      estimate_item_selected: null,
+      estimate_items_selected: [],
       windows_width: 1920
     }
 
@@ -88,6 +84,24 @@ class EstimateRoute extends React.Component {
     }
   }
 
+  onEstimateRowSelected = rows => {
+    this.setState(prevState => ({
+      estimate_items_selected: rows
+    }))
+  }
+
+  onEstimateRowUpdate = (column, row, value) => {
+    // if(column.assesor == 'quantity'){
+    //   let quantity = parseFloat(value)
+    //   this.props.updateLineItemDetail(row.parent_id, {
+    //     id: row.id,
+    //     quantity
+    //   })
+    // }
+
+    console.log(row, value)
+  }
+
   onDetailRowExpand = (row) => {
     if(row.is_assembly){
       this.props.loadLineItemDetails(row.entity_id)
@@ -114,7 +128,7 @@ class EstimateRoute extends React.Component {
       hierachy_level: 1,
       indirect_percentage: 0,
       project_id: this.props.active_project.id,
-      estimate_id: this.props.estimates.active
+      estimate_id: this.props.estimate.id
     }
 
     return this.props.addEstimateItem(estimate_item)
@@ -125,7 +139,7 @@ class EstimateRoute extends React.Component {
 
     const estimate_item = {
       ...item,
-      estimate_id: this.props.estimates.active
+      estimate_id: this.props.estimate.id
     }
 
     this.props.deleteEstimateItem(estimate_item)
@@ -218,11 +232,186 @@ class EstimateRoute extends React.Component {
 
   }
 
-  render(){
+  getToolbarItems = () => {
 
     const {props, state} = this
 
-    
+    let toolbar_items = [{
+      name: 'Add root element',
+      action: () => {
+        this.onAddEstimateItem({
+          parent_id: null,
+          code: "01",
+          description: " ",
+          quantity: 0,
+          is_item: false
+        })
+      }
+    }]
+
+    if(state.estimate_items_selected.length > 0){
+      if(state.estimate_items_selected.length == 1){
+        //  Get the row selected from the props.
+        let ei_selected = props.estimate.estimate_items[state.estimate_items_selected[0]]
+
+        if(ei_selected.is_item){
+          //  Item
+          toolbar_items = [
+            ...toolbar_items,
+            {
+              name: 'Delete item',
+              action: () => {
+  
+                this.setState(prevState => ({
+                  estimate_items_selected: []
+                }))
+  
+                this.onDeleteEstimateItem(ei_selected)
+              }
+            }
+          ]
+        }else{
+          //  Header
+
+          toolbar_items = [
+            ...toolbar_items,
+            {
+              name: 'Delete header',
+              action: () => {
+                //  It needs to delete the header and all sub items/headers
+                
+
+                const getChildren = (children) => {
+
+                  return children.reduce((acum, child_id) => {
+                    let new_children = []
+                    let child = props.estimate.estimate_items[child_id]
+                    if(child.hasOwnProperty('_children')){
+                      new_children = getChildren(child._children)
+                    }
+
+                    return [
+                      ...acum,
+                      ...new_children,
+                      child_id
+                    ]
+                  }, [])
+                  
+                }
+
+                let itemsToBeDeleted = [
+                  ei_selected.id,
+                  ...getChildren(ei_selected._children)
+                ]
+
+                //console.log(itemsToBeDeleted)
+                
+                this.setState(prevState => ({
+                  estimate_items_selected: []
+                }))
+                itemsToBeDeleted.forEach(id => this.onDeleteEstimateItem({
+                  id: id
+                }))
+              }
+            }
+          ]
+
+          if(ei_selected.hasOwnProperty('_children') && ei_selected._children.length > 0){
+            //  Check the kind of children it has, it could be items or headers
+            let child = props.estimate.estimate_items[ei_selected._children[0]]
+            if(child.is_item){
+              //  It has items
+              toolbar_items = [
+                ...toolbar_items,
+                {
+                  name: 'Add item',
+                  action: () => {
+                    this.onAddEstimateItem({
+                      parent_id: ei_selected.id,
+                      code: "01",
+                      description: " ",
+                      quantity: 0,
+                      is_item: true
+                    })
+                  }
+                }
+              ]
+            }else{
+              //  It has more headers
+              toolbar_items = [
+                ...toolbar_items,
+                {
+                  name: 'Add header',
+                  action: () => {
+                    this.onAddEstimateItem({
+                      parent_id: ei_selected.id,
+                      code: "01",
+                      description: " ",
+                      quantity: 0,
+                      is_item: false
+                    })
+                  }
+                }
+              ]
+            }
+            
+          }else{
+            //  It's empty, free to add items of sub-headers
+            toolbar_items = [
+              ...toolbar_items,
+              {
+                name: 'Add item',
+                action: () => {
+                  this.onAddEstimateItem({
+                    parent_id: ei_selected.id,
+                    code: "01",
+                    description: " ",
+                    quantity: 0,
+                    is_item: true
+                  })
+                }
+              },
+              {
+                name: 'Add header',
+                action: () => {
+                  this.onAddEstimateItem({
+                    parent_id: ei_selected.id,
+                    code: "01",
+                    description: " ",
+                    quantity: 0,
+                    is_item: false
+                  })
+                }
+              }
+            ]
+          }
+          
+        }
+      }else{
+        //  More than 1 row selected
+        toolbar_items.push({
+          name: 'Delete items',
+          action: () => {
+            let itemsToBeDeleted = state.estimate_items_selected
+
+            this.setState(prevState => ({
+              estimate_items_selected: []
+            }))
+            itemsToBeDeleted.forEach(id => this.onDeleteEstimateItem({
+              id: id
+            }))
+          }
+        })
+      }
+    }
+
+    return toolbar_items
+  }
+
+  render(){
+
+    const {props, state} = this
+ 
     //  Check if an estimate has already been selected then take it from estimate collection.
 
     const active_estimate = props.estimate
@@ -258,14 +447,15 @@ class EstimateRoute extends React.Component {
       const LIDs = LI.line_item_details ? LI.line_item_details : []
 
       //  Prepare line item details for table component. Add value false to the prop is_item if it is an assembly
-      //table_detail_rows = this.prepareLIDs(EI.line_item_id, LIDs)
       table_detail_rows = this.prepareLIDs(LIDs, null, EI.line_item_id)
     
     }
 
-  
+    //  Toolbar items
+
+    let toolbar_items = this.getToolbarItems()
+
     //  Styles
-    
     const model_viewer_classname = props.is_estimate_detail_visible ? 'Viewer-container' : 'Viewer-container--Full'
     
     return (
@@ -274,18 +464,25 @@ class EstimateRoute extends React.Component {
         windowResizeAware={true} 
         orientation="horizontal"
       >
-
-        <ReflexElement onStopResize={() => console.log('Hey')} className="left-pane">
+        <ReflexElement size={30}>
+          <Toolbar 
+            items={toolbar_items}
+          />
+        </ReflexElement>
+        <ReflexElement className="left-pane">
 
           <ReflexContainer 
             orientation="vertical"
             windowResizeAware={true} 
-          >
+          > 
+            
             <ReflexElement>
+                
                 <Table 
                   appElement="#app"
                   loaderAvatar="/images/loader.gif"
                   allowToDragRows={true}
+                  selected_rows={this.state.estimate_items_selected}
                   isLoading={estimate_items.length == 0}
                   columns={[{
                     Header: 'Code',
@@ -328,6 +525,8 @@ class EstimateRoute extends React.Component {
                   }]}
                   rows={estimate_items}
                   onRowExpand={this.onEstimateRowExpand}
+                  onRowSelect={this.onEstimateRowSelected}
+                  onUpdateRow={this.onEstimateRowUpdate}
                 />
               
             </ReflexElement>
@@ -410,8 +609,7 @@ const mapDispatchToProps = (dispatch) => ({
   loadEstimateItems: estimate_id => dispatch(loadEstimateItems(estimate_id)),
   addEstimateItem: item => dispatch(addEstimateItem(item)),
   deleteEstimateItem : estimate_id => dispatch(deleteEstimateItem(estimate_id)),
-  selectEstimateItem: id => dispatch(selectEstimateItem(id)),
-  updateEstimateItemById: (id, item) => dispatch(updateEstimateItemById(id, item)),
+  updateEstimateItem: (id, item) => dispatch(updateEstimateItem(id, item)),
 
   //  Line items
 

@@ -1,4 +1,5 @@
 import pick from 'lodash/pick'
+import { fetchApi } from "utils/api"
 import { loadLineItemById } from "./line_item";
 
 const shouldCallAPI = (stateProperty, _id) => {
@@ -19,80 +20,54 @@ const shouldCallAPI = (stateProperty, _id) => {
 export const addEstimateItem = (estimate_item) => ({
   type    : 'ADD_ESTIMATE_ITEM',
   payload : estimate_item.estimate_id,
-  callAPI: (dispatch) => {
-    return new Promise((resolve, reject) => {
-      fetch(
-          `${API_URL}/estimate_item/`, 
-          {
-            method: 'POST',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(estimate_item)
-          }
-        )
-        .then(
-          response => {
-            if(response.status == 400)
-              reject(response)
-          return response.json() 
-          }
-        )
-        .then(response => {
-          let estimate_item = pick(response, [
-            'id',
-            'parent_id',
-            'is_disable',
-            'is_item',
-            'line_item_id',
-            'code',
-            'description',
-            'quantity',
-            'indirect_percentage',
-          ])
+  callAPI: async dispatch => {
+    estimate_item = await fetchApi(
+      `${API_URL}/estimate_item/`, 
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(estimate_item)
+      }
+    )
+    estimate_item = pick(estimate_item, [
+      'id',
+      'parent_id',
+      'is_disable',
+      'is_item',
+      'line_item_id',
+      'code',
+      'description',
+      'quantity',
+      'indirect_percentage',
+    ])
 
-          // //  If the Estimate item is a LI and it has changed it should fetch the new one
-          // if(estimate_item.is_item){
-          //   dispatch(loadLineItemById(estimate_item.line_item_id))
-          // }
+    return estimate_item
 
-          resolve(estimate_item) 
-          })
-    })
   }
 })
 
 export const deleteEstimateItem = (estimate_item) => ({
   type    : 'DELETE_ESTIMATE_ITEM',
   payload : estimate_item.estimate_id,
-  callAPI: (dispatch) => {
-    return new Promise((resolve, reject) => {
-      fetch(
-          `${API_URL}/estimate_item/${estimate_item.id}`, 
-          {
-            method: 'DELETE',
-            headers: {
-              Accept: 'application/json',
-              'Content-Type': 'application/json',
-            }
-          }
-        )
-        .then(
-          response => {
-            if(response.status == 400)
-              reject(response)
-          return response.json() 
-          }
-        )
-        .then(response => {
-          resolve(estimate_item.id) 
-        })
-    })
+  callAPI: async (dispatch) => {
+    estimate_item = await fetchApi(
+      `${API_URL}/estimate_item/${estimate_item.id}`, 
+      {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        }
+      }
+    )
+    return estimate_item.id
   }
 })
 
-export const updateEstimateItemById = (id, estimate_item) => ({
+export const updateEstimateItem = (id, estimate_item) => ({
   type: 'UPDATE_ESTIMATE_ITEM',
   callAPI: (dispatch) => {
     return new Promise((resolve, reject) => {
@@ -137,53 +112,6 @@ export const updateEstimateItemById = (id, estimate_item) => ({
     })
   }
 })
-
-export const selectEstimateItem = (id) => ({
-  type    : 'SELECT_ESTIMATE_ITEM',
-  payload : id
-})
-
-export const loadEstimateItemById = (id) => {
-  return {
-
-    type: 'LOAD_ESTIMATE_ITEM',
-    shouldCallAPI: shouldCallAPI('estimate_items', id),
-    callAPI: (dispatch) => {
-      return new Promise((resolve, reject) => {
-
-        fetch(`${API_URL}/estimate_item/${id}`)
-          .then(
-            response => {
-              if(response.status == 404)
-                reject('Not found')
-            return response.json() 
-            }
-          )
-          .then(response => {
-
-            let estimate_item = pick(response, [
-              'id',
-              'line_item_id',
-              'parent_id',
-              'code',
-              'description',
-              'quantity',
-              'indirect_percentage',
-              'is_item'
-            ])
-
-            //  If the Estimate item is a LI it should get the LI from the database.
-            // if(estimate_item.is_item){
-            //   dispatch(loadLineItemById(estimate_item.line_item_id))
-            // }
-
-            resolve(estimate_item) 
-            })
-      })
-    }
-
-  }
-}
 
 //  It fetches all the estimate items of an Estimate at once. 
 export const loadEstimateItems = (estimate_id) => ({

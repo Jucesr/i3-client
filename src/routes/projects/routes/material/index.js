@@ -27,11 +27,7 @@ class Material extends React.Component {
   render(){
     const {props} = this
     const table_rows = props.materials
-    // console.log(materialKeyArray.length)
-    // console.log(rows)
-    // console.log(table_rows)
     return (
-      
       <div> 
         <Table 
           appElement="#app"

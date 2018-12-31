@@ -82,11 +82,10 @@ export default (state = initialState, action = {}) => {
         }
       }, {})
 
-      // //  It adds the property child to entities based on parent id.
+      // It adds the property child to entities based on parent id.
       Object.keys(data).forEach(key => {
           if(data[key].parent_id !== null){
             const parent_id = data[key].parent_id
-            //  The material belongs to a category material. It needs to add it as it's child
             if(!data[parent_id].hasOwnProperty('_children')){
               data[parent_id]._children = []
             }
@@ -110,13 +109,30 @@ export default (state = initialState, action = {}) => {
 
     case 'ADD_ESTIMATE_ITEM_SUCCESS': {
 
+      let newEstimateItems = {
+        ...state.entities[payload].estimate_items
+      }
+
+      //  Verify if it's a root item or a item that has a parent. 
+      if(response.parent_id != null){
+        //  Item with parent. It needs to add it to the object and also update _children in parent
+        if(!newEstimateItems[response.parent_id].hasOwnProperty('_children')){
+          newEstimateItems[response.parent_id]._children = [] 
+        }
+        newEstimateItems[response.parent_id]._children = [
+          ...newEstimateItems[response.parent_id]._children,
+          response.id
+        ]
+      }
+      newEstimateItems[response.id] = {...response, _children: []}
+
       return {
         ...state,
         entities: {
           ...state.entities,
           [payload]: {
             ...state.entities[payload],
-            estimate_items: state.entities[payload].estimate_items.concat(response.id)
+            estimate_items: newEstimateItems
             
           }
         }
@@ -126,7 +142,18 @@ export default (state = initialState, action = {}) => {
     case 'DELETE_ESTIMATE_ITEM_SUCCESS': {
 
       let estimate_id = payload
-      let estimate_item_id = response
+      let estimate_item = state.entities[estimate_id].estimate_items[response]
+      let newEstimateItems = {
+        ...state.entities[estimate_id].estimate_items
+      }
+
+      //  It has a parent, it needs to remove it from the _children property of the parent.
+      if(estimate_item.parent_id != null && newEstimateItems.hasOwnProperty(estimate_item.parent_id)){
+        
+        newEstimateItems[estimate_item.parent_id]._children = newEstimateItems[estimate_item.parent_id]._children.filter(child_id => child_id != estimate_item.id)
+      }
+
+      delete newEstimateItems[estimate_item.id]
 
       return {
         ...state,
@@ -134,7 +161,7 @@ export default (state = initialState, action = {}) => {
           ...state.entities,
           [estimate_id]: {
             ...state.entities[estimate_id],
-            estimate_items: state.entities[estimate_id].estimate_items.filter(item => item != estimate_item_id)
+            estimate_items: newEstimateItems
           }
         }
       }

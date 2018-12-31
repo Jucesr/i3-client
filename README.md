@@ -98,6 +98,15 @@ Date: Dec 28, 2018
   * Add Material route, it loads the material of the project.
   * Add unloadMaterial and loadMaterials actions to Material reducer.
 
+## V0.7.7
+Date: Dec 30, 2018
+  * Add a toolbar in estimate item route.
+    * To add estimate items
+    * To add headers
+    * To delete estimate items
+    * To delete headers
+  * Remove old EstimateTable that uses React-Table.
+
 ## Glossary
 
 * DB = Database
