@@ -115,6 +115,18 @@ Date: Dec 31, 2018
 Date: Dec 31, 2018
   * Add action loadLineItem, it uses fetchApi method. 
 
+## V0.8.0
+Date: Jan 16, 2019
+  * Add currency type for InputField component.
+  * Add onCellClick event in Table and Row component.
+  * Add CommodityWindow component.
+  * Merge estimate_item_selected and estimate_items_selected.
+  * Add method to add line item detail in Estimate route.
+  * Add method to delete line item.
+  * Re-built line item actions to use fetchApi util.
+  * Add actions to addMaterial, loadMaterialByCode, copyMaterialToOtherProject 
+
+
 ## Glossary
 
 * DB = Database
