@@ -10,13 +10,13 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
-    case 'ADD_LINE_ITEM': {
+    case 'ADD_LINE_ITEM_SUCCESS': {
       return {
         ...state,
         entities: {
-          ...entities,
-          [action.payload.id]: {
-            ...action.payload
+          ...state.entities,
+          [action.response.id]: {
+            ...action.response
           }
         }
       };
@@ -159,6 +159,24 @@ export default (state = initialState, action = {}) => {
             unit_rate_mxn: unit_rate.mxn,
             unit_rate_usd: unit_rate.usd,
             lastFetched: Date.now()
+          }
+        },
+        error: null,
+        isFetching: false
+      };
+    }
+
+    case 'ADD_LINE_ITEM_DETAIL_SUCCESS': {
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          [payload]: {
+            ...state.entities[payload],
+            line_item_details: [
+              ...state.entities[payload].line_item_details,
+              response
+            ],
           }
         },
         error: null,

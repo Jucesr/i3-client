@@ -358,6 +358,7 @@ export default class Table extends React.Component {
             isSelected={isSelected}
             columns={columns}
             depth={depth}
+            onCellClick={this.props.onCellClick}
             onRowClick={this.props.onRowClick}
             onUpdateRow={this.props.onUpdateRow}
             onRowContextMenu={this.onRowContextMenu}
@@ -688,6 +689,7 @@ Table.propTypes = {
   onRowClick: PropTypes.func,
   onRowExpand: PropTypes.func,
   onRowSelect: PropTypes.func,
+  onCellClick: PropTypes.func,
 
   onUpdateRow: PropTypes.func,
   onAddRow: PropTypes.func,
@@ -707,6 +709,7 @@ Table.defaultProps = {
 
   onRowClick: () => {},
   onRowSelect: () => {},
+  onCellClick: () => {},
 
   onAddRow: () => {},
   onDeleteRow: () => {},

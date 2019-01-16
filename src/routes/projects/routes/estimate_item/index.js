@@ -3,6 +3,8 @@ import {connect} from 'react-redux';
 import {Decimal} from 'decimal.js';
 import Viewer from "./components/Viewer";
 import Toolbar from "./components/Toolbar";
+import CommodityWindow from "./components/CommodityWindow";
+import Modal from 'react-modal'
 
 import 'react-reflex/styles.css'
 
@@ -22,11 +24,16 @@ import {
 } from "actions/estimate_items";
 
 import { 
-  loadLineItemById, 
-  loadLineItemWithDetailById,
+  addLineItem,
+  addLineItemDetail,
   loadLineItemDetails, 
   updateLineItemDetail 
 } from "actions/line_item";
+
+import { 
+  loadMaterialByCode,
+  copyMaterialToOtherProject
+ } from "actions/material";
 
 import { addSubHeaderTools, clearSubHeaderTools } from "actions/ui";
 
@@ -35,7 +42,10 @@ class EstimateRoute extends React.Component {
   constructor(props){
     super(props)
     this.state = {
+      line_item_details: {},
       estimate_items_selected: [],
+      detail_items_selected: [],
+      is_commodities_windows_open: false,
       windows_width: 1920
     }
 
@@ -53,6 +63,8 @@ class EstimateRoute extends React.Component {
     
     //  Load tools for this route
     this.props.addSubHeaderTools(['ClearEstimate', 'ToggleModel', 'ToogleEstimateDetails'])
+
+    //  Load estimate items
     this.props.loadEstimateItems(this.getEstimateId())
 
   }
@@ -75,16 +87,14 @@ class EstimateRoute extends React.Component {
     return true
   }
 
-  onEstimateRowExpand = (row) => {
-    if(row.is_item){
-      this.props.loadLineItemDetails(row.line_item_id)
-      this.setState(prevState => ({
-        estimate_item_selected: row
-      }))
-    }
-  }
-
   onEstimateRowSelected = rows => {
+    let EI = rows.length == 1 ? this.props.estimate.estimate_items[rows[0]] : null;
+    let is_item = EI !== null ? (EI.is_item) : false 
+
+    if(is_item){
+      this.props.loadLineItemDetails(EI.line_item_id)
+    }
+
     this.setState(prevState => ({
       estimate_items_selected: rows
     }))
@@ -96,6 +106,12 @@ class EstimateRoute extends React.Component {
       estimate_id: this.getEstimateId(),
       [column.assesor]: value
     })
+  }
+
+  onEstimateRowExpand = (row) => {
+    if(row.is_item){
+      this.props.loadLineItemDetails(row.line_item_id)
+    }
   }
 
   onDetailRowExpand = (row) => {
@@ -114,12 +130,24 @@ class EstimateRoute extends React.Component {
     }
   }
 
+  onDetailRowSelected = rows => {
+    this.setState(prevState => ({
+      detail_items_selected: rows
+    }))
+  }
+
+  toggleCommoditiesWindow = () => {
+    this.setState(prevState => ({
+      is_commodities_windows_open: !this.state.is_commodities_windows_open
+    }))
+  }
+
   onAddEstimateItem = item => {
     //  Add meta data.
     const estimate_item = {
       ...item,
       wbs_item_id: null,
-      line_item_id: null,
+      line_item_id: item.hasOwnProperty('line_item_id') ? item.line_item_id : null,
       is_disable: false,
       hierachy_level: 1,
       indirect_percentage: 0,
@@ -141,6 +169,85 @@ class EstimateRoute extends React.Component {
     this.props.deleteEstimateItem(estimate_item)
   }
 
+  onAddLineItemDetail = async row => {
+    
+    let lid = {
+      project_id: row.project_id,
+      is_assembly: false,
+      quantity: 0,
+      formula: ""
+    }
+    //  Only allow to add Materials that are items.
+    if(row.is_item){  
+
+      //  Check if the material that is being added is from other project.
+      if(row.project_id !== this.props.active_project.id){
+        //  It will need to check if the material with the code already exists in the current project.
+        const response = await this.props.loadMaterialByCode(this.props.active_project.id, row.code)
+        
+        if(response.hasOwnProperty('error')){
+          //  It does not exits
+          //  It will need to make a copy of the material. (Create it in the current project).
+          let material = {
+            ...row,
+            base_cost: row.unit_rate,
+            other_cost: row.unit_rate,
+            waste_cost: row.unit_rate,
+            project_id: this.props.active_project.id
+          }
+          
+          const new_material = await this.props.copyMaterialToOtherProject(material.id, this.props.active_project.id)
+          
+          if(!new_material.hasOwnProperty('error')){
+            const new_detail = new_material.response  
+
+            lid = {
+              ...lid,
+              id: new_detail.id,
+              code: new_detail.code
+            }
+          }
+
+        }else{
+          //  It exits
+          
+          const current_material = response.response
+
+          //  It needs to check if the unit rate matches
+          if(current_material.unit_rate == row.unit_rate){
+            //  There is no problem
+          }else{
+            //  Unit rates are different
+          }
+
+          lid = {
+            ...lid,
+            id: current_material.id,
+            code: current_material.code
+          }
+        }
+    
+      }else{
+
+        //  Belongs to the same project, There is no need to validate anything
+        lid = {
+          ...lid,
+          id: row.id,
+          code: row.code
+        }
+      }
+      
+
+      const line_item_id = this.props.estimate.estimate_items[this.state.estimate_items_selected[0]].line_item_id
+
+      this.props.addLineItemDetail(line_item_id, lid)
+      this.toggleCommoditiesWindow()
+      
+    }
+    
+  }
+
+
   prepareLIDs = (LIDs, parent_id, parent_line_item_id) => {
     
     return LIDs.reduce((acum, lid) => {
@@ -150,6 +257,7 @@ class EstimateRoute extends React.Component {
         let line_item = this.props.line_items[lid.entity_id]
         lid = {
           ...lid,
+          code: line_item.code,
           unit_rate_mxn: line_item.unit_rate_mxn,
           unit_rate_usd: line_item.unit_rate_usd,
           description: line_item.spanish_description,
@@ -172,6 +280,7 @@ class EstimateRoute extends React.Component {
         let material = this.props.materials[lid.entity_id]
         lid = {
           ...lid,
+          code: material.code,
           unit_rate_mxn: material.currency == 'MXN' ? material.unit_rate : 0,
           unit_rate_usd: material.currency == 'USD' ? material.unit_rate : 0,
           description: material.description,
@@ -188,7 +297,7 @@ class EstimateRoute extends React.Component {
           parent_line_item_id: parent_line_item_id,
           parent_id: parent_id,
           is_item: !lid.is_assembly,
-          code: lid.entity_code,
+          code: lid.code,
           unit_rate: lid.unit_rate_mxn + (lid.unit_rate_usd * 20),
           total: (lid.unit_rate_mxn + (lid.unit_rate_usd * 20)) * lid.quantity,
           type: lid.is_assembly ? 'A': 'M'
@@ -264,6 +373,12 @@ class EstimateRoute extends React.Component {
   
                 this.onDeleteEstimateItem(ei_selected)
               }
+            },{
+              name: 'Add detail',
+              action: () => {
+                //  It creates a LID.
+                this.toggleCommoditiesWindow()
+              }
             }
           ]
         }else{
@@ -299,8 +414,6 @@ class EstimateRoute extends React.Component {
                   ei_selected.id,
                   ...getChildren(ei_selected._children)
                 ]
-
-                //console.log(itemsToBeDeleted)
                 
                 this.setState(prevState => ({
                   estimate_items_selected: []
@@ -321,9 +434,22 @@ class EstimateRoute extends React.Component {
                 ...toolbar_items,
                 {
                   name: 'Add item',
-                  action: () => {
+                  action: async () => {
+                    //  It creates a line item and assign the line item id to the estimate item
+                    let line_item = {
+                      project_id: this.props.active_project.id,
+                      wbs_item_id: null,
+                      code: '01',
+                      spanish_description: 'Algo',
+                      english_description: 'Something',
+                      uom: ' '
+                    }
+
+                    let {response} = await this.props.addLineItem(line_item)
+
                     this.onAddEstimateItem({
                       parent_id: ei_selected.id,
+                      line_item_id: response.id,
                       code: "01",
                       description: " ",
                       quantity: 0,
@@ -357,9 +483,22 @@ class EstimateRoute extends React.Component {
               ...toolbar_items,
               {
                 name: 'Add item',
-                action: () => {
+                action: async () => {
+
+                  let line_item = {
+                    project_id: this.props.active_project.id,
+                    wbs_item_id: null,
+                    code: '01',
+                    spanish_description: 'Algo',
+                    english_description: 'Something',
+                    uom: ' '
+                  }
+
+                  let {response} = await this.props.addLineItem(line_item)
+
                   this.onAddEstimateItem({
                     parent_id: ei_selected.id,
+                    line_item_id: response.id,
                     code: "01",
                     description: " ",
                     quantity: 0,
@@ -401,6 +540,11 @@ class EstimateRoute extends React.Component {
       }
     }
 
+
+    if(state.detail_items_selected.length > 0){
+
+    }
+
     return toolbar_items
   }
 
@@ -435,16 +579,22 @@ class EstimateRoute extends React.Component {
 
     let table_detail_rows = {}
 
-    if(!!state.estimate_item_selected){
-      let EI = state.estimate_item_selected 
+    if(state.estimate_items_selected.length == 1){
 
-      let LI = props.line_items[EI.line_item_id] 
+      let EI_ID = state.estimate_items_selected[0] 
 
-      const LIDs = LI.line_item_details ? LI.line_item_details : []
+      let EI = props.estimate.estimate_items[EI_ID]
 
-      //  Prepare line item details for table component. Add value false to the prop is_item if it is an assembly
-      table_detail_rows = this.prepareLIDs(LIDs, null, EI.line_item_id)
-    
+      if(EI.is_item){
+        let LI = props.line_items[EI.line_item_id] 
+
+        const LIDs = LI.line_item_details ? LI.line_item_details : []
+
+        //  Prepare line item details for table component. Add value false to the prop is_item if it is an assembly
+        table_detail_rows = this.prepareLIDs(LIDs, null, EI.line_item_id) 
+      }
+      
+        
     }
 
     //  Toolbar items
@@ -522,7 +672,6 @@ class EstimateRoute extends React.Component {
                     format: 'currency' 
                   }]}
                   rows={estimate_items}
-                  onRowExpand={this.onEstimateRowExpand}
                   onRowSelect={this.onEstimateRowSelected}
                   onUpdateRow={this.onEstimateRowUpdate}
                 />
@@ -542,6 +691,14 @@ class EstimateRoute extends React.Component {
         { props.is_estimate_detail_visible && 
 
             <ReflexElement>
+              <Modal
+                isOpen={this.state.is_commodities_windows_open}
+                onRequestClose={this.toggleCommoditiesWindow}
+                contentLabel="Example Modal"
+              >
+                <CommodityWindow onRowClick={this.onAddLineItemDetail} />
+              </Modal>
+
               <Table 
                 appElement="#app"
                 loaderAvatar="/images/loader.gif"
@@ -550,10 +707,16 @@ class EstimateRoute extends React.Component {
                 columns={[{
                   Header: 'Type',
                   assesor: 'type',
-                  width: 35,
+                  editable: true,
+                  format: {
+                    type: 'select',
+                    options: ['', 'M', 'A']
+                  },
+                  width: 45,
                 },{
                   Header: 'Code',
                   assesor: 'code',
+                  editable: true,
                   width: 100
                 },{
                   Header: 'Description',
@@ -587,7 +750,9 @@ class EstimateRoute extends React.Component {
                   format: 'currency' 
                 }]}
                 rows={table_detail_rows}
+                selected_rows={this.state.detail_items_selected}
                 onRowExpand={this.onDetailRowExpand}
+                onRowSelect={this.onDetailRowSelected}
                 onUpdateRow={this.onDetailRowUpdate}
               />
             </ReflexElement>
@@ -610,19 +775,22 @@ const mapDispatchToProps = (dispatch) => ({
   updateEstimateItem: (id, item) => dispatch(updateEstimateItem(id, item)),
 
   //  Line items
-
-  loadLineItemById: id => dispatch(loadLineItemById(id)),
-  loadLineItemWithDetailById: id => dispatch(loadLineItemWithDetailById(id)),
+  addLineItem: line_item => dispatch(addLineItem(line_item)),
 
   //  Line item details
 
+  addLineItemDetail: (line_item_id, lid) => dispatch(addLineItemDetail(line_item_id, lid)),
   loadLineItemDetails: id => dispatch(loadLineItemDetails(id)),
   updateLineItemDetail: (line_item_id, LID) => dispatch(updateLineItemDetail(line_item_id, LID)),
 
   //  UI
 
   addSubHeaderTools: tools => dispatch(addSubHeaderTools(tools)),
-  clearSubHeaderTools: () => dispatch(clearSubHeaderTools())
+  clearSubHeaderTools: () => dispatch(clearSubHeaderTools()),
+
+  //  Material
+  loadMaterialByCode: ( project_id, code ) => dispatch(loadMaterialByCode(project_id, code)),
+  copyMaterialToOtherProject: (material_id, project_id) => dispatch(copyMaterialToOtherProject(material_id, project_id))
 })
 
 const mapStateToProps = (state) => ({  

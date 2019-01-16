@@ -103,10 +103,13 @@ class Row extends React.Component {
 
   onRowSelect = row => {
     return e => {
-      
       this.props.onRowSelect(row, e.ctrlKey)
-      
-      
+    }
+  }
+
+  onCellClick = (column, row) => {
+    return e => {
+      this.props.onCellClick(column, row)
     }
   }
 
@@ -131,13 +134,26 @@ class Row extends React.Component {
     this.props.onUpdateRow(column, row, value)
   }
 
-  renderCell = (column, row) => {
+  getDefaultValue = (format) => {
+    switch (format) {
+      case 'text': return ''
+      case 'number': return 0
+      case 'currency': return 0
+      case 'textarea': return ''
+    }
 
+    return ''
+  }
+
+  renderCell = (column, row) => {
+    
     if(this.shouldRenderCell(column, row)){
       let value = row[column.assesor]  
 
       if(column.editable){
-
+        if(value == undefined){
+          value = this.getDefaultValue(column.format)
+        }
         return (
           <InputField
             format={column.format}
@@ -237,6 +253,7 @@ class Row extends React.Component {
 
           col.Cell ? (
             <td 
+              onClick={this.onCellClick(col, row)}
               key={index}
               style={{
                 width: col.width,
@@ -249,6 +266,7 @@ class Row extends React.Component {
             
           ):(
             <td 
+              onClick={this.onCellClick(col, row)}
               key={index}
               style={{
                 width: col.width,

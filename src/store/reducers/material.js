@@ -10,6 +10,17 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
+    case 'COPY_MATERIAL_SUCCESS':
+    case 'ADD_MATERIAL_SUCCESS': {
+      return {
+        ...state,
+        entities: {
+          ...state.entities,
+          [response.id]: response
+        }
+      }
+    }
+
     case 'UNLOAD_MATERIALS': {
       return {
         ...state,
@@ -17,6 +28,7 @@ export default (state = initialState, action = {}) => {
       };
     }
     
+    case 'LOAD_MATERIALS_REQUEST':
     case 'LOAD_MATERIAL_REQUEST': {
       return {
         ...state,
@@ -44,13 +56,6 @@ export default (state = initialState, action = {}) => {
         },
         error: null,
         isFetching: false
-      };
-    }
-
-    case 'LOAD_MATERIALS_REQUEST': {
-      return {
-        ...state,
-        isFetching: true
       };
     }
 

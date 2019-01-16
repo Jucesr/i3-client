@@ -1,5 +1,4 @@
 import React from 'react'
-import tree from "utils/Tree.js"
 import {connect} from 'react-redux'
 
 import { loadMaterials } from "actions/material";
@@ -47,18 +46,22 @@ class Material extends React.Component {
           },{
             Header: 'UOM',
             assesor: 'uom',
+            onlyItems: true,
             width: 100,
           },{
             Header: 'Base Cost',
             assesor: 'base_cost',
             editable: true,
+            onlyItems: true,
             format: 'currency'
           },{
             Header: 'Unit Rate',
             assesor: 'unit_rate',
+            onlyItems: true,
             format: 'currency'
           },{
             Header: 'Currency',
+            onlyItems: true,
             assesor: 'currency'
           }]}
           rows={table_rows}

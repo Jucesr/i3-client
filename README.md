@@ -111,6 +111,10 @@ Date: Dec 30, 2018
 Date: Dec 31, 2018
   * Estimate items can be updated. (Quantity and Description)
 
+## V0.7.9
+Date: Dec 31, 2018
+  * Add action loadLineItem, it uses fetchApi method. 
+
 ## Glossary
 
 * DB = Database

@@ -88,6 +88,18 @@ class InputField extends React.Component {
         )
       }
 
+      case "currency": {
+        return (
+          <input
+            className="InputField"
+            type='text'
+            value={this.state.currentValue}
+            onChange={this.onChange.bind(this)}
+            onBlur={this.onBlur.bind(this)}
+          />
+        )
+      }
+
       case "text": {
         return (
           <input
@@ -99,8 +111,22 @@ class InputField extends React.Component {
           />
         )
       }
-        
-      
+
+      case "select": {
+        const options = this.props.format.options
+        return (
+          <select 
+            defaultValue={this.state.currentValue}
+            className="InputField"
+          >
+            {options.map((opt, index) => (
+              <option value={opt} key={index}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        )
+      }
     }  
   };
 }

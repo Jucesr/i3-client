@@ -1,6 +1,6 @@
 import pick from 'lodash/pick'
 import { fetchApi } from "utils/api"
-import { loadLineItemById } from "./line_item";
+import { loadLineItem } from "./line_item";
 
 const shouldCallAPI = (stateProperty, _id) => {
   return state => {
@@ -134,7 +134,7 @@ export const loadEstimateItems = (estimate_id) => ({
               //  If the Estimate item is a LI it should fetch the LI from the database.
               
               if(estimate_item.is_item && !!estimate_item.line_item_id){
-                let action = loadLineItemById(estimate_item.line_item_id)
+                let action = loadLineItem(estimate_item.line_item_id)
                 
                 array_of_line_items_request.push(dispatch(action))
               }
