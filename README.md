@@ -130,6 +130,7 @@ Date: Jan 16, 2019
 Date: Jan 17, 2019
   * Update Table component to improve filter column performance.
   * Add Line item module route.
+  * Add module name in subheader
 
 
 ## Glossary

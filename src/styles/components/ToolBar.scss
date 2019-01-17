@@ -1,4 +1,4 @@
-.ToolBar{
+.SideBar{
   margin: 0 auto;
   height: calc(100vh - #{$header_height} - #{$sub_header_height});
   transition: width 300ms linear;
@@ -7,20 +7,20 @@
   box-shadow: 1px 0px 1px 0px rgba(116, 129, 141, 0.1);
 }
 
-.ToolBar_open{
+.SideBar_open{
   width: 180px;
 }
 
-.ToolBar_close{
+.SideBar_close{
   width: 0px;
 }
 
-.ToolBar-container{
+.SideBar-container{
   display: flex;
   flex-direction: column;
 }
 
-.ToolBar-item{
+.SideBar-item{
 
   &:hover{
     background-color: darken(white, 10%);
@@ -33,7 +33,7 @@
   }
 }
 
-.ToolBar-item-active{
+.SideBar-item-active{
   background-color: darken(white, 5%);
   font-weight: bold;
   color: $redux; 

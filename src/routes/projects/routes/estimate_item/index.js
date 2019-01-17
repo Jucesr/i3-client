@@ -64,7 +64,7 @@ class EstimateRoute extends React.Component {
   componentDidMount = () => {
     
     //  Load tools for this route
-    this.props.addSubHeaderTools(['ToggleModel', 'ToogleEstimateDetails'])
+    this.props.addSubHeaderTools(['ToggleModel', 'ToggleEstimateDetails'])
 
     //  Load estimate items
     this.props.loadEstimateItems(this.getEstimateId())
