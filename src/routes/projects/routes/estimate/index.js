@@ -18,7 +18,6 @@ class EstimateRoute extends React.Component {
   }
 
   componentDidMount = () => {
-
     //  Fetch estimates of the active project.
     this.props.loadEstimates(this.getProjectId())
   }
@@ -27,8 +26,6 @@ class EstimateRoute extends React.Component {
     this.props.selectEstimate(estimate_id)
 
     this.props.history.push(`/projects/${this.getProjectId()}/estimates/${estimate_id}`)
-
-    //this.props.loadEstimateItems(estimate_id)
   }
 
   render(){

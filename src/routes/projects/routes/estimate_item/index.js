@@ -16,6 +16,8 @@ import {
 
 import Table from "components/Table/Table";
 
+import { clearEstimate } from "actions/estimates";
+
 import { 
   loadEstimateItems, 
   addEstimateItem,
@@ -62,7 +64,7 @@ class EstimateRoute extends React.Component {
   componentDidMount = () => {
     
     //  Load tools for this route
-    this.props.addSubHeaderTools(['ClearEstimate', 'ToggleModel', 'ToogleEstimateDetails'])
+    this.props.addSubHeaderTools(['ToggleModel', 'ToogleEstimateDetails'])
 
     //  Load estimate items
     this.props.loadEstimateItems(this.getEstimateId())
@@ -72,6 +74,7 @@ class EstimateRoute extends React.Component {
   componentWillUnmount = () => {
     //  Remove any tool load by this route
     this.props.clearSubHeaderTools()
+    this.props.clearEstimate()
   }
 
   shouldComponentUpdate = (nextProps, nextState) => {
@@ -766,6 +769,8 @@ class EstimateRoute extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
+
+  clearEstimate: () => dispatch(clearEstimate()),
 
   //  Estimate Items
 

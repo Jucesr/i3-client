@@ -1,9 +1,10 @@
 import { mergeDeep } from "utils";
 
 const initialState = {
+  module_name: undefined,
+  is_sidebar_open: false,
   is_model_visible: false,
   is_estimate_detail_visible: true,
-  is_sidebar_open: false,
   estimate_table_expanded: {},
   sub_header_tools: []
 }
@@ -16,6 +17,12 @@ export default (state = initialState, action = {}) => {
       return{
         ...state,
         is_model_visible: !state.is_model_visible
+      }
+
+    case "TOGGLE_SIDEBAR":
+      return{
+        ...state,
+        is_sidebar_open: !state.is_sidebar_open
       }
 
     case "TOGGLE_ESTIMATE_DETAILS":
@@ -42,6 +49,27 @@ export default (state = initialState, action = {}) => {
       return {
         ...state,
         sub_header_tools: []
+      }
+    }
+
+    case 'SET_MODULE_NAME': {
+      return {
+        ...state,
+        module_name: payload
+      }
+    }
+
+    case 'SET_MODULE_NAME': {
+      return {
+        ...state,
+        module_name: payload
+      }
+    }
+
+    case 'CLEAR_MODULE_NAME': {
+      return {
+        ...state,
+        module_name: undefined
       }
     }
   

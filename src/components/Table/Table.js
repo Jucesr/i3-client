@@ -18,6 +18,7 @@ export default class Table extends React.Component {
       }),
       structure: [],
       open_rows: {},
+      column_filters: {},
       splitter_start: 0,
       tableWidth: 0,
       is_setting_open: false,
@@ -32,6 +33,13 @@ export default class Table extends React.Component {
     Modal.setAppElement(this.props.appElement);
 
     this.container = React.createRef();
+  }
+
+  shouldComponentUpdate = (nextProps, nextState) => {
+    if(nextState.column_filters != this.state.column_filters)
+      return false
+
+    return true
   }
 
   componentDidMount = () => {
@@ -447,22 +455,32 @@ export default class Table extends React.Component {
     }
   }
 
-  onColumFilterChange = (index) => {
+  onColumFilterChange = (assesor) => {
 
     return e => {
       let value = e.target.value
-      const columns = this.state.columns.map((colum, i) => {
-        if(index === i){
-          colum.text_filter = value
-        }
-
-        return colum
-      })
-
       this.setState(prevState => ({
-        columns
+        column_filters: {
+          ...prevState.column_filters,
+          [assesor]: value
+        }
       }))
     }
+  }
+
+  onClickFilterButton = () => {
+
+    const columns = this.state.columns.map((colum, i) => {
+      if(this.state.column_filters.hasOwnProperty(colum.assesor)){
+        colum.text_filter = this.state.column_filters[colum.assesor]
+      }
+
+      return colum
+    })
+
+    this.setState(prevState => ({
+      columns
+    }))
   }
 
   getVisibleColumns = () => {
@@ -559,7 +577,7 @@ export default class Table extends React.Component {
                   >
                   <div style={{width: '100%'}}>
                     <div style={{textAlign: 'center'}}>{col.Header}</div>
-                    {!!col.filter && <input onChange={this.onColumFilterChange(index)}/>}
+                    {!!col.filter && <div><input onChange={this.onColumFilterChange(col.assesor)}/> <button onClick={this.onClickFilterButton}>🔎</button></div>}
                   </div>
                   {
                     index !== columns.length -1 && 

@@ -126,6 +126,11 @@ Date: Jan 16, 2019
   * Re-built line item actions to use fetchApi util.
   * Add actions to addMaterial, loadMaterialByCode, copyMaterialToOtherProject 
 
+## V0.8.1
+Date: Jan 17, 2019
+  * Update Table component to improve filter column performance.
+  * Add Line item module route.
+
 
 ## Glossary
 

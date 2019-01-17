@@ -14,7 +14,7 @@ const ToolBar = (props) => {
         <div className="ToolBar-container">
           <ToolBarItem to={`/projects/${id}`} name="Overview" />
           <ToolBarItem to={`/projects/${id}/estimates`} name="Estimates" />
-          <ToolBarItem name="Line Items" />
+          <ToolBarItem to={`/projects/${id}/line_items`} name="Line Items" />
           <ToolBarItem to={`/projects/${id}/materials`} name="Materials" />
           <ToolBarItem name="WBS" />
           <ToolBarItem name="Packages" />
@@ -38,6 +38,7 @@ const ToolBarItem = (props) => {
       to={props.to || '/projects'} 
       className="ToolBar-item"
       activeClassName="ToolBar-item-active"
+      onClick={() => {console.log('hi')}}
     > 
       <div>
         {props.name} 

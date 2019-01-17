@@ -19,3 +19,17 @@ export const addSubHeaderTools = (tools) => ({
 export const clearSubHeaderTools = () => ({
   type    : 'CLEAR_SUBHEADER_TOOLS'
 })
+
+export const setModuleName = (name) => ({
+  type    : 'SET_MODULE_NAME',
+  payload: name
+})
+
+export const clearModuleName = (name) => ({
+  type    : 'CLEAR_MODULE_NAME',
+  payload: name
+})
+
+export const toggleSideBar = () => ({
+  type: 'TOGGLE_SIDEBAR'
+})

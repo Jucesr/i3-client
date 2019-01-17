@@ -5,13 +5,16 @@ import {Route, Redirect} from 'react-router-dom';
 import ToolBar from "./components/ToolBar";
 import SubHeader from "./components/SubHeader";
 
+import { selectProject } from "actions/projects";
 import { clearEstimate } from "actions/estimates";
 import { toggleModel, toggleEstimateDetails } from "actions/ui";
 import { unloadMaterials } from "actions/material";
+import { unloadLineItems } from "actions/line_item";
 
 import EstimateRoute from "./routes/estimate";
 import EstimateItemRoute from "./routes/estimate_item";
 import MaterialRoute from "./routes/material";
+import LineItemRoute from "./routes/line_item";
 
 class ProjectRoute extends React.Component {
 
@@ -22,6 +25,11 @@ class ProjectRoute extends React.Component {
     }
   }
 
+  componentWillUnmount = () => {
+    this.props.unloadMaterials()
+    this.props.unloadLineItems()
+  }
+  
   onClearEstimate = () => {
 
     const url_parts = this.props.location.pathname.split('/');
@@ -43,10 +51,6 @@ class ProjectRoute extends React.Component {
     this.setState((prevState) => ({
       isToolBarOpen: !prevState.isToolBarOpen
     }))
-  }
-
-  componentWillUnmount = () => {
-    this.props.unloadMaterials()
   }
 
   render(){
@@ -90,6 +94,7 @@ class ProjectRoute extends React.Component {
               <Route path="/projects/:id/estimates" component={EstimateRoute} exact={true}/>
               <Route path="/projects/:id/estimates/:id" component={EstimateItemRoute} exact={true}/>
               <Route path="/projects/:id/materials/" component={MaterialRoute} exact={true}/>
+              <Route path="/projects/:id/line_items/" component={LineItemRoute} exact={true}/>
             </div> 
           </div>
   
@@ -104,10 +109,12 @@ class ProjectRoute extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
+  selectProject: id => dispatch(selectProject(id)),
   clearEstimate: () => dispatch(clearEstimate()),
   toggleModel: () => dispatch(toggleModel()),
   toggleEstimateDetails : () => dispatch(toggleEstimateDetails()),
-  unloadMaterials: () => dispatch(unloadMaterials())
+  unloadMaterials: () => dispatch(unloadMaterials()),
+  unloadLineItems: () => dispatch(unloadLineItems())
 })
 
 const mapStateToProps = (state) => ({  

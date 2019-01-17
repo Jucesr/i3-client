@@ -10,6 +10,23 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
+    case 'UPDATE_LINE_ITEM_DETAIL_REQUEST':
+    case 'LOAD_LINE_ITEM_DETAILS_REQUEST':
+    case 'LOAD_LINE_ITEM_REQUEST':
+    case 'LOAD_LINE_ITEMS_REQUEST': {
+      return {
+        ...state,
+        isFetching: true
+      };
+    }
+
+    case 'UNLOAD_LINE_ITEMS': {
+      return {
+        ...state,
+        entities: {}
+      };
+    }
+
     case 'ADD_LINE_ITEM_SUCCESS': {
       return {
         ...state,
@@ -22,50 +39,37 @@ export default (state = initialState, action = {}) => {
       };
     }
     
-    case 'LOAD_LINE_ITEMS_REQUEST': {
-      return {
-        ...state,
-        isFetching: true
-      };
-    }
-
-    // case 'LOAD_LINE_ITEMS_FAILURE': {
-    //   return {
-    //     ...state,
-    //     error,
-    //     isFetching: false
-    //   };
-    // }
+    
 
     case 'LOAD_LINE_ITEMS_SUCCESS': {
 
-      const estimates = response.reduce((current, project) => {
-        current[project.id] = project
-        return current
+      //  It first transform the array into an object.
+      let obj = response.reduce((acum, current) => {
+        return {
+          ...acum,
+          [current.id]: current
+        }
       }, {})
+
+      //  It adds the property child to entities based on parent id.
+      Object.keys(obj).forEach(key => {
+        if(obj[key].parent_id != null){
+          const parent_id = obj[key].parent_id
+          //  The material belongs to a category material. It needs to add it as it's child
+          if(!obj[parent_id].hasOwnProperty('_children')){
+            obj[parent_id]._children = []
+          }
+          obj[parent_id]._children.push(key) 
+        }
+    })
 
       return {
         ...state,
         entities: {
           ...state.entities,
-          ...estimates
+          ...obj
         },
         error: null,
-        isFetching: false
-      };
-    }
-
-    case 'LOAD_LINE_ITEM_REQUEST': {
-      return {
-        ...state,
-        isFetching: true
-      };
-    }
-
-    case 'LOAD_LINE_ITEM_FAILURE': {
-      return {
-        ...state,
-        error,
         isFetching: false
       };
     }
@@ -88,11 +92,11 @@ export default (state = initialState, action = {}) => {
       };
     }
 
-
-    case 'LOAD_LINE_ITEM_DETAILS_REQUEST': {
+    case 'LOAD_LINE_ITEM_FAILURE': {
       return {
         ...state,
-        isFetching: true
+        error,
+        isFetching: false
       };
     }
 
@@ -119,13 +123,6 @@ export default (state = initialState, action = {}) => {
         },
         error: null,
         isFetching: false
-      };
-    }
-
-    case 'UPDATE_LINE_ITEM_DETAIL_REQUEST': {
-      return {
-        ...state,
-        isFetching: true
       };
     }
 
