@@ -2,7 +2,7 @@ import React from 'react'
 import {connect} from 'react-redux';
 import {Decimal} from 'decimal.js';
 import Viewer from "./components/Viewer";
-import Toolbar from "./components/Toolbar";
+import Toolbar from "components/Toolbar";
 import CommodityWindow from "./components/CommodityWindow";
 import Modal from 'react-modal'
 

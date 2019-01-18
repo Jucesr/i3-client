@@ -59,10 +59,6 @@ const SideBar = (props) => {
   )
 }
 
-SideBar.propTypes = {
-  isOpen: PropTypes.bool.isRequired
-};
-
 const SideBarItem = (props) => {
   return (
     <NavLink

@@ -131,6 +131,7 @@ Date: Jan 17, 2019
   * Update Table component to improve filter column performance.
   * Add Line item module route.
   * Add module name in subheader
+  * Make subheader and sidebar components independent
 
 
 ## Glossary
