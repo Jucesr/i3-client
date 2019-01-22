@@ -7,9 +7,15 @@ import {
   ReflexElement
 } from 'react-reflex'
 
-import { loadLineItems } from "actions/line_item";
+import { 
+  addLineItem,
+  deleteLineItem, 
+  updateLineItem,
+  loadLineItems 
+} from "actions/line_item";
 
 import Table from "components/Table/Table"
+import ImportItemWindow from "components/ImportItemWindow";
 import Toolbar from "components/Toolbar";
 
 class LineItem extends React.Component {
@@ -32,6 +38,13 @@ class LineItem extends React.Component {
     return project_id
   }
 
+  onLineItemRowUpdate = (column, row, value) => {
+    this.props.updateLineItem({
+      id: row.id,
+      [column.assesor]: value
+    })
+  }
+
   onLineItemRowSelected = rows => {
     let EI = rows.length == 1 ? this.props.line_items[rows[0]] : null;
     // let is_item = EI !== null ? (EI.is_item) : false 
@@ -48,25 +61,64 @@ class LineItem extends React.Component {
 
     const {props, state} = this
 
+    const getChildren = (children) => {
+
+      return children.reduce((acum, child_id) => {
+        let new_children = []
+        let child = props.line_items[child_id]
+        if(child.hasOwnProperty('_children')){
+          new_children = getChildren(child._children)
+        }
+
+        return [
+          ...acum,
+          ...new_children,
+          child_id
+        ]
+      }, [])
+      
+    }
+
     let toolbar_items = [{
       name: 'Add root element',
       action: () => {
-        this.onAddEstimateItem({
-          parent_id: null,
-          code: "01",
-          description: " ",
-          quantity: 0,
-          is_item: false
-        })
+
+        let rootElements = Object.keys(props.line_items).reduce((acum, key) => {
+          if(props.line_items[key].parent_id == null){
+            return [
+              ...acum,
+              props.line_items[key]
+            ]
+          }
+          return acum
+        }, [])
+
+        rootElements = rootElements.sort((a,b) => a.code - b.code)
+
+        let code = parseInt(rootElements.slice(-1)[0].code)
+        
+        if(code < 99){
+            this.props.addLineItem({
+              project_id: props.active_project,
+              is_item: 0,
+              parent_id: null,
+              wbs_item_id: null,
+              code: (code + 1).toString(),
+              spanish_description: " ",
+              english_description: " ",
+              uom: null
+          })
+        }
+
       }
     }]
 
     if(state.line_items_selected.length > 0){
       if(state.line_items_selected.length == 1){
         //  Get the row selected from the props.
-        let ei_selected = props.line_items[state.line_items_selected[0]]
+        let item_selected = props.line_items[state.line_items_selected[0]]
 
-        if(ei_selected.is_item){
+        if(item_selected.is_item){
           //  Item
           toolbar_items = [
             ...toolbar_items,
@@ -78,7 +130,7 @@ class LineItem extends React.Component {
                   line_items_selected: []
                 }))
   
-                this.onDeleteEstimateItem(ei_selected)
+                this.props.deleteLineItem(item_selected)
               }
             },{
               name: 'Add detail',
@@ -90,51 +142,31 @@ class LineItem extends React.Component {
           ]
         }else{
           //  Header
-
           toolbar_items = [
             ...toolbar_items,
             {
               name: 'Delete header',
               action: () => {
                 //  It needs to delete the header and all sub items/headers
-                
-
-                const getChildren = (children) => {
-
-                  return children.reduce((acum, child_id) => {
-                    let new_children = []
-                    let child = props.line_items[child_id]
-                    if(child.hasOwnProperty('_children')){
-                      new_children = getChildren(child._children)
-                    }
-
-                    return [
-                      ...acum,
-                      ...new_children,
-                      child_id
-                    ]
-                  }, [])
-                  
-                }
 
                 let itemsToBeDeleted = [
-                  ei_selected.id,
-                  ...getChildren(ei_selected._children)
+                  item_selected.id,
+                  ...getChildren(item_selected._children)
                 ]
                 
                 this.setState(prevState => ({
                   line_items_selected: []
                 }))
-                itemsToBeDeleted.forEach(id => this.onDeleteEstimateItem({
+                itemsToBeDeleted.forEach(id => this.props.deleteLineItem({
                   id: id
                 }))
               }
             }
           ]
 
-          if(ei_selected.hasOwnProperty('_children') && ei_selected._children.length > 0){
+          if(item_selected.hasOwnProperty('_children') && item_selected._children.length > 0){
             //  Check the kind of children it has, it could be items or headers
-            let child = props.line_items[ei_selected._children[0]]
+            let child = props.line_items[item_selected._children[0]]
             if(child.is_item){
               //  It has items
               toolbar_items = [
@@ -142,25 +174,24 @@ class LineItem extends React.Component {
                 {
                   name: 'Add item',
                   action: async () => {
-                    //  It creates a line item and assign the line item id to the estimate item
-                    let line_item = {
-                      project_id: this.props.active_project.id,
+
+                    let me = props.line_items[item_selected.id]
+                    
+                    let children = me._children.map(child => props.line_items[child])
+            
+                    children = children.sort((a,b) => a.code - b.code)
+            
+                    let code = parseInt(children.slice(-1)[0].code)
+
+                    this.props.addLineItem({
+                      project_id: props.active_project,
+                      is_item: 1,
+                      parent_id: item_selected.id,
                       wbs_item_id: null,
-                      code: '01',
-                      spanish_description: 'Algo',
-                      english_description: 'Something',
-                      uom: ' '
-                    }
-
-                    let {response} = await this.props.addLineItem(line_item)
-
-                    this.onAddEstimateItem({
-                      parent_id: ei_selected.id,
-                      line_item_id: response.id,
-                      code: "01",
-                      description: " ",
-                      quantity: 0,
-                      is_item: true
+                      code: `${item_selected.code}.${code}`,
+                      spanish_description: " ",
+                      english_description: " ",
+                      uom: null
                     })
                   }
                 }
@@ -172,12 +203,24 @@ class LineItem extends React.Component {
                 {
                   name: 'Add header',
                   action: () => {
-                    this.onAddEstimateItem({
-                      parent_id: ei_selected.id,
-                      code: "01",
-                      description: " ",
-                      quantity: 0,
-                      is_item: false
+                    let me = props.line_items[item_selected.id]
+                    
+                    let children = me._children.map(child => props.line_items[child])
+            
+                    children = children.sort((a,b) => a.code - b.code)
+            
+                    let code = parseInt(children.slice(-1)[0].code)
+
+                    this.props.addLineItem({
+
+                      project_id: props.active_project,
+                      is_item: 0,
+                      parent_id: item_selected.id,
+                      wbs_item_id: null,
+                      code: `${item_selected.code}.${code}`,
+                      spanish_description: " ",
+                      english_description: " ",
+                      uom: null
                     })
                   }
                 }
@@ -190,38 +233,32 @@ class LineItem extends React.Component {
               ...toolbar_items,
               {
                 name: 'Add item',
-                action: async () => {
+                action: () => {
 
-                  let line_item = {
-                    project_id: this.props.active_project.id,
+                  this.props.addLineItem({
+                    project_id: props.active_project,
+                    is_item: 1,
+                    parent_id: item_selected.id,
                     wbs_item_id: null,
-                    code: '01',
-                    spanish_description: 'Algo',
-                    english_description: 'Something',
-                    uom: ' '
-                  }
-
-                  let {response} = await this.props.addLineItem(line_item)
-
-                  this.onAddEstimateItem({
-                    parent_id: ei_selected.id,
-                    line_item_id: response.id,
-                    code: "01",
-                    description: " ",
-                    quantity: 0,
-                    is_item: true
+                    code: `${item_selected.code}.01`,
+                    spanish_description: " ",
+                    english_description: " ",
+                    uom: null
                   })
                 }
               },
               {
                 name: 'Add header',
                 action: () => {
-                  this.onAddEstimateItem({
-                    parent_id: ei_selected.id,
-                    code: "01",
-                    description: " ",
-                    quantity: 0,
-                    is_item: false
+                  this.props.addLineItem({
+                    project_id: props.active_project,
+                    is_item: 0,
+                    parent_id: item_selected.id,
+                    wbs_item_id: null,
+                    code: `${item_selected.code}.01`,
+                    spanish_description: " ",
+                    english_description: " ",
+                    uom: null
                   })
                 }
               }
@@ -236,10 +273,25 @@ class LineItem extends React.Component {
           action: () => {
             let itemsToBeDeleted = state.line_items_selected
 
+            itemsToBeDeleted = itemsToBeDeleted.reduce((acum, item_id) => {
+              let children = []
+              let item = props.line_items[item_id]
+              if(item.hasOwnProperty('_children')){
+                children = getChildren(item._children)
+              }
+
+              return [
+                item_id,
+                ...acum,
+                ...children
+              ]
+            }, [])
+
             this.setState(prevState => ({
               line_items_selected: []
             }))
-            itemsToBeDeleted.forEach(id => this.onDeleteEstimateItem({
+
+            itemsToBeDeleted.forEach(id => this.props.deleteLineItem({
               id: id
             }))
           }
@@ -303,6 +355,7 @@ class LineItem extends React.Component {
                     Header: 'UOM',
                     assesor: 'uom',
                     onlyItems: true,
+                    editable: true,
                     width: 100,
                   },{
                     Header: 'MXN',
@@ -317,7 +370,15 @@ class LineItem extends React.Component {
                   }]}
                   rows={table_rows}
                   onRowSelect={this.onLineItemRowSelected}
+                  onUpdateRow={this.onLineItemRowUpdate}
                 /> 
+              </ReflexElement>
+              
+              <ReflexSplitter/>
+
+              <ReflexElement>
+                <ImportItemWindow/>
+                
               </ReflexElement>
             </ReflexContainer> 
 
@@ -329,6 +390,9 @@ class LineItem extends React.Component {
 }
 
 const mapDispatchToProps = (dispatch) => ({
+  addLineItem: line_item => dispatch(addLineItem(line_item)),
+  deleteLineItem: line_item => dispatch(deleteLineItem(line_item)),
+  updateLineItem: line_item => dispatch(updateLineItem(line_item)),
   loadLineItems: project_id => dispatch(loadLineItems(project_id))
 })
 

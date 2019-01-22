@@ -10,6 +10,7 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
+    case 'DELETE_LINE_ITEM_REQUEST':
     case 'UPDATE_LINE_ITEM_DETAIL_REQUEST':
     case 'LOAD_LINE_ITEM_DETAILS_REQUEST':
     case 'LOAD_LINE_ITEM_REQUEST':
@@ -28,18 +29,66 @@ export default (state = initialState, action = {}) => {
     }
 
     case 'ADD_LINE_ITEM_SUCCESS': {
+
+      let newLineItems = {
+        ...state.entities
+      }
+
+      //  Verify if it's a root item or a item that has a parent. 
+      if(response.parent_id != null){
+        //  Item with parent. It needs to add it to the object and also update _children in parent
+        if(!newLineItems[response.parent_id].hasOwnProperty('_children')){
+          newLineItems[response.parent_id]._children = [] 
+        }
+        newLineItems[response.parent_id]._children = [
+          ...newLineItems[response.parent_id]._children,
+          response.id
+        ]
+      }
+      newLineItems[response.id] = {...response, _children: []}
+
       return {
         ...state,
         entities: {
           ...state.entities,
-          [action.response.id]: {
-            ...action.response
-          }
+          ...newLineItems
         }
       };
     }
-    
-    
+
+    case 'DELETE_LINE_ITEM_SUCCESS': {
+
+      let item = state.entities[response]
+      let newItems = {
+        ...state.entities
+      }
+
+      //  It has a parent, it needs to remove it from the _children property of the parent.
+      if(item.parent_id != null && newItems.hasOwnProperty(item.parent_id)){
+        newItems[item.parent_id]._children = newItems[item.parent_id]._children.filter(child_id => child_id != item.id)
+      }
+
+      delete newItems[item.id]
+
+      return {
+        ...state,
+        isFetching: false,
+        entities: {
+          ...newItems
+        }
+      }
+    }
+
+    case 'UPDATE_LINE_ITEM_SUCCESS': {
+      return {
+        ...state,
+        isFetching: false,
+        entities: {
+          ...state.entities,
+          [response.id]: response
+        }
+      }
+    }
 
     case 'LOAD_LINE_ITEMS_SUCCESS': {
 

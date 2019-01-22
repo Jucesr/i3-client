@@ -6,7 +6,7 @@ import Select from 'react-select'
 import { loadMaterials } from "actions/material";
 import { loadProjects } from "actions/projects";
 
-class CommodityWindow extends React.Component {
+class ImportItemWindow extends React.Component {
 
   constructor(props){
     super(props)
@@ -95,6 +95,7 @@ class CommodityWindow extends React.Component {
 
         <Table
           onRowClick={this.props.onRowClick} 
+          allowToDragRows={true}
           appElement="#app"
           loaderAvatar="/images/loader.gif"
           isLoading={props.is_loading}
@@ -139,4 +140,4 @@ const mapStateToProps = (state) => ({
   projects: state.projects.entities
 })
 
-export default connect(mapStateToProps, mapDispatchToProps)(CommodityWindow);
+export default connect(mapStateToProps, mapDispatchToProps)(ImportItemWindow);

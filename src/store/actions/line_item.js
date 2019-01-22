@@ -37,6 +37,56 @@ export const addLineItem = (line_item) => ({
   }
 })
 
+export const deleteLineItem = (line_item) => ({
+  type    : 'DELETE_LINE_ITEM',
+  payload : line_item.id,
+  callAPI: async (dispatch) => {
+    line_item = await fetchApi(
+      `${API_URL}/line_item/${line_item.id}`, 
+      {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        }
+      }
+    )
+    return line_item.id
+  }
+})
+
+export const updateLineItem = (line_item) => ({
+  type: 'UPDATE_LINE_ITEM',
+  callAPI: async (dispatch) => {
+    line_item = await fetchApi(
+      `${API_URL}/line_item/${line_item.id}`, 
+      {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(line_item)
+      }
+    )
+        
+    line_item = pick(line_item, [
+      'id',
+      'parent_id',
+      'is_item',
+      'code',
+      'spanish_description',
+      'english_description',
+      'uom',
+      'unit_rate_mxn',
+      'unit_rate_usd',
+      'project_id'
+    ])
+    
+    return line_item
+  }
+})
+
 export const loadLineItem = (id, options = {}) => {
 
   const {force = false} = options
@@ -50,12 +100,15 @@ export const loadLineItem = (id, options = {}) => {
       
       line_item = pick(line_item, [
         'id',
+        'parent_id',
+        'is_item',
         'code',
         'spanish_description',
         'english_description',
         'uom',
         'unit_rate_mxn',
-        'unit_rate_usd'
+        'unit_rate_usd',
+        'project_id'
       ])
 
       line_item.description = {
@@ -208,7 +261,6 @@ export const loadLineItems = (project_id) => ({
      
   }
 })
-
 
 export const unloadLineItems = () => ({
   type    : 'UNLOAD_LINE_ITEMS'

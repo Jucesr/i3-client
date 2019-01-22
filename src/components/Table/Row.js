@@ -10,18 +10,24 @@ const RowTarget = {
       drop_row: props.row
     }
   },
-  canDrop(props){
-    const {row} = props
-    return !row.is_item && 
-    (
-      (row.hasOwnProperty('subrows') && row.subrows.length > 0 && row.subrows[0].is_item) || 
-      (row.hasOwnProperty('subrows') && row.subrows.length === 0) ||
-      (!row.hasOwnProperty('subrows'))
-    )
+  canDrop(props, monitor){
+    
+    if(props.hasOwnProperty('canDropRow')){
+      return props.canDropRow(props, monitor)
+    }
+    return true
   }
 };
 
 const RowSource = {
+
+    canDrag(props, monitor){
+      if(props.hasOwnProperty('canDragRow')){
+        return props.canDragRow(props, monitor)
+      }
+      return true
+    },
+
     beginDrag(props) {
       return {
         row: props.row
@@ -30,7 +36,7 @@ const RowSource = {
     endDrag(props, monitor) {
       const item = monitor.getItem()
       const dropResult = monitor.getDropResult()
-
+      
       //  Row cannot be drop inside itself and not inside of the current header
       if (dropResult && item.row.parent_id !== dropResult.drop_row.id && item.row.id !== dropResult.drop_row.id) {
         props.onMoveRow(item.row, dropResult.drop_row)
@@ -50,7 +56,8 @@ function collectSource(connect, monitor) {
     return{
       connectDragSource: connect.dragSource(),
       connectDragPreview: connect.dragPreview(),
-      isDragging: monitor.isDragging()
+      isDragging: monitor.isDragging(),
+      canDrag: monitor.canDrag()
     }
 }
 
@@ -181,7 +188,8 @@ class Row extends React.Component {
       connectDragSource,
       connectDropTarget,
       isOver,
-      canDrop, 
+      canDrop,
+      canDrag, 
       index,
       row,
       is_open,
@@ -231,7 +239,7 @@ class Row extends React.Component {
                 width: 25,
                 flex: `25 0 auto`,
                 maxWidth: 25,
-                cursor: allowToDragRows ? 'move' : 'default',
+                cursor: allowToDragRows && canDrag ? 'move' : 'default',
               }}
             >
             </td>

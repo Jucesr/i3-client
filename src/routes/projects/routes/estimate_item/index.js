@@ -3,7 +3,7 @@ import {connect} from 'react-redux';
 import {Decimal} from 'decimal.js';
 import Viewer from "./components/Viewer";
 import Toolbar from "components/Toolbar";
-import CommodityWindow from "./components/CommodityWindow";
+import ImportItemWindow from "components/ImportItemWindow";
 import Modal from 'react-modal'
 
 import 'react-reflex/styles.css'
@@ -699,7 +699,7 @@ class EstimateRoute extends React.Component {
                 onRequestClose={this.toggleCommoditiesWindow}
                 contentLabel="Example Modal"
               >
-                <CommodityWindow onRowClick={this.onAddLineItemDetail} />
+                <ImportItemWindow onRowClick={this.onAddLineItemDetail} />
               </Modal>
 
               <Table 

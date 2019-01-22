@@ -80,6 +80,7 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mapStateToProps = (state) => ({  
+  isOpen: state.ui.is_sidebar_open,
   project_id: state.projects.active,
   moduleName: state.ui.module_name
 })

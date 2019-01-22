@@ -79,27 +79,34 @@ export default class Table extends React.Component {
       return acum
     }, [])
 
+    const sortMethod = (a, b) => {
+      return  a.code - b.code 
+    }
+
     const generateTree = (elements) => {
 
       return elements.reduce( (acum, element_id) => {
         const element = rows[element_id]
 
         if(element.hasOwnProperty('_children')){
+
           return [
             ...acum,
             {
               id: element_id,
+              code: element.code.length <= 2 ? element.code : element.code.slice(-2),
               subrows: element.hasOwnProperty('_children') ? generateTree(element._children) : undefined
             }
-          ]
+          ].sort(sortMethod)
         }
-        
+
         return [
           ...acum,
           {
+            code: element.code.length <= 2 ? element.code : element.code.slice(-2),
             id: element_id
           }
-        ]
+        ].sort(sortMethod)
 
       },[])
     }
@@ -374,6 +381,8 @@ export default class Table extends React.Component {
             onRowSelect={this.onRowSelect}
             onMoveRow={this.props.onMoveRow}
             allowToDragRows={this.props.allowToDragRows}
+            canDropRow={this.props.canDropRow}
+            canDragRow={this.props.canDragRow}
             onlyItems={this.props.onlyItems}
           />
         )
@@ -716,6 +725,8 @@ Table.propTypes = {
   onDeleteHeader: PropTypes.func,
   onMoveRow: PropTypes.func,
 
+  canDropRow: PropTypes.func,
+  canDragRow: PropTypes.func,
   allowToDragRows: PropTypes.bool,
   isLoading: PropTypes.bool,
   loaderAvatar: PropTypes.string,
@@ -725,6 +736,8 @@ Table.propTypes = {
 Table.defaultProps = {
   selected_rows: [],
 
+  canDropRow: () => true,
+  canDragRow: () => true,
   onRowClick: () => {},
   onRowSelect: () => {},
   onCellClick: () => {},
