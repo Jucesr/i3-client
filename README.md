@@ -133,7 +133,7 @@ Date: Jan 17, 2019
   * Add module name in subheader
   * Make subheader and sidebar components independent
 
-## V0.8.1
+## V0.8.2
 Date: Jan 21, 2019
   * Update Table component to let parent component provide logic to hanlde dragging and dropping.
   * Add methods to add and delete line items in the Line Item module.
