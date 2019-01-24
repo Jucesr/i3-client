@@ -10,15 +10,23 @@ export default class Table extends React.Component {
   constructor(props){
     super(props)
     this.state = {
-      columns: props.columns.map(column => {
-        if(!column.hasOwnProperty('is_visible')){
-          column.is_visible = true
-        }
-        return column
-      }),
       structure: [],
       open_rows: {},
       column_filters: {},
+      column_extended: this.props.columns.reduce((acum, item) => {
+        acum[item.assesor] = {}; 
+
+        if(item.hasOwnProperty('is_visible')){
+          acum[item.assesor].is_visible = item.is_visible
+        }
+
+        if(item.hasOwnProperty('width')){
+          acum[item.assesor].width = item.width
+        }
+
+
+        return acum
+      }, {}),
       splitter_start: 0,
       tableWidth: 0,
       is_setting_open: false,
@@ -57,13 +65,31 @@ export default class Table extends React.Component {
     }
 
     if(prevProps.rows != this.props.rows){
-      // console.log('rows has changed!')
-      // const start = Date.now()
       this.generateTableStructure()
-      // const end = Date.now()
-      // console.log(end - start)
     }
-    
+
+    if(prevProps.columns != this.props.columns){
+      this.generateColumnExtended()
+    }
+  }
+
+  generateColumnExtended = () => {
+    this.setState(prevState => ({
+      column_extended: this.props.columns.reduce((acum, item) => {
+        acum[item.assesor] = {}; 
+
+        if(item.hasOwnProperty('is_visible')){
+          acum[item.assesor].is_visible = item.is_visible
+        }
+
+        if(item.hasOwnProperty('width')){
+          acum[item.assesor].width = item.width
+        }
+
+
+        return acum
+      }, {})
+    }))
   }
 
   generateTableStructure = () => {
@@ -120,10 +146,10 @@ export default class Table extends React.Component {
     const scrollWidth = 17
     const widthOfDummyColumns = 55 + scrollWidth
     const maxWidth = this.container.current.offsetWidth
-    
-    const column_width_taken = this.state.columns.reduce((acum, item) => {
+
+    const column_width_taken = this.getColumns().reduce((acum, item) => {
       const hasWidth = item.hasOwnProperty('width')
-      const isVisible = item.hasOwnProperty('is_visible') ? item.is_visible : true
+      const isVisible = this.isColumnVisible(item.assesor) 
       const increase = (hasWidth && isVisible) ? item.width : 0
       return {
         free_space: acum.free_space + ((hasWidth && !isVisible) ? item.width_base : 0),
@@ -132,51 +158,58 @@ export default class Table extends React.Component {
         value: acum.value + increase 
       }
     }, {free_space: 0, visible_columns: 0, number: 0, value: 0})
-
+    
     let new_columns
     if(column_width_taken.visible_columns === column_width_taken.number){
       //  All the columns have width already
       
       //  Check if there are invisible columns 
 
-      if(column_width_taken.visible_columns < this.state.columns.length){
+      if(column_width_taken.visible_columns < this.props.columns.length){
         //  There are at less 1 invisible column. We need to increase the value of other columns
 
         const increaseBy = column_width_taken.free_space / column_width_taken.visible_columns
-        new_columns = this.state.columns.map(column => {
-          if(column.is_visible){
-            column.width = column.width_base + increaseBy
+        new_columns = this.props.columns.reduce( (acum, column) => {
+          
+          const isVisible = this.isColumnVisible(column.assesor)
+          if(isVisible){
+            acum[column.assesor].width = this.state.column_extended[column.assesor].width_base + increaseBy
+            //column.width = column.width_base + increaseBy
           }
-
-          return column
-        })
+          return acum
+        }, this.state.column_extended)
 
       }else{
         //  All columns are visible, Use original width
-        new_columns = this.state.columns.map(column => ({
-          ...column,
-          width: column.width_base
-        }))
+        new_columns = this.props.columns.reduce((acum, column) => {
+          acum[column.assesor].width = this.state.column_extended[column.assesor].width_base
+          return acum
+        }, this.state.column_extended)
       }
 
     }else{
       //  Some columns do not have width property
       const column_width = (maxWidth - column_width_taken.value - widthOfDummyColumns) / (column_width_taken.visible_columns - column_width_taken.number) 
 
-      new_columns = this.state.columns.map(colum => {
-
-        if(!colum.hasOwnProperty('width')){
-          colum.width = column_width
-          colum.width_base = column_width
-        }else{
-          colum.width_base = colum.width          
+      new_columns = this.props.columns.reduce( (acum, column) => {
+        
+        acum[column.assesor] = {
+          ...this.state.column_extended[column.assesor]
         }
-        return colum
-      })
+
+        if(!column.hasOwnProperty('width')){
+          acum[column.assesor].width = column_width
+          acum[column.assesor].width_base = column_width
+        }else{
+          acum[column.assesor].width_base = column.width          
+        }
+
+        return acum
+      }, {})
     }
 
     this.setState(prevState => ({
-      columns: new_columns,
+      column_extended: new_columns,
       tableWidth: this.container.current.offsetWidth
     }))
   }
@@ -418,18 +451,16 @@ export default class Table extends React.Component {
       if(xpos !== 0) {
         let grow  = this.state.splitter_start - xpos
 
-        grow = this.state.columns[index].width_base + (grow * -1) 
-
-        const columns = this.state.columns.map((colum, i) => {
-          if(index === i){
-            colum.width = grow
-          }
-
-          return colum
-        })
+        grow = this.state.column_extended[index].width_base + (grow * -1) 
 
         this.setState(prevState => ({
-          columns
+          column_extended: {
+            ...prevState.column_extended,
+            [index]: {
+              ...prevState.column_extended[index],
+              width: grow
+            }
+          }
         }))
 
       }
@@ -445,18 +476,16 @@ export default class Table extends React.Component {
       if(xpos !== 0) {
         let grow  = this.state.splitter_start - xpos
 
-        grow = this.state.columns[index].width_base + (grow * -1) 
-
-        const columns = this.state.columns.map((colum, i) => {
-          if(index === i){
-            colum.width_base = grow
-          }
-
-          return colum
-        })
+        grow = this.state.column_extended[index].width_base + (grow * -1) 
 
         this.setState(prevState => ({
-          columns
+          column_extended: {
+            ...prevState.column_extended,
+            [index]: {
+              ...prevState.column_extended[index],
+              width: grow
+            }
+          }
         }))
 
       }
@@ -479,7 +508,7 @@ export default class Table extends React.Component {
 
   onClickFilterButton = () => {
 
-    const columns = this.state.columns.map((colum, i) => {
+    const columns = this.props.columns.map((colum, i) => {
       if(this.state.column_filters.hasOwnProperty(colum.assesor)){
         colum.text_filter = this.state.column_filters[colum.assesor]
       }
@@ -492,9 +521,36 @@ export default class Table extends React.Component {
     }))
   }
 
-  getVisibleColumns = () => {
-    return this.state.columns.filter(colum => colum.is_visible)
+  isColumnVisible = (name) => {
+    return this.state.column_extended.hasOwnProperty(name) ? (this.state.column_extended[name].hasOwnProperty('is_visible') ? this.state.column_extended[name].is_visible : true ): true
   }
+
+  getVisibleColumns = () => {
+    return this.getColumns().filter(colum => this.isColumnVisible(colum.assesor))
+  }
+
+  getColumns = () => {
+    return this.props.columns.map(col => {
+
+      if(this.state.column_extended.hasOwnProperty(col.assesor)){
+
+        const col_extended = this.state.column_extended[col.assesor]
+
+        if(col_extended.hasOwnProperty('width_base')){
+          col.width_base = col_extended.width_base
+        }
+
+        if(col_extended.hasOwnProperty('width')){
+          col.width = col_extended.width
+        }
+      }
+
+      return col
+    
+    })
+  }
+
+
 
   //  Setting modal methods
 
@@ -593,8 +649,8 @@ export default class Table extends React.Component {
                     <div 
                       className="Table-Column-Header--resizer" 
                       onDragStart={this.onResizeColumnStart}
-                      onDrag={this.onResizeColumnDragging(index)}
-                      onDragEnd={this.onResizeColumnEnd(index)}
+                      onDrag={this.onResizeColumnDragging(col.assesor)}
+                      onDragEnd={this.onResizeColumnEnd(col.assesor)}
                       >
                       
                     </div>
@@ -671,7 +727,7 @@ export default class Table extends React.Component {
                 </tr>
             </thead>
             <tbody>
-            {this.state.columns.map(colum => (
+            {this.props.columns.map(colum => (
                 <tr key={colum.assesor}  >
                   <td className="Table-Settings-Name-Column">{colum.Header}</td>
                   <td
@@ -680,21 +736,27 @@ export default class Table extends React.Component {
                       cursor: 'pointer'
                     }}
                     onClick={e => {
-                      this.setState(prevState => ({
-                        columns: prevState.columns.map(col => {
-                          if(col.assesor === colum.assesor){
-                            col.is_visible = !col.is_visible
-                            col.keep_with = true
-                          }else{
-                            col.keep_with = false
+                      this.setState(prevState => {
+
+                        const new_columns = Object.keys(prevState.column_extended).reduce((acum, key) => {
+                          acum[key] = {
+                            ...prevState.column_extended[key]
+                          }
+                          if(key === colum.assesor){
+                            acum[key].is_visible = !this.isColumnVisible(key)
                           }
 
-                          return col
+                          return acum
+                          
+                        }, {})
+
+                        return ({
+                          column_extended: new_columns
                         })
-                      }), () => this.updateColumnsWidth())
+                      }, () => this.updateColumnsWidth())
                     }}
                   >
-                  {colum.is_visible ? '✓' : 'X'}</td>
+                  {this.isColumnVisible(colum.assesor) ? '✓' : 'X'}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,3 +1,5 @@
+import { convertToArrayObject} from "utils";
+
 const initialState = {
   entities: {},
   error: null,
@@ -47,10 +49,7 @@ export default (state = initialState, action = {}) => {
 
     case 'LOAD_PROJECTS_SUCCESS': {
 
-      const projects = response.reduce((current, project) => {
-        current[project.id] = project
-        return current
-      }, {})
+      const projects = convertToArrayObject(response)
 
       return {
         ...state,

@@ -3,6 +3,7 @@ import projectReducer from './reducers/project'
 import estimateReducer from './reducers/estimate'
 import lineItemsReducer from './reducers/line_item'
 import materialReducer from './reducers/material'
+import importWindowReducer from './reducers/import_window'
 import UIReducer from "./reducers/ui";
 
 
@@ -21,7 +22,8 @@ export default () => {
       estimates: estimateReducer,
       line_items: lineItemsReducer,
       materials: materialReducer,
-      ui: UIReducer
+      ui: UIReducer,
+      import_window: importWindowReducer
     }),
     persistedState,
     composeEnhancers(applyMiddleware(thunk), applyMiddleware(callAPI))

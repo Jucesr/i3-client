@@ -30,7 +30,9 @@ class ProjectRoute extends React.Component {
   render(){
     const {state, props} = this
 
-    const {projects} = props
+    const {projects, isSideBarOpen} = props
+
+    const className = `ProjectRoute_subroute ${isSideBarOpen ? 'ProjectRoute_subroute_open' : 'ProjectRoute_subroute_close'}`;
     
     const overView = () => <div></div>
 
@@ -45,7 +47,7 @@ class ProjectRoute extends React.Component {
           <div className="ProjectRoute_container">
             <SideBar /> 
   
-            <div className="ProjectRoute_subroute">
+            <div className={className}>
               <Route path="/projects/:id" component={overView} exact={true}/>
               <Route path="/projects/:id/estimates" component={EstimateRoute} exact={true}/>
               <Route path="/projects/:id/estimates/:id" component={EstimateItemRoute} exact={true}/>
@@ -71,6 +73,7 @@ const mapDispatchToProps = (dispatch) => ({
 })
 
 const mapStateToProps = (state) => ({  
+  isSideBarOpen: state.ui.is_sidebar_open,
   projects: state.projects
 })
 

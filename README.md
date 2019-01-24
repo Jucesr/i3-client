@@ -138,6 +138,15 @@ Date: Jan 21, 2019
   * Update Table component to let parent component provide logic to hanlde dragging and dropping.
   * Add methods to add and delete line items in the Line Item module.
 
+## V0.8.3
+Date: Jan 24, 2019
+  * Update ImportItemWindow component so it can import both materials and line items
+  * Update Table component so parent can update columns. Columns are not store in the state of Table anymore, there is a new field in state to track extra properties of columns called columns_extended.
+  * Update index of project route to change width when side bar is open
+  * Add tool to subheader, 'toggleImportWindow'
+  * Add import_window actions and reducers
+  * Update reducers to use 2 util fuctions called 'convertToArrayObject', 'addChildrenToItems' 
+
 
 ## Glossary
 

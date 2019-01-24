@@ -2,7 +2,12 @@ import React from 'react'
 import {connect} from 'react-redux';
 import PropTypes from 'prop-types'
 
-import { toggleSideBar, toggleModel, toggleEstimateDetails } from "actions/ui";
+import { 
+  toggleSideBar, 
+  toggleModel, 
+  toggleEstimateDetails,
+  toggleImportWindow 
+} from "actions/ui";
 
 const SubHeader = (props) => {
 
@@ -69,7 +74,8 @@ const ToolItem = (props) => {
 const mapDispatchToProps = (dispatch) => ({
   toggleSideBar: () => dispatch(toggleSideBar()),
   toggleModel: () => dispatch(toggleModel()),
-  toggleEstimateDetails : () => dispatch(toggleEstimateDetails())
+  toggleEstimateDetails : () => dispatch(toggleEstimateDetails()),
+  toggleImportWindow: () => dispatch(toggleImportWindow())
 })
 
 const mapStateToProps = (state) => ({  

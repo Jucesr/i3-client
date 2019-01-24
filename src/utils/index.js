@@ -1,5 +1,27 @@
 import React from 'react'
 
+export const convertToArrayObject = (array) => {
+  return array.reduce((current, item) => {
+    current[item.id] = item
+    return current
+  }, {})
+}
+
+export const addChildrenToItems = (object) => {
+
+  Object.keys(object).forEach(key => {
+    if(object[key].parent_id != null){
+      const parent_id = object[key].parent_id
+      //  The material belongs to a category material. It needs to add it as it's child
+      if(!object[parent_id].hasOwnProperty('_children')){
+        object[parent_id]._children = []
+      }
+      object[parent_id]._children.push(key) 
+    }
+  })
+
+  return object
+}
 
 export const replaceAll = (text, obj) => {
   for (var x in obj) {

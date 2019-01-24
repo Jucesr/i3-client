@@ -5,6 +5,7 @@ const initialState = {
   is_sidebar_open: false,
   is_model_visible: false,
   is_estimate_detail_visible: true,
+  is_import_window_visible: false,
   estimate_table_expanded: {},
   sub_header_tools: []
 }
@@ -13,6 +14,12 @@ export default (state = initialState, action = {}) => {
   const {type, payload} = action;
 
   switch (type) {
+    case "TOGGLE_IMPORT_WINDOW":
+      return{
+        ...state,
+        is_import_window_visible: !state.is_import_window_visible
+      }
+
     case "TOGGLE_MODEL":
       return{
         ...state,

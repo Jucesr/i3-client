@@ -4,5 +4,13 @@
 
 .ProjectRoute_subroute{
   height: calc(100vh - #{$header_height} - #{$sub_header_height});
+}
+
+.ProjectRoute_subroute_open {
+  width: calc(100vw - 180px);
+}
+
+.ProjectRoute_subroute_close {
   width: 100%;
+  
 }

@@ -1,3 +1,5 @@
+import { convertToArrayObject, addChildrenToItems } from "utils";
+
 const initialState = {
   entities: {},
   error: null,
@@ -93,30 +95,16 @@ export default (state = initialState, action = {}) => {
     case 'LOAD_LINE_ITEMS_SUCCESS': {
 
       //  It first transform the array into an object.
-      let obj = response.reduce((acum, current) => {
-        return {
-          ...acum,
-          [current.id]: current
-        }
-      }, {})
+      let items = convertToArrayObject(response)
 
       //  It adds the property child to entities based on parent id.
-      Object.keys(obj).forEach(key => {
-        if(obj[key].parent_id != null){
-          const parent_id = obj[key].parent_id
-          //  The material belongs to a category material. It needs to add it as it's child
-          if(!obj[parent_id].hasOwnProperty('_children')){
-            obj[parent_id]._children = []
-          }
-          obj[parent_id]._children.push(key) 
-        }
-    })
+      items = addChildrenToItems(items)
 
       return {
         ...state,
         entities: {
           ...state.entities,
-          ...obj
+          ...items
         },
         error: null,
         isFetching: false

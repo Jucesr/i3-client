@@ -6,6 +6,10 @@ export const toggleEstimateDetails = () => ({
   type: 'TOGGLE_ESTIMATE_DETAILS'
 })
 
+export const toggleImportWindow = () => ({
+  type: 'TOGGLE_IMPORT_WINDOW'
+})
+
 export const saveExpanded = (expanded) => ({
   type    : 'SAVE_EXPANDED',
   payload : expanded

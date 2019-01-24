@@ -1,4 +1,5 @@
 import pick from 'lodash/pick'
+import { fetchApi } from "utils/api"
 
 export const addProject = (project) => ({
   type    : 'ADD_PROJECT',
@@ -12,40 +13,22 @@ export const selectProject = (id) => ({
 
 export const loadProjects = () => ({
   type    : 'LOAD_PROJECTS',
-  callAPI: (dispatch) => {
-    return new Promise((resolve, reject) => {
-      fetch(`${API_URL}/project/`)
-        .then(
-          response => {
-            if(response.status != 200)
-              reject(response)
-          return response.json() 
-          }
-        )
-        .then(response => {
+  callAPI: async dispatch => {
+  
+      let projects = await fetchApi(`${API_URL}/project/`)
 
-          response = response.map(
-            p => {
-              return{
-                ...pick(p, [
-                  'id',
-                  'name',
-                  'code',
-                  'description',
-                  'status',
-                  'type',
-                  'currency',
-                  'uen',
-                  'picture_url',
-                  'progress'
-                ])
-              }
-              
-            }
-          )
-          resolve(response) 
-          })
-    })
+      return projects.map(project => pick(project, [
+        'id',
+        'name',
+        'code',
+        'description',
+        'status',
+        'type',
+        'currency',
+        'uen',
+        'picture_url',
+        'progress'
+      ]))
   }
 })
 
