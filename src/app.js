@@ -8,7 +8,7 @@ import LoadingPage from './components/LoadingPage'
 import { DragDropContextProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 
-import configureSocketIO from './services/socket'
+// import configureSocketIO from './services/socket'
 
 import 'normalize.css/normalize.css'
 import './styles/styles.scss'

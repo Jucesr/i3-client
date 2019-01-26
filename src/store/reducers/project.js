@@ -53,10 +53,7 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        entities: {
-          ...state.entities,
-          ...projects
-        },
+        entities: projects,
         error: null,
         isFetching: false
       };

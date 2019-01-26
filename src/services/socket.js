@@ -1,14 +1,14 @@
-import socketIOClient from "socket.io-client"
+// import socketIOClient from "socket.io-client"
 
-import { loadLineItem } from "actions/line_item";
+// import { loadLineItem } from "actions/line_item";
 
-const socket = socketIOClient(API_URL);
+// const socket = socketIOClient(API_URL);
 
-export default (store) => {
+// export default (store) => {
 
-  // socket.on("UPDATE_LINE_ITEM", id => {
-  //   store.dispatch(loadLineItem(id, {force: true}))
-  //   console.log(id)
-  // });
+//   // socket.on("UPDATE_LINE_ITEM", id => {
+//   //   store.dispatch(loadLineItem(id, {force: true}))
+//   //   console.log(id)
+//   // });
 
-}
+// }

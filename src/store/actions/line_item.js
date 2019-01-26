@@ -122,6 +122,63 @@ export const loadLineItem = (id, options = {}) => {
   }
 }
 
+export const importLineItem = (project_id, line_item) => ({
+  type    : 'IMPORT_LINE_ITEM',
+  callAPI: async dispatch => {
+    line_item = await fetchApi(
+      `${API_URL}/line_item/${line_item.id}/copyTo/${project_id}`,
+      {
+        method: 'PUT',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(line_item)
+      }
+      )
+    return pick(line_item, [
+      'id',
+      'parent_id',
+      'is_item',
+      'code',
+      'spanish_description',
+      'english_description',
+      'uom',
+      'unit_rate_mxn',
+      'unit_rate_usd',
+      'project_id'
+    ])
+  }
+})
+
+export const loadLineItems = (project_id) => ({
+  type    : 'LOAD_LINE_ITEMS',
+  callAPI: async dispatch => {
+    let line_items = await fetchApi(`${API_URL}/project/${project_id}/line_items/`)
+    return line_items.map(li => pick(li, [
+      'id',
+      'parent_id',
+      'is_item',
+      'code',
+      'spanish_description',
+      'english_description',
+      'uom',
+      'unit_rate_mxn',
+      'unit_rate_usd',
+      'project_id'
+    ]))
+     
+  }
+})
+
+export const unloadLineItems = () => ({
+  type    : 'UNLOAD_LINE_ITEMS'
+})
+
+// ***************************
+//  LINE ITEM DETAILS ACTIONS
+// ***************************
+
 export const addLineItemDetail = (line_item_id, lid) => ({
   type    : 'ADD_LINE_ITEM_DETAIL',
   payload : line_item_id,
@@ -242,29 +299,7 @@ export const updateLineItemDetail = (line_item_id, line_item_detail) => ({
   }
 })
 
-export const loadLineItems = (project_id) => ({
-  type    : 'LOAD_LINE_ITEMS',
-  callAPI: async dispatch => {
-    let line_items = await fetchApi(`${API_URL}/project/${project_id}/line_items/`)
-    return line_items.map(li => pick(li, [
-      'id',
-      'parent_id',
-      'is_item',
-      'code',
-      'spanish_description',
-      'english_description',
-      'uom',
-      'unit_rate_mxn',
-      'unit_rate_usd',
-      'project_id'
-    ]))
-     
-  }
-})
 
-export const unloadLineItems = () => ({
-  type    : 'UNLOAD_LINE_ITEMS'
-})
 
 
 

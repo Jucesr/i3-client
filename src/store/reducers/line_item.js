@@ -30,6 +30,7 @@ export default (state = initialState, action = {}) => {
       };
     }
 
+    case 'IMPORT_LINE_ITEM_SUCCESS':
     case 'ADD_LINE_ITEM_SUCCESS': {
 
       let newLineItems = {
@@ -82,12 +83,18 @@ export default (state = initialState, action = {}) => {
     }
 
     case 'UPDATE_LINE_ITEM_SUCCESS': {
+      
+      let org = state.entities[response.id]
+      
       return {
         ...state,
         isFetching: false,
         entities: {
           ...state.entities,
-          [response.id]: response
+          [response.id]: {
+           ...org,
+           ...response 
+          }
         }
       }
     }
@@ -102,10 +109,7 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        entities: {
-          ...state.entities,
-          ...items
-        },
+        entities: items,
         error: null,
         isFetching: false
       };

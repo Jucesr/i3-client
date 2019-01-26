@@ -12,13 +12,72 @@ export default (state = initialState, action = {}) => {
 
   switch (type) {
 
+    case 'IMPORT_MATERIAL_SUCCESS':
     case 'COPY_MATERIAL_SUCCESS':
     case 'ADD_MATERIAL_SUCCESS': {
+
+      let newEntities = {
+        ...state.entities
+      }
+
+      //  Verify if it's a root item or a item that has a parent. 
+      if(response.parent_id != null){
+        //  Item with parent. It needs to add it to the object and also update _children in parent
+        if(!newEntities[response.parent_id].hasOwnProperty('_children')){
+          newEntities[response.parent_id]._children = [] 
+        }
+        newEntities[response.parent_id]._children = [
+          ...newEntities[response.parent_id]._children,
+          response.id
+        ]
+      }
+      newEntities[response.id] = {...response, _children: []}
+
       return {
         ...state,
         entities: {
           ...state.entities,
-          [response.id]: response
+          ...newEntities
+        }
+      };
+    }
+
+    case 'DELETE_MATERIAL_SUCCESS': {
+
+      let item = state.entities[response]
+      let newItems = {
+        ...state.entities
+      }
+
+      //  It has a parent, it needs to remove it from the _children property of the parent.
+      if(item.parent_id != null && newItems.hasOwnProperty(item.parent_id)){
+        newItems[item.parent_id]._children = newItems[item.parent_id]._children.filter(child_id => child_id != item.id)
+      }
+
+      delete newItems[item.id]
+
+      return {
+        ...state,
+        isFetching: false,
+        entities: {
+          ...newItems
+        }
+      }
+    }
+
+    case 'UPDATE_MATERIAL_SUCCESS': {
+      
+      let org = state.entities[response.id]
+      
+      return {
+        ...state,
+        isFetching: false,
+        entities: {
+          ...state.entities,
+          [response.id]: {
+           ...org,
+           ...response 
+          }
         }
       }
     }
@@ -79,10 +138,7 @@ export default (state = initialState, action = {}) => {
 
       return {
         ...state,
-        entities: {
-          ...state.entities,
-          ...items
-        },
+        entities: items,
         error: null,
         isFetching: false
       };

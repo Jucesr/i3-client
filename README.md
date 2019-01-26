@@ -147,6 +147,11 @@ Date: Jan 24, 2019
   * Add import_window actions and reducers
   * Update reducers to use 2 util fuctions called 'convertToArrayObject', 'addChildrenToItems' 
 
+## V0.8.4
+Date: Jan 25, 2019
+  * Add methods to add, delete, update and import materials from the Materials module.
+  * Update reducers LOAD_SUCCESS cases. They do not keep the older state, now they only set what is receive from the action.
+
 
 ## Glossary
 
