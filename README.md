@@ -152,6 +152,10 @@ Date: Jan 25, 2019
   * Add methods to add, delete, update and import materials from the Materials module.
   * Update reducers LOAD_SUCCESS cases. They do not keep the older state, now they only set what is receive from the action.
 
+## V0.8.5
+Date: Jan 31, 2019
+  * Add method to add line item from the estimate module. The new line items that are created from estimate module will be store in a new category call 'New Line Items' and will not contain description.
+
 
 ## Glossary
 

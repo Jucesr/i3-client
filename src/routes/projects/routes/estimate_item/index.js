@@ -29,7 +29,8 @@ import {
   addLineItem,
   addLineItemDetail,
   loadLineItemDetails, 
-  updateLineItemDetail 
+  updateLineItemDetail,
+  addLineItemFromEstimateModule 
 } from "actions/line_item";
 
 import { 
@@ -440,15 +441,10 @@ class EstimateRoute extends React.Component {
                   action: async () => {
                     //  It creates a line item and assign the line item id to the estimate item
                     let line_item = {
-                      project_id: this.props.active_project.id,
-                      wbs_item_id: null,
-                      code: '01',
-                      spanish_description: 'Algo',
-                      english_description: 'Something',
-                      uom: ' '
+                      project_id: this.props.active_project.id
                     }
 
-                    let {response} = await this.props.addLineItem(line_item)
+                    let {response} = await this.props.addLineItemFromEstimateModule(line_item)
 
                     this.onAddEstimateItem({
                       parent_id: ei_selected.id,
@@ -489,15 +485,10 @@ class EstimateRoute extends React.Component {
                 action: async () => {
 
                   let line_item = {
-                    project_id: this.props.active_project.id,
-                    wbs_item_id: null,
-                    code: '01',
-                    spanish_description: 'Algo',
-                    english_description: 'Something',
-                    uom: ' '
+                    project_id: this.props.active_project.id
                   }
 
-                  let {response} = await this.props.addLineItem(line_item)
+                  let {response} = await this.props.addLineItemFromEstimateModule(line_item)
 
                   this.onAddEstimateItem({
                     parent_id: ei_selected.id,
@@ -773,7 +764,7 @@ const mapDispatchToProps = (dispatch) => ({
   clearEstimate: () => dispatch(clearEstimate()),
 
   //  Estimate Items
-
+  addLineItemFromEstimateModule: li => dispatch(addLineItemFromEstimateModule(li)),
   loadEstimateItems: estimate_id => dispatch(loadEstimateItems(estimate_id)),
   addEstimateItem: item => dispatch(addEstimateItem(item)),
   deleteEstimateItem : estimate_id => dispatch(deleteEstimateItem(estimate_id)),

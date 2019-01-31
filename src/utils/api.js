@@ -7,3 +7,10 @@ export const fetchApi = (url, options) => {
       return response.json()
     })
 }
+
+export const fetchWithError = (url, options) => {
+  return fetch(url, options)
+    .then(response => {
+      return response.json()
+    })
+}

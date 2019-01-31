@@ -1,5 +1,5 @@
 import pick from 'lodash/pick'
-import { fetchApi } from "utils/api"
+import { fetchApi, fetchWithError } from "utils/api"
 import { loadMaterial } from "./material";
 
 const shouldCallAPI = (stateProperty, _id) => {
@@ -15,6 +15,48 @@ const shouldCallAPI = (stateProperty, _id) => {
     return shouldFetch 
 
   }
+}
+
+export const addLineItemFromEstimateModule = (line_item) => {
+    return async dispatch => {
+      //  First it needs to check if there is already a section for line items that were not imported from Master Catalog.
+
+      let section = await fetchWithError(`${API_URL}/project/${line_item.project_id}/line_items/99`)
+      
+      let parent_id
+      if(section.hasOwnProperty('id')){
+        //  It found it
+        parent_id = section.id
+      }else{
+        //  It does not exits
+
+        //  Create the section.
+        let res = await dispatch(addLineItem({
+          parent_id: null,
+          is_item: 0,
+          code: '99',
+          spanish_description: 'Nuevos Conceptos',
+          english_description: 'New Line Items',
+          uom: null,
+          project_id: line_item.project_id,
+          wbs_item_id: null,
+        }))
+        parent_id = res.response.id
+      }
+      
+      //  Create the line item
+      return await dispatch(addLineItem({
+        parent_id: parent_id,
+        is_item: 1,
+        code: '99.01',
+        spanish_description: 'Sin descripcion',
+        english_description: 'No description',
+        uom: null,
+        project_id: line_item.project_id,
+        wbs_item_id: null,
+      }))
+    }
+    
 }
 
 export const addLineItem = (line_item) => ({
