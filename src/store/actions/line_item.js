@@ -2,6 +2,19 @@ import pick from 'lodash/pick'
 import { fetchApi, fetchWithError } from "utils/api"
 import { loadMaterial } from "./material";
 
+const li_fields = [
+  'id',
+  'parent_id',
+  'is_item',
+  'code',
+  'spanish_description',
+  'english_description',
+  'uom',
+  'unit_rate_mxn',
+  'unit_rate_usd',
+  'project_id'
+]
+
 const shouldCallAPI = (stateProperty, _id) => {
   return state => {
     if(!state[stateProperty].entities[_id])
@@ -140,18 +153,7 @@ export const loadLineItem = (id, options = {}) => {
 
       let line_item = await fetchApi(`${API_URL}/line_item/${id}`)
       
-      line_item = pick(line_item, [
-        'id',
-        'parent_id',
-        'is_item',
-        'code',
-        'spanish_description',
-        'english_description',
-        'uom',
-        'unit_rate_mxn',
-        'unit_rate_usd',
-        'project_id'
-      ])
+      line_item = pick(line_item, li_fields)
 
       line_item.description = {
         es: line_item.spanish_description,
@@ -178,18 +180,7 @@ export const importLineItem = (project_id, line_item) => ({
         body: JSON.stringify(line_item)
       }
       )
-    return pick(line_item, [
-      'id',
-      'parent_id',
-      'is_item',
-      'code',
-      'spanish_description',
-      'english_description',
-      'uom',
-      'unit_rate_mxn',
-      'unit_rate_usd',
-      'project_id'
-    ])
+    return pick(line_item, li_fields)
   }
 })
 
@@ -197,18 +188,7 @@ export const loadLineItems = (project_id) => ({
   type    : 'LOAD_LINE_ITEMS',
   callAPI: async dispatch => {
     let line_items = await fetchApi(`${API_URL}/project/${project_id}/line_items/`)
-    return line_items.map(li => pick(li, [
-      'id',
-      'parent_id',
-      'is_item',
-      'code',
-      'spanish_description',
-      'english_description',
-      'uom',
-      'unit_rate_mxn',
-      'unit_rate_usd',
-      'project_id'
-    ]))
+    return line_items.map(li => pick(li, li_fields))
      
   }
 })

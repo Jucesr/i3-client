@@ -512,7 +512,7 @@ class LineItem extends React.Component {
                   assesor: 'total',
                   format: 'currency' 
                 }]}
-                rows={[]}
+                rows={{}}
                 // selected_rows={this.state.detail_items_selected}
                 // onRowExpand={this.onDetailRowExpand}
                 // onRowSelect={this.onDetailRowSelected}
@@ -608,7 +608,7 @@ class LineItem extends React.Component {
                         assesor: 'total',
                         format: 'currency' 
                       }]}
-                      rows={[]}
+                      rows={{}}
                       // selected_rows={this.state.detail_items_selected}
                       // onRowExpand={this.onDetailRowExpand}
                       // onRowSelect={this.onDetailRowSelected}

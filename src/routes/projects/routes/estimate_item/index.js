@@ -26,7 +26,7 @@ import {
 } from "actions/estimate_items";
 
 import { 
-  addLineItem,
+  importLineItem,
   addLineItemDetail,
   loadLineItemDetails, 
   updateLineItemDetail,
@@ -65,7 +65,7 @@ class EstimateRoute extends React.Component {
   componentDidMount = () => {
     
     //  Load tools for this route
-    this.props.addSubHeaderTools(['ToggleModel', 'ToggleEstimateDetails'])
+    this.props.addSubHeaderTools(['ToggleModel', 'ToggleImportWindow', 'ToggleEstimateDetails'])
 
     //  Load estimate items
     this.props.loadEstimateItems(this.getEstimateId())
@@ -542,6 +542,25 @@ class EstimateRoute extends React.Component {
     return toolbar_items
   }
 
+  onImportRow = async (source, target) => {
+    //  Import line item
+    const {response} = await this.props.importLineItem(this.props.active_project.id, {
+      id: source.id
+    })
+
+    //  Create a new estimate item and assign the new LI
+    
+    this.onAddEstimateItem({
+      parent_id: target.id,
+      line_item_id: response.id,
+      code: target.code,
+      quantity: 0,
+      is_item: response.is_item,
+      description: response.spanish_description
+    })
+
+  }
+
   render(){
 
     const {props, state} = this
@@ -596,51 +615,114 @@ class EstimateRoute extends React.Component {
     let toolbar_items = this.getToolbarItems()
 
     //  Styles
-    const model_viewer_classname = props.is_estimate_detail_visible ? 'Viewer-container' : 'Viewer-container--Full'
+    const model_viewer_classname = 'Viewer-container-Full'
+
+    const viewport = props.is_import_window_visible ? 0.5 : 1
     
     return (
       <ReflexContainer
-        className="EstimateItemRoute"
-        windowResizeAware={true} 
-        orientation="horizontal"
-      >
-        <ReflexElement size={30}>
-          <Toolbar 
-            items={toolbar_items}
-          />
-        </ReflexElement>
-        <ReflexElement className="left-pane">
+        orientation="vertical"
+      > 
+        {/* Estimate item Window (Left)*/}
+        <ReflexElement>
+          <ReflexContainer orientation="horizontal" windowResizeAware={true} >
+            <ReflexElement size={30}>
+              <Toolbar 
+                items={toolbar_items}
+              />
+            </ReflexElement>
 
-          <ReflexContainer 
-            orientation="vertical"
-            windowResizeAware={true} 
-          > 
-            
             <ReflexElement>
-                
+              <Table 
+                appElement="#app"
+                loaderAvatar="/images/loader.gif"
+                allowToDragRows={true}
+                selected_rows={this.state.estimate_items_selected}
+                isLoading={estimate_items.length == 0}
+                columns={[{
+                  Header: 'Code',
+                  assesor: 'code',
+                  width: 100 * viewport
+                  //filter: true
+                },{
+                  Header: 'Description',
+                  assesor: 'description',
+                  editable: true,
+                  format: 'textarea',
+                  width: 800 * viewport
+                  //filter: true
+                },{
+                  Header: 'UOM',
+                  assesor: 'uom',
+                  editable: true,
+                  onlyItems: true,
+                  width: 80 * viewport,
+                },{
+                  Header: 'Quantity',
+                  assesor: 'quantity',
+                  editable: true,
+                  format: {
+                    type: 'number',
+                    decimals: 2
+                  },
+                  width: 150 * viewport,
+                  onlyItems: true
+                },{
+                  Header: 'UR MXN',
+                  assesor: 'unit_rate_mxn',
+                  width: 150 * viewport,
+                  format: 'currency'
+                },{
+                  Header: 'UR USD',
+                  assesor: 'unit_rate_usd',
+                  width: 150 * viewport,
+                  format: 'currency'
+                },{
+                  Header: 'Total',
+                  assesor: 'total',
+                  width: 150 * viewport,
+                  format: 'currency' 
+                }]}
+                rows={estimate_items}
+                onRowSelect={this.onEstimateRowSelected}
+                onUpdateRow={this.onEstimateRowUpdate}
+              />
+            </ReflexElement>
+
+            <ReflexSplitter/>
+
+            {/* Detail Window */}
+
+            { props.is_detail_visible && 
+              <ReflexElement>
                 <Table 
                   appElement="#app"
                   loaderAvatar="/images/loader.gif"
-                  allowToDragRows={true}
-                  selected_rows={this.state.estimate_items_selected}
-                  isLoading={estimate_items.length == 0}
+                  isLoading={false}
+                  noRowsMessage="Select an item to see details here."
                   columns={[{
+                    Header: 'Type',
+                    assesor: 'type',
+                    editable: true,
+                    format: {
+                      type: 'select',
+                      options: ['', 'M', 'A']
+                    },
+                    width: 45,
+                  },{
                     Header: 'Code',
                     assesor: 'code',
+                    editable: true,
                     width: 100
-                    //filter: true
                   },{
                     Header: 'Description',
                     assesor: 'description',
                     editable: true,
                     format: 'textarea',
-                    width: 800
-                    //filter: true
+                    width: 700
                   },{
                     Header: 'UOM',
                     assesor: 'uom',
-                    editable: true,
-                    onlyItems: true,
                     width: 100,
                   },{
                     Header: 'Quantity',
@@ -650,106 +732,129 @@ class EstimateRoute extends React.Component {
                       type: 'number',
                       decimals: 2
                     },
-                    width: 150,
-                    onlyItems: true
+                    width: 150
                   },{
-                    Header: 'UR MXN',
-                    assesor: 'unit_rate_mxn',
+                    Header: 'Unit Rate',
+                    assesor: 'unit_rate',
                     format: 'currency'
                   },{
-                    Header: 'UR USD',
-                    assesor: 'unit_rate_usd',
-                    format: 'currency'
+                    Header: 'Currency',
+                    assesor: 'currency'
                   },{
                     Header: 'Total',
                     assesor: 'total',
                     format: 'currency' 
                   }]}
-                  rows={estimate_items}
-                  onRowSelect={this.onEstimateRowSelected}
-                  onUpdateRow={this.onEstimateRowUpdate}
+                  rows={{}}
+                  // selected_rows={this.state.detail_items_selected}
+                  // onRowExpand={this.onDetailRowExpand}
+                  // onRowSelect={this.onDetailRowSelected}
+                  // onUpdateRow={this.onDetailRowUpdate}
                 />
-              
-            </ReflexElement>
-            <ReflexSplitter/>
-            
-            {props.is_model_visible && <ReflexElement className="right-pane">
-              {/* <div>Aqui va el modelo</div> */}
-              <Viewer className={model_viewer_classname}/>
-            </ReflexElement>}        
+              </ReflexElement>
+            }
 
           </ReflexContainer>
-              
         </ReflexElement>
-        <ReflexSplitter/>       
-        { props.is_estimate_detail_visible && 
 
-            <ReflexElement>
-              <Modal
-                isOpen={this.state.is_commodities_windows_open}
-                onRequestClose={this.toggleCommoditiesWindow}
-                contentLabel="Example Modal"
-              >
-                <ImportItemWindow onRowClick={this.onAddLineItemDetail} />
-              </Modal>
+        <ReflexSplitter/>
 
-              <Table 
-                appElement="#app"
-                loaderAvatar="/images/loader.gif"
-                isLoading={props.isLoadingLineItemDetails}
-                noRowsMessage="Select an estimate item to see details here."
-                columns={[{
-                  Header: 'Type',
-                  assesor: 'type',
-                  editable: true,
-                  format: {
-                    type: 'select',
-                    options: ['', 'M', 'A']
-                  },
-                  width: 45,
-                },{
-                  Header: 'Code',
-                  assesor: 'code',
-                  editable: true,
-                  width: 100
-                },{
-                  Header: 'Description',
-                  assesor: 'description',
-                  editable: true,
-                  format: 'textarea',
-                  width: 700
-                },{
-                  Header: 'UOM',
-                  assesor: 'uom',
-                  width: 100,
-                },{
-                  Header: 'Quantity',
-                  assesor: 'quantity',
-                  editable: true,
-                  format: {
-                    type: 'number',
-                    decimals: 2
-                  },
-                  width: 150
-                },{
-                  Header: 'Unit Rate',
-                  assesor: 'unit_rate',
-                  format: 'currency'
-                },{
-                  Header: 'Currency',
-                  assesor: 'currency'
-                },{
-                  Header: 'Total',
-                  assesor: 'total',
-                  format: 'currency' 
-                }]}
-                rows={table_detail_rows}
-                selected_rows={this.state.detail_items_selected}
-                onRowExpand={this.onDetailRowExpand}
-                onRowSelect={this.onDetailRowSelected}
-                onUpdateRow={this.onDetailRowUpdate}
-              />
-            </ReflexElement>
+        {/* Import window / Model Window (Right) */}
+
+        { props.is_model_visible && 
+          <ReflexElement className="right-pane">
+            <Viewer className={model_viewer_classname}/>
+          </ReflexElement>
+        }  
+      
+        { props.is_import_window_visible && 
+          <ReflexElement 
+            className="left-pane"
+            propagateDimensions={true} 
+            resizeWidth={false}
+            resizeHeight={false}
+          >
+          <ReflexContainer 
+              orientation="horizontal"
+              windowResizeAware={true} 
+            >
+                <ReflexElement
+                  propagateDimensions={true} 
+                  resizeWidth={false}
+                  resizeHeight={false}
+                >
+                  <ImportItemWindow
+                    onDropRow={this.onImportRow}
+                    type='line_items'
+                  />
+                  
+                </ReflexElement>
+
+                <ReflexSplitter/>
+
+                {/* Detail Window */}
+
+                { props.is_detail_visible && 
+
+                <ReflexElement>
+                  <Table 
+                    appElement="#app"
+                    loaderAvatar="/images/loader.gif"
+                    isLoading={false}
+                    noRowsMessage="Select an item to see details here."
+                    columns={[{
+                      Header: 'Type',
+                      assesor: 'type',
+                      editable: true,
+                      format: {
+                        type: 'select',
+                        options: ['', 'M', 'A']
+                      },
+                      width: 45,
+                    },{
+                      Header: 'Code',
+                      assesor: 'code',
+                      editable: true,
+                      width: 100
+                    },{
+                      Header: 'Description',
+                      assesor: 'description',
+                      editable: true,
+                      format: 'textarea',
+                      width: 700
+                    },{
+                      Header: 'UOM',
+                      assesor: 'uom',
+                      width: 100,
+                    },{
+                      Header: 'Quantity',
+                      assesor: 'quantity',
+                      editable: true,
+                      format: {
+                        type: 'number',
+                        decimals: 2
+                      },
+                      width: 150
+                    },{
+                      Header: 'Unit Rate',
+                      assesor: 'unit_rate',
+                      format: 'currency'
+                    },{
+                      Header: 'Currency',
+                      assesor: 'currency'
+                    },{
+                      Header: 'Total',
+                      assesor: 'total',
+                      format: 'currency' 
+                    }]}
+                    rows={{}}
+                  />
+                </ReflexElement>
+                }
+
+            </ReflexContainer> 
+
+        </ReflexElement>
         
         }
             
@@ -771,7 +876,7 @@ const mapDispatchToProps = (dispatch) => ({
   updateEstimateItem: (id, item) => dispatch(updateEstimateItem(id, item)),
 
   //  Line items
-  addLineItem: line_item => dispatch(addLineItem(line_item)),
+  importLineItem: (project_id, line_item) => dispatch(importLineItem(project_id, line_item)),
 
   //  Line item details
 
@@ -799,7 +904,8 @@ const mapStateToProps = (state) => ({
   materials: state.materials.entities,
   active_project: state.projects.entities[state.projects.active],
   is_model_visible: state.ui.is_model_visible,
-  is_estimate_detail_visible: state.ui.is_estimate_detail_visible
+  is_detail_visible: state.ui.is_estimate_detail_visible,
+  is_import_window_visible: state.ui.is_import_window_visible,
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(EstimateRoute);

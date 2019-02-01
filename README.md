@@ -156,6 +156,11 @@ Date: Jan 25, 2019
 Date: Jan 31, 2019
   * Add method to add line item from the estimate module. The new line items that are created from estimate module will be store in a new category call 'New Line Items' and will not contain description.
 
+## V0.8.6
+  Date: Jan 31, 2019
+  * Update Table component, the method getColumns will no longer modify props.
+  * Add methods to import estimate items. 
+
 
 ## Glossary
 

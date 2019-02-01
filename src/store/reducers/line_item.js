@@ -38,7 +38,7 @@ export default (state = initialState, action = {}) => {
       }
 
       //  Verify if it's a root item or a item that has a parent. 
-      if(response.parent_id != null){
+      if(response.parent_id != null && newLineItems.hasOwnProperty(response.parent_id)){
         //  Item with parent. It needs to add it to the object and also update _children in parent
         if(!newLineItems[response.parent_id].hasOwnProperty('_children')){
           newLineItems[response.parent_id]._children = [] 

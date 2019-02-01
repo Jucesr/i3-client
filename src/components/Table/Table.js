@@ -60,8 +60,8 @@ export default class Table extends React.Component {
   componentDidUpdate = (prevProps, prevState) => {
     console.log('Did update Table')
     if(this.container.current.offsetWidth != this.state.tableWidth){
-      console.log(`There is a diference ${this.container.current.offsetWidth} - ${this.state.tableWidth}`)
-      this.updateColumnsWidth()
+      // console.log(`There is a diference ${this.container.current.offsetWidth} - ${this.state.tableWidth}`)
+      // this.updateColumnsWidth()
     }
 
     if(prevProps.rows != this.props.rows){
@@ -532,20 +532,22 @@ export default class Table extends React.Component {
   getColumns = () => {
     return this.props.columns.map(col => {
 
-      if(this.state.column_extended.hasOwnProperty(col.assesor)){
+      let new_col = {...col}
 
-        const col_extended = this.state.column_extended[col.assesor]
+      if(this.state.column_extended.hasOwnProperty(new_col.assesor)){
+
+        const col_extended = this.state.column_extended[new_col.assesor]
 
         if(col_extended.hasOwnProperty('width_base')){
-          col.width_base = col_extended.width_base
+          new_col.width_base = col_extended.width_base
         }
 
         if(col_extended.hasOwnProperty('width')){
-          col.width = col_extended.width
+          new_col.width = col_extended.width
         }
       }
 
-      return col
+      return new_col
     
     })
   }
